@@ -31,7 +31,7 @@ class CreateMovimientosTable extends Migration
             $table->foreign('id_cliente')->references('id_persona')->on('personas')->onDelete('cascade');
             $table->foreign('id_recinto')->references('id_recinto')->on('recintos')->onDelete('cascade');
             $table->foreign('id_proveedor')->references('id_persona')->on('personas')->onDelete('cascade');
-            $table->foreign('id_operador')->references('id_usuario')->on('usuarios')->onDelete('cascade');
+            $table->foreign('id_operador')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('id_almacen')->references('id_almacen')->on('almacenes')->onDelete('cascade');
         });
     }

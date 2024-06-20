@@ -49,6 +49,16 @@ class Persona extends Model
 		'celular'
 	];
 
+	public function setNombreAttribute($value)
+    {
+        $this->attributes['nombre'] = ucwords(strtolower($value));
+    }
+
+    public function setPapellidoAttribute($value)
+    {
+        $this->attributes['papellido'] = ucwords(strtolower($value));
+    }
+
 	public function contactos()
 	{
 		return $this->hasMany(Contacto::class, 'id_persona');
@@ -66,6 +76,6 @@ class Persona extends Model
 
 	public function usuario()
 	{
-		return $this->hasOne(Usuario::class, 'id_usuario');
+		return $this->hasOne(User::class, 'id');
 	}
 }

@@ -23,6 +23,44 @@
   <!-- Alternatively, you can also include a specific color theme after the main stylesheet to alter the default color theme of the template -->
   {{-- @vite(['resources/sass/main.scss', 'resources/sass/oneui/themes/amethyst.scss', 'resources/js/oneui/app.js']) --}}
   @yield('js')
+  <!-- In your backend.layout.blade.php, inside the <head> tag -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Function to set dark mode based on stored preference
+      function setDarkMode() {
+        const darkMode = localStorage.getItem('darkMode');
+        const pageContainer = document.getElementById('page-container');
+
+        if (darkMode === 'enabled') {
+          pageContainer.classList.add('dark-mode');
+        } else {
+          pageContainer.classList.remove('dark-mode');
+        }
+      }
+
+      // Toggle dark mode
+      function toggleDarkMode() {
+        const pageContainer = document.getElementById('page-container');
+        pageContainer.classList.toggle('dark-mode');
+
+        // Store preference in localStorage
+        const darkMode = pageContainer.classList.contains('dark-mode') ? 'enabled' : 'disabled';
+        localStorage.setItem('darkMode', darkMode);
+      }
+
+      // Event listener for the dark mode toggle button
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', function() {
+          toggleDarkMode();
+        });
+      }
+
+      // Initialize dark mode based on stored preference
+      setDarkMode();
+    });
+  </script>
+
 </head>
 
 <body>

@@ -76,7 +76,7 @@ class Movimiento extends Model
 
 	public function usuario()
 	{
-		return $this->belongsTo(Usuario::class, 'id_operador');
+		return $this->belongsTo(User::class, 'id_operador');
 	}
 
 	public function recinto()

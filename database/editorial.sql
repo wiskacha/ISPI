@@ -419,7 +419,7 @@ INSERT INTO `ubicaciones` (`id_ubicacion`, `direccion`, `telefono`, `tipo`, `not
 CREATE TABLE `usuarios` (
   `id_usuario` int(11) NOT NULL,
   `nick` varchar(100) NOT NULL,
-  `pass` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
   `remember_token` varchar(100) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -431,7 +431,7 @@ CREATE TABLE `usuarios` (
 -- Dumping data for table `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `nick`, `pass`, `remember_token`, `email`, `created_at`, `updated_at`, `deleted_at`) VALUES
+INSERT INTO `usuarios` (`id_usuario`, `nick`, `password`, `remember_token`, `email`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (10, 'usuario1', 'password1', NULL, 'usuario1@example.com', '2024-06-18 00:12:11', '2024-06-18 00:12:11', NULL),
 (11, 'usuario2', 'password2', NULL, 'usuario2@example.com', '2024-06-18 00:12:11', '2024-06-18 00:12:11', NULL);
 

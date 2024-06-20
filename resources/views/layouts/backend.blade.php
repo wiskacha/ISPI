@@ -1,3 +1,4 @@
+<!-- @auth -->
 <!doctype html>
 <html lang="{{ config('app.locale') }}">
 
@@ -5,9 +6,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 
-  <title>OneUI - Bootstrap 5 Admin Template &amp; UI Framework</title>
+  <title>Sistema ISPI</title>
 
-  <meta name="description" content="OneUI - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave">
+  <meta name="description" content="ISPI">
   <meta name="author" content="pixelcave">
   <meta name="robots" content="index, follow">
 
@@ -85,7 +86,7 @@
 
         <!-- User Info -->
         <div class="ms-2">
-          <a class="text-dark fw-semibold fs-sm" href="javascript:void(0)">John Smith</a>
+          <a class="text-dark fw-semibold fs-sm" href="javascript:void(0)">{{auth()->user()->nick}}</a>
         </div>
         <!-- END User Info -->
 
@@ -124,11 +125,11 @@
       <!-- Side Header -->
       <div class="content-header">
         <!-- Logo -->
-        <a class="font-semibold text-dual" href="/">
+        <a class="font-semibold text-dual" href="/dashboard">
           <span class="smini-visible">
             <i class="fa fa-circle-notch text-primary"></i>
           </span>
-          <span class="smini-hide fs-5 tracking-wider">One<span class="fw-normal">UI</span></span>
+          <span class="smini-hide fs-5 tracking-wider">IS<span class="fw-normal">PI &#9811; </span></span>
         </a>
         <!-- END Logo -->
 
@@ -273,13 +274,13 @@
           <div class="dropdown d-inline-block ms-2">
             <button type="button" class="btn btn-sm btn-alt-secondary d-flex align-items-center" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <img class="rounded-circle" src="{{ asset('media/avatars/avatar10.jpg') }}" alt="Header Avatar" style="width: 21px;">
-              <span class="d-none d-sm-inline-block ms-2">John</span>
+              <span class="d-none d-sm-inline-block ms-2">{{auth()->user()->nick}}</span>
               <i class="fa fa-fw fa-angle-down d-none d-sm-inline-block ms-1 mt-1"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-md dropdown-menu-end p-0 border-0" aria-labelledby="page-header-user-dropdown">
               <div class="p-3 text-center bg-body-light border-bottom rounded-top">
                 <img class="img-avatar img-avatar48 img-avatar-thumb" src="{{ asset('media/avatars/avatar10.jpg') }}" alt="">
-                <p class="mt-2 mb-0 fw-medium">John Smith</p>
+                <p class="mt-2 mb-0 fw-medium">{{ auth()->user()->persona->nombre }} {{ auth()->user()->persona->papellido }}</p>
                 <p class="mb-0 text-muted fs-sm fw-medium">Web Developer</p>
               </div>
               <div class="p-2">
@@ -300,9 +301,10 @@
                 <a class="dropdown-item d-flex align-items-center justify-content-between" href="javascript:void(0)">
                   <span class="fs-sm fw-medium">Lock Account</span>
                 </a>
-                <a class="dropdown-item d-flex align-items-center justify-content-between" href="javascript:void(0)">
+                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
                   <span class="fs-sm fw-medium">Log Out</span>
                 </a>
+
               </div>
             </div>
           </div>
@@ -457,7 +459,27 @@
     </footer>
     <!-- END Footer -->
   </div>
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Está seguro(a) de cerrar sesión?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <a href="/logout" class="btn btn-danger">Cerrar Sesión</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- END Page Container -->
 </body>
 
 </html>
+<!-- @endauth -->

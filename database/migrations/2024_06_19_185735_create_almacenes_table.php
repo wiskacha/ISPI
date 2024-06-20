@@ -15,7 +15,7 @@ class CreateAlmacenesTable extends Migration
     {
         Schema::create('almacenes', function (Blueprint $table) {
             $table->increments('id_almacen');
-            $table->string('nombre', 100);
+            $table->string('nombre', 100)->unique();
             $table->timestamps();
             $table->softDeletes();
         });

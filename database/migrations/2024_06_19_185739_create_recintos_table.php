@@ -15,7 +15,7 @@ class CreateRecintosTable extends Migration
     {
         Schema::create('recintos', function (Blueprint $table) {
             $table->increments('id_recinto');
-            $table->string('nombre', 100);
+            $table->string('nombre', 100)->unique();
             $table->string('direccion', 200);
             $table->string('tipo', 100);
             $table->integer('telefono');
