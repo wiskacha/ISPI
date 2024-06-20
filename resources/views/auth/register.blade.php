@@ -55,14 +55,15 @@
 
                                     // Function to validate input against regex
                                     function validateInput(inputElement) {
-                                        var inputValue = inputElement.value.trim(); // Trim whitespace
+    var inputValue = inputElement.value.trim(); // Trim whitespace
 
-                                        // Regex to allow letters and spaces only, not at start or end
-                                        var regex = /^[a-zA-Z]+(?:\s+[a-zA-Z]+)*$/;
-                                        if (!regex.test(inputValue)) {
-                                            inputElement.value = "";
-                                        }
-                                    }
+    // Regex to allow letters (including ñ and Ñ) and spaces only, not at start or end
+    var regex = /^[a-zA-ZñÑ]+(?:\s+[a-zA-ZñÑ]+)*$/;
+    if (!regex.test(inputValue)) {
+        inputElement.value = "";
+    }
+}
+
                                     nombreInput.addEventListener("input", function() {
                                         validateInput(this);
                                     });
@@ -73,15 +74,15 @@
                                 });
                             </script>
                             <div class="mb-4">
-                                <input type="number" class="form-control form-control-lg form-control-alt" id="carnet" name="carnet" placeholder="Cédula de Identidad" required min="1000000" max="9999999">
+                                <input type="number" class="form-control form-control-lg form-control-alt" id="carnet" name="carnet" placeholder="Cédula de Identidad" required min="1000" max="99999999999">
                             </div>
                             <script>
                                 document.addEventListener("DOMContentLoaded", function() {
                                     var inputElement = document.getElementById("carnet");
 
                                     inputElement.addEventListener("input", function() {
-                                        if (this.value.length > 7) {
-                                            this.value = this.value.slice(0, 7); // Limit to 7 characters
+                                        if (this.value.length > 11) {
+                                            this.value = this.value.slice(0, 11); // Limit to 7 characters
                                         }
                                     });
                                 });

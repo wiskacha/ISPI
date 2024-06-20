@@ -33,8 +33,9 @@ class RegisterRequest extends FormRequest
             'carnet' => [
                 'required',
                 'unique:personas,carnet',
-                'regex:/^\d{7}$/'
+                'regex:/^\d{4,11}$/'
             ],
+
             'email' => [
                 'required',
                 'email',
