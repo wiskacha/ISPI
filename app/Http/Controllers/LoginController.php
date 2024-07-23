@@ -22,8 +22,9 @@ class LoginController extends Controller
     public function login(LoginRequest $request){
         $credentials = $request->getCredentials();
         if(!Auth::validate($credentials)){
-            Session::flash('error', 'Credenciales incorrectas. Por favor, intenta de nuevo.');
-            return redirect()->to('/login')->withErrors('auth.failed');
+            Session::flash('error', 'Credenciales incorrectas');
+            Session::flash('openModal', true);
+            return redirect()->to('/')->withErrors('auth.failed');
         }
         $user = Auth::getProvider()->retrieveByCredentials($credentials);
 

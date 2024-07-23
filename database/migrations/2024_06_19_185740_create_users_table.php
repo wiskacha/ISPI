@@ -15,10 +15,12 @@ return new class extends Migration
             $table->increments('id');
             $table->string('nick');
             $table->string('email')->unique();
+            $table->string('rol')->default('user'); // Set default role if needed
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('id', 'usuarios_ibfk_1')->references('id_persona')->on('personas')->onDelete('cascade')->onUpdate('cascade');
         });
