@@ -13,14 +13,9 @@ use App\Models\User;
 
 class CheckRole
 {
-    public function __construct()
-    {
-        dd('Middleware instantiated');
-    }
 
     public function handle(Request $request, Closure $next, $role)
     {
-        dd('Middleware handled');
         
         $user = Auth::user();
 
