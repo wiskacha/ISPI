@@ -16,7 +16,7 @@ class CheckRole
 
     public function handle(Request $request, Closure $next, $role)
     {
-        
+
         $user = Auth::user();
 
         if ($user && $user->hasRole($role)) {
@@ -26,4 +26,3 @@ class CheckRole
         return redirect('/dashboard')->withErrors('You do not have the required role.');
     }
 }
-

@@ -75,11 +75,17 @@
                                                                 id="nick" name="nick"
                                                                 placeholder="Nombre de Usuario/Email" required>
                                                         </div>
-                                                        <div class="mb-4">
+                                                        <div class="mb-4 position-relative">
                                                             <input type="password"
                                                                 class="form-control form-control-alt form-control-lg"
                                                                 id="password" name="password" placeholder="Contraseña"
                                                                 required>
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y"
+                                                                id="togglePassword"
+                                                                style="border:none; background:transparent;">
+                                                                <i id="eyeIcon" class="fa fa-eye-slash"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                     <div class="row mb-4">
@@ -105,7 +111,7 @@
 
         </div>
     </div>
-    
+
     <!-- END Hero -->
     @if (Session::has('openModal'))
         <script>
@@ -118,5 +124,32 @@
             });
         </script>
     @endif
+    <script>
+        document.getElementById('togglePassword').addEventListener('mousedown', function() {
+            let passwordInput = document.getElementById('password');
+            let eyeIcon = document.getElementById('eyeIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+
+        document.getElementById('togglePassword').addEventListener('mouseup', function() {
+            let passwordInput = document.getElementById('password');
+            let eyeIcon = document.getElementById('eyeIcon');
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        });
+
+        document.getElementById('togglePassword').addEventListener('mouseleave', function() {
+            let passwordInput = document.getElementById('password');
+            let eyeIcon = document.getElementById('eyeIcon');
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        });
+    </script>
     <!-- CSS for modal animation, dark mode toggle, and smooth color transition -->
 @endsection
