@@ -22,7 +22,6 @@ class CheckRole
         if ($user && $user->hasRole($role)) {
             return $next($request);
         }
-
         return redirect('/dashboard')->withErrors('You do not have the required role.');
     }
 }

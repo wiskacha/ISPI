@@ -42,6 +42,6 @@ class User extends Authenticatable
 
     public function hasRole($role)
     {
-        return $this->rol === $role; // Ensure 'rol' matches your column name
+        return $this->role === $role; // Ensure 'rol' matches your column name
     }
 }
