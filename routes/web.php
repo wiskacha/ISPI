@@ -20,27 +20,28 @@ Route::middleware(['role:admin'])->group(function () {
 // Rutas de Usuario
 Route::middleware(['auth'])->group(function () {
     //PERSONAS
-        //CLIENTES: 
+    //CLIENTES: 
     Route::get('/personas/clientes/vista', [PersonaController::class, 'index'])->name('personas.clientes.vistaClientes');
     Route::get('/personas/clientes/registro', [PersonaController::class, 'registerpage'])->name('personas.clientes.registroClientes');
-    Route::post('/personas/clientes/register', [PersonaController::class, 'register']);
     Route::post('/personas/clientes/register', [PersonaController::class, 'register'])->name('personas.register');
+    // Route to show the edit form
+    Route::get('/personas/{persona}/edit', [PersonaController::class, 'editCliente'])->name('persona.editCliente');
+    // Route to handle the update request
+    Route::put('personas/{persona}', [PersonaController::class, 'updateCliente'])->name('personas.updateCliente');
 
-        //
+    //
     Route::delete('/personas/{id}', [PersonaController::class, 'destroy'])->name('persona.destroy');
     Route::view('/pages/slick', 'pages.slick');
     Route::view('/pages/datatables', 'pages.datatables');
     Route::view('/pages/blank', 'pages.blank');
-    
 });
 
 // Rutas de Visitante
-Route::view('/', 'landing');
+Route::match(['get', 'post'], '/', [HomeController::class, 'show']);
+Route::view('/landing','landing');
 Route::view('/login', 'landing');
 Route::get('/logout', [LogoutController::class, 'logout']);
 
-Route::get('/register', [RegisterController::class, 'show']);
-Route::post('/register', [RegisterController::class, 'register']);
 
 Route::get('/login', [HomeController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);

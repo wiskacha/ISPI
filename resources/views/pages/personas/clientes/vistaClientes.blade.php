@@ -130,7 +130,7 @@
                             <th class="text-center hide-on-small" style="width: 5%;">#</th>
                             <th style="width: 15%;">Nombre</th>
                             <th style="width: 15%;">Carnet</th>
-                            <th class="hide-on-small"style="width: 15%;">Celular</th>
+                            <th class="hide-on-small" style="width: 15%;">Celular</th>
                             <th class="text-center" style="width: 10%;">Acciones</th> <!-- New column for actions -->
                         </tr>
                     </thead>
@@ -138,12 +138,16 @@
                         @foreach ($personas as $index => $persona)
                             <tr>
                                 <td class="text-center hide-on-small">{{ $index + 1 }}</td>
-                                <td class="fw-semibold">{{ $persona->NOMBRE }}</td>
-                                <td class="text-muted ">{{ $persona->CARNET }}</td>
+                                <td class="fw-semibold">
+                                    {{ $persona->NOMBRE }}
+                                    @if ($persona->has_user)
+                                        <i class="fa fa-check-circle text-success" title="Verified User"></i>
+                                    @endif
+                                </td>
+                                <td class="text-muted">{{ $persona->CARNET }}</td>
                                 <td class="text-muted hide-on-small">{{ $persona->CELULAR ?? 'N/A' }}</td>
                                 <td class="text-center">
                                     <!-- Form to handle the delete action -->
-
                                     <form method="POST" action="{{ route('persona.destroy', $persona->id_persona) }}"
                                         style="display:inline;">
                                         @csrf
@@ -151,15 +155,22 @@
                                         <button type="submit" class="btn btn-sm btn-danger"
                                             onclick="return confirm('¿Está seguro que desea eliminar a {{ $persona->NOMBRE }}?');">
                                             <i class="fa fa-trash"></i>
-                                            <h7 class="hide-on-small">Eliminar</h7>
+                                            <span class="hide-on-small">Eliminar</span>
                                         </button>
                                     </form>
+
+                                    <!-- Button to handle the edit action -->
+                                    <a href="{{ route('persona.editCliente', $persona) }}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-edit"></i>
+                                        <span class="hide-on-small">Editar</span>
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 

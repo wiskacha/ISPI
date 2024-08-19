@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Persona;
 use App\Models\User;
 use App\Http\Requests\RegisterRequestCliente;
+use App\Http\Requests\UpdateRequestCliente;
 
 class PersonaController extends Controller
 {
@@ -15,14 +16,15 @@ class PersonaController extends Controller
     {
         $excludeUsers = $request->get('exclude_users', false);
 
-        $query = Persona::selectRaw("id_persona, 
+        $query = Persona::selectRaw("
+        id_persona, 
         CONCAT(nombre, ' ', papellido, ' ', COALESCE(sapellido, '')) AS NOMBRE,
         carnet AS CARNET,
-        celular AS CELULAR
-    ")->whereNull('deleted_at');
+        celular AS CELULAR,
+        EXISTS(SELECT 1 FROM users WHERE users.id = personas.id_persona AND users.deleted_at IS NULL) AS has_user
+    ")->whereNull('personas.deleted_at');
 
         if ($excludeUsers) {
-            // Add a condition to exclude users that are not soft-deleted
             $query->whereNotIn('id_persona', function ($query) {
                 $query->select('id')
                     ->from('users')
@@ -56,7 +58,18 @@ class PersonaController extends Controller
         return redirect()->route('personas.clientes.vistaClientes')->with('success', 'Persona agregada correctamente.');
     }
 
+    //EDITAR CLIENTES:
+    public function editCliente(Persona $persona)
+    {
+        return view('pages.personas.clientes.editarPersona', compact('persona'));
+    }
 
+    public function updateCliente(UpdateRequestCliente $request, Persona $persona)
+    {
+        $persona->update($request->validated()); // Update the instance with validated data
+
+        return redirect()->route('personas.clientes.vistaClientes')->with('success', 'Persona actualizada correctamente.');
+    }
 
     //VISTA DE USUARIOS
     public function users()
@@ -69,7 +82,7 @@ class PersonaController extends Controller
             ->whereNull('users.deleted_at')
             ->orderBy('users.updated_at', 'DESC')
             ->get();
-            return view('pages.personas.clientes.vistaClientes', ['personas' => $personas]);
+        return view('pages.personas.clientes.vistaClientes', ['personas' => $personas]);
     }
 
     public function destroy($id)

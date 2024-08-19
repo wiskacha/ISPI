@@ -12,7 +12,7 @@ class HomeController extends Controller
         if (Auth::check()) {
             return view('dashboard');
         } else {
-            return redirect('/'); 
+            return view('landing'); 
         }
     }
 }
