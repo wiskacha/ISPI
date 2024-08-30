@@ -46,54 +46,7 @@
 
 @section('content')
     <!-- Modal Structure -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmModalLabel">Confirmar Actualización</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>¿Estás seguro de que deseas actualizar la información con los siguientes datos?</p>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Nuevo Perfil</h5>
-                                    <p class="card-text"><strong>Nombre:</strong> <span id="modal-nombre"></span></p>
-                                    <p class="card-text"><strong>Primer Apellido:</strong> <span
-                                            id="modal-papellido"></span></p>
-                                    <p class="card-text"><strong>Segundo Apellido:</strong> <span
-                                            id="modal-sapellido"></span></p>
-                                    <p class="card-text"><strong>Carnet:</strong> <span id="modal-carnet"></span></p>
-                                    <p class="card-text"><strong>Celular:</strong> <span id="modal-celular"></span></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card">
-                                <div class="card-body text-muted">
-                                    <h5 class="card-title">Viejo Perfil</h5>
-                                    <p class="card-text"><strong>Nombre:</strong> <span id="old-nombre"></span></p>
-                                    <p class="card-text"><strong>Primer Apellido:</strong> <span id="old-papellido"></span>
-                                    </p>
-                                    <p class="card-text"><strong>Segundo Apellido:</strong> <span id="old-sapellido"></span>
-                                    </p>
-                                    <p class="card-text"><strong>Carnet:</strong> <span id="old-carnet"></span></p>
-                                    <p class="card-text"><strong>Celular:</strong> <span id="old-celular"></span></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="confirm-update">Confirmar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    @include('partials.confirmation-modal', ['persona' => $persona])
 
     <div class="bg-body-light">
         <div class="content content-full">
@@ -152,17 +105,19 @@
                                 <label for="carnet" class="form-label">Carnet</label>
                                 <input type="number" id="carnet" name="carnet"
                                     value="{{ old('carnet', $persona->carnet) }}" class="form-control" required>
+                                <span id="carnet-error" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label for="celular" class="form-label">Celular</label>
                                 <input type="text" id="celular" name="celular"
                                     value="{{ old('celular', $persona->celular) }}" class="form-control">
+                                <span id="celular-error" class="text-danger"></span>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between mb-4">
-                            <!-- Reset button on the left -->
+                            <!-- Botón de deshacer -->
                             <button type="reset" class="btn btn-warning me-2">Deshacer</button>
 
                             <!-- Button group on the right -->
@@ -198,6 +153,38 @@
         @endif
 
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateBtn = document.getElementById('update-btn');
+            const form = document.getElementById('update-form');
+            const inputs = form.querySelectorAll('input[required], input[type="text"], input[type="number"]');
+
+            function validateForm() {
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (input.dataset.touched === 'true') { // Solo si el usuario ha interactuado
+                        if (!input.checkValidity()) {
+                            input.classList.add('is-invalid');
+                            isValid = false;
+                        } else {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                    }
+                });
+                updateBtn.disabled = !isValid;
+            }
+
+
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.dataset.touched = 'true';
+                    validateForm();
+                });
+            });
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const updateBtn = document.getElementById('update-btn');
@@ -268,43 +255,117 @@
             var sapellidoInput = document.getElementById("sapellido");
             var carnetInput = document.getElementById("carnet");
             var celularInput = document.getElementById("celular");
+            var updateBtn = document.getElementById("update-btn");
 
-            function validateInput(inputElement) {
-                var inputValue = inputElement.value.trim();
-                var regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
-                if (!regex.test(inputValue)) {
-                    inputElement.value = "";
+            var originalCarnet = "{{ $persona->carnet }}";
+            var originalCelular = "{{ $persona->celular }}";
+
+            function setInputValidity(inputElement, isValid) {
+                if (isValid) {
+                    inputElement.classList.remove("is-invalid");
+                    inputElement.classList.add("is-valid");
+                } else {
+                    inputElement.classList.remove("is-valid");
+                    inputElement.classList.add("is-invalid");
                 }
             }
 
+            function validateTextInput(inputElement) {
+                var inputValue = inputElement.value.trim();
+                var regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
+                if (!regex.test(inputValue)) {
+                    setInputValidity(inputElement, false);
+                    return false;
+                } else {
+                    setInputValidity(inputElement, true);
+                    return true;
+                }
+            }
+
+            function validateCarnetInput(inputElement) {
+                var inputValue = inputElement.value.trim();
+
+                // Ignorar si el valor es el mismo que el original
+                if (inputValue === originalCarnet) {
+                    setInputValidity(inputElement, true);
+                    updateBtn.disabled = false;
+                    return true;
+                }
+
+                if (inputValue.length > 11 || inputValue.length < 4) {
+                    inputElement.value = inputValue.slice(0, 12);
+                    setInputValidity(inputElement, false);
+                    updateBtn.disabled = true;
+                    return false;
+
+                }
+
+                fetch("/validate-carnet?value=" + encodeURIComponent(inputValue))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            setInputValidity(inputElement, false);
+                            updateBtn.disabled = true;
+                        } else {
+                            setInputValidity(inputElement, true);
+                            updateBtn.disabled = false;
+                        }
+                    });
+
+                return true;
+            }
+
+            function validateCelularInput(inputElement) {
+                var inputValue = inputElement.value.replace(/\D/g, '');
+
+                // Ignorar si el valor es el mismo que el original
+                if (inputValue === originalCelular) {
+                    setInputValidity(inputElement, true);
+                    updateBtn.disabled = false;
+                    return true;
+                }
+
+                if (inputValue.length != 8) {
+                    inputElement.value = inputValue.slice(0, 8);
+                    setInputValidity(inputElement, false);
+                    updateBtn.disabled = true;
+                    return false;
+                }
+
+                fetch("/validate-celular?value=" + encodeURIComponent(inputValue))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            setInputValidity(inputElement, false);
+                            updateBtn.disabled = true;
+                        } else {
+                            setInputValidity(inputElement, true);
+                            updateBtn.disabled = false;
+                        }
+                    });
+
+                return true;
+            }
+
             nombreInput.addEventListener("input", function() {
-                validateInput(this);
+                validateTextInput(this);
             });
 
             papellidoInput.addEventListener("input", function() {
-                validateInput(this);
+                validateTextInput(this);
             });
 
             sapellidoInput.addEventListener("input", function() {
-                validateInput(this);
+                validateTextInput(this);
             });
 
             carnetInput.addEventListener("input", function() {
-                if (this.value.length > 13) {
-                    this.value = this.value.slice(0, 13); // Limit to 100 characters
-                }
+                validateCarnetInput(this);
             });
 
             celularInput.addEventListener("input", function() {
-                // Remove any non-numeric characters
-                this.value = this.value.replace(/\D/g, '');
-
-                // Limit to 11 digits
-                if (this.value.length > 8) {
-                    this.value = this.value.slice(0, 8);
-                }
+                validateCelularInput(this);
             });
-
         });
     </script>
 @endsection

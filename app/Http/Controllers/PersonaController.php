@@ -71,6 +71,26 @@ class PersonaController extends Controller
         return redirect()->route('personas.clientes.vistaClientes')->with('success', 'Persona actualizada correctamente.');
     }
 
+    public function checkCarnet(Request $request)
+    {
+        $exists = Persona::where('carnet', $request->carnet)
+            ->where('id_persona', '<>', $request->id_persona) // Excluir la persona actual
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
+    public function checkCelular(Request $request)
+    {
+        $exists = Persona::where('celular', $request->celular)
+            ->where('id_persona', '<>', $request->id_persona) // Excluir la persona actual
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
+
+
     //VISTA DE USUARIOS
     public function users()
     {

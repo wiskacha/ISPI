@@ -8,7 +8,9 @@ use App\Http\Controllers\PersonaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\CheckRole;
-
+use Illuminate\Http\Request;
+use App\Models\Persona;
+use App\Models\User;
 // Dashboard route
 Route::match(['get', 'post'], '/dashboard', [HomeController::class, 'show']);
 
@@ -26,6 +28,30 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/personas/clientes/register', [PersonaController::class, 'register'])->name('personas.register');
     // Route to show the edit form
     Route::get('/personas/{persona}/edit', [PersonaController::class, 'editCliente'])->name('persona.editCliente');
+
+    Route::get('/validate-carnet', function (Request $request) {
+        $personaId = $request->query('persona_id');
+        $carnet = $request->query('value');
+
+        $exists = Persona::where('carnet', $carnet)
+            ->where('id_persona', '!=', $personaId)
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    });
+
+    Route::get('/validate-celular', function (Request $request) {
+        $personaId = $request->query('persona_id');
+        $celular = $request->query('value');
+
+        $exists = Persona::where('celular', $celular)
+            ->where('id_persona', '!=', $personaId)
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    });
+
+
     // Route to handle the update request
     Route::put('personas/{persona}', [PersonaController::class, 'updateCliente'])->name('personas.updateCliente');
 
@@ -38,7 +64,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Rutas de Visitante
 Route::match(['get', 'post'], '/', [HomeController::class, 'show']);
-Route::view('/landing','landing');
+Route::view('/landing', 'landing');
 Route::view('/login', 'landing');
 Route::get('/logout', [LogoutController::class, 'logout']);
 
