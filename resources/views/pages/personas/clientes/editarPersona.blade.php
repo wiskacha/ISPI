@@ -87,18 +87,21 @@
                                 <label for="nombre" class="form-label">Nombre</label>
                                 <input type="text" id="nombre" name="nombre"
                                     value="{{ old('nombre', $persona->nombre) }}" class="form-control" required>
+                                <span id="nombre-error" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label for="papellido" class="form-label">Primer Apellido</label>
                                 <input type="text" id="papellido" name="papellido"
                                     value="{{ old('papellido', $persona->papellido) }}" class="form-control" required>
+                                <span id="papellido-error" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label for="sapellido" class="form-label">Segundo Apellido</label>
                                 <input type="text" id="sapellido" name="sapellido"
                                     value="{{ old('sapellido', $persona->sapellido) }}" class="form-control">
+                                <span id="sapellido-error" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -110,27 +113,33 @@
 
                             <div class="col-md-6 mb-3">
                                 <label for="celular" class="form-label">Celular</label>
-                                <input type="text" id="celular" name="celular"
+                                <input type="number" id="celular" name="celular"
                                     value="{{ old('celular', $persona->celular) }}" class="form-control">
                                 <span id="celular-error" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mb-4">
+                        <div class="d-flex justify-content-between mb-4 align-items-center">
                             <!-- Botón de deshacer -->
-                            <button type="reset" class="btn btn-warning me-2">Deshacer</button>
+                            <button type="reset" id="reset-btn" class="btn btn-warning me-2">Deshacer</button>
 
-                            <!-- Button group on the right -->
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-primary" id="update-btn">Actualizar</button>
-                                <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary"
-                                    id="cancelar-btn">Cancelar</a>
+                            <div class="d-flex align-items-center">
+                                <!-- Texto "No se han realizado cambios" -->
+                                <span id="no-changes-text" class="text-muted font-italic me-3"
+                                    style="display: none; white-space: nowrap;">
+                                    No se han realizado cambios
+                                </span>
 
+                                <!-- Botón de actualizar -->
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary" id="update-btn">Actualizar</button>
+                                    <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary"
+                                        id="cancelar-btn">Cancelar</a>
+                                </div>
                             </div>
                         </div>
-
-
                     </form>
+
                 </div>
             </div>
         </div>
@@ -185,187 +194,171 @@
         });
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const updateBtn = document.getElementById('update-btn');
-            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fields = {
+            nombre: document.getElementById("nombre"),
+            papellido: document.getElementById("papellido"),
+            sapellido: document.getElementById("sapellido"),
+            carnet: document.getElementById("carnet"),
+            celular: document.getElementById("celular")
+        };
+        const updateBtn = document.getElementById("update-btn");
+        const noChangesText = document.getElementById("no-changes-text");
+        const originals = {
+            nombre: "{{ $persona->nombre }}",
+            papellido: "{{ $persona->papellido }}",
+            sapellido: "{{ $persona->sapellido }}",
+            carnet: "{{ $persona->carnet }}",
+            celular: "{{ $persona->celular }}"
+        };
+        let touchedFields = new Set();
 
-            updateBtn.addEventListener('click', function() {
-                // Set values for new details
-                document.getElementById('modal-nombre').textContent = document.getElementById('nombre')
-                    .value;
-                document.getElementById('modal-papellido').textContent = document.getElementById(
-                    'papellido').value;
-                document.getElementById('modal-sapellido').textContent = document.getElementById(
-                    'sapellido').value;
-                document.getElementById('modal-carnet').textContent = document.getElementById('carnet')
-                    .value;
-                document.getElementById('modal-celular').textContent = document.getElementById('celular')
-                    .value;
+        function setInputValidity(input, isValid, formatMsg = '', existsMsg = '') {
+            const errorSpan = document.getElementById(`${input.id}-error`);
+            if (!isValid) {
+                const message = existsMsg || formatMsg;
+                input.classList.add("is-invalid");
+                input.classList.remove("is-valid");
+                errorSpan.textContent = message;
+            } else {
+                input.classList.add("is-valid");
+                input.classList.remove("is-invalid");
+                errorSpan.textContent = '';
+            }
+        }
 
-                // Set values for old details
-                document.getElementById('old-nombre').textContent =
-                    "{{ old('nombre', $persona->nombre) }}";
-                document.getElementById('old-papellido').textContent =
-                    "{{ old('papellido', $persona->papellido) }}";
-                document.getElementById('old-sapellido').textContent =
-                    "{{ old('sapellido', $persona->sapellido) }}";
-                document.getElementById('old-carnet').textContent =
-                    "{{ old('carnet', $persona->carnet) }}";
-                document.getElementById('old-celular').textContent =
-                    "{{ old('celular', $persona->celular) }}";
+        function resetFieldState(input) {
+            input.classList.remove("is-valid", "is-invalid");
+            document.getElementById(`${input.id}-error`).textContent = '';
+        }
 
-                // Show modal
-                confirmModal.show();
-            });
+        function validateTextInput(input) {
+            const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
+            const isValid = regex.test(input.value.trim());
+            setInputValidity(input, isValid, "Este campo solo puede contener letras y espacios.");
+        }
 
-            document.getElementById('confirm-update').addEventListener('click', function() {
-                document.getElementById('update-form').submit();
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const cancelarButton = document.getElementById('cancelar-btn');
-
-            if (cancelarButton) {
-                cancelarButton.addEventListener('click', function(event) {
-                    // Prevent the default link action
-                    event.preventDefault();
-
-                    // Show confirmation dialog
-                    const confirmed = confirm(
-                        '¿Estás seguro de que quieres cancelar? Todos los cambios no guardados se perderán.'
-                    );
-
-                    if (confirmed) {
-                        // Redirect to the route if confirmed
-                        window.location.href = cancelarButton.href;
-                    }
+        function validateCarnetInput(input) {
+            const value = input.value.trim();
+            const isValidFormat = value.length >= 4 && value.length <= 11;
+            if (!isValidFormat) {
+                setInputValidity(input, false, "El carnet debe tener entre 4 y 11 caracteres.");
+                return;
+            }
+            if (value === originals.carnet) {
+                resetFieldState(input);
+                touchedFields.delete(input.id);
+                return;
+            }
+            fetch(`/validate-carnet?value=${encodeURIComponent(value)}`)
+                .then(response => response.json())
+                .then(data => {
+                    setInputValidity(input, !data.exists, '', "Este carnet ya está registrado.");
+                    validateAllFields();
                 });
+        }
+
+        function validateCelularInput(input) {
+            const value = input.value.replace(/\D/g, '');
+            const isValidFormat = value.length === 8;
+            if (!isValidFormat) {
+                setInputValidity(input, false, "El número de celular debe tener 8 dígitos.");
+                return;
             }
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var nombreInput = document.getElementById("nombre");
-            var papellidoInput = document.getElementById("papellido");
-            var sapellidoInput = document.getElementById("sapellido");
-            var carnetInput = document.getElementById("carnet");
-            var celularInput = document.getElementById("celular");
-            var updateBtn = document.getElementById("update-btn");
-
-            var originalCarnet = "{{ $persona->carnet }}";
-            var originalCelular = "{{ $persona->celular }}";
-
-            function setInputValidity(inputElement, isValid) {
-                if (isValid) {
-                    inputElement.classList.remove("is-invalid");
-                    inputElement.classList.add("is-valid");
-                } else {
-                    inputElement.classList.remove("is-valid");
-                    inputElement.classList.add("is-invalid");
-                }
+            if (value === originals.celular) {
+                resetFieldState(input);
+                touchedFields.delete(input.id);
+                return;
             }
+            fetch(`/validate-celular?value=${encodeURIComponent(value)}`)
+                .then(response => response.json())
+                .then(data => {
+                    setInputValidity(input, !data.exists, '', "Este número de celular ya está registrado.");
+                    validateAllFields();
+                });
+        }
 
-            function validateTextInput(inputElement) {
-                var inputValue = inputElement.value.trim();
-                var regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
-                if (!regex.test(inputValue)) {
-                    setInputValidity(inputElement, false);
-                    return false;
-                } else {
-                    setInputValidity(inputElement, true);
-                    return true;
+        function handleInput(input, validator) {
+            touchedFields.add(input.id);
+            validator(input);
+            validateAllFields();
+        }
+
+        function resetTouchedFields() {
+            Object.keys(fields).forEach(key => {
+                const field = fields[key];
+                if (field.value.trim() === originals[key].trim()) {
+                    resetFieldState(field);
+                    touchedFields.delete(key);
                 }
-            }
-
-            function validateCarnetInput(inputElement) {
-                var inputValue = inputElement.value.trim();
-
-                // Ignorar si el valor es el mismo que el original
-                if (inputValue === originalCarnet) {
-                    setInputValidity(inputElement, true);
-                    updateBtn.disabled = false;
-                    return true;
-                }
-
-                if (inputValue.length > 11 || inputValue.length < 4) {
-                    inputElement.value = inputValue.slice(0, 12);
-                    setInputValidity(inputElement, false);
-                    updateBtn.disabled = true;
-                    return false;
-
-                }
-
-                fetch("/validate-carnet?value=" + encodeURIComponent(inputValue))
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.exists) {
-                            setInputValidity(inputElement, false);
-                            updateBtn.disabled = true;
-                        } else {
-                            setInputValidity(inputElement, true);
-                            updateBtn.disabled = false;
-                        }
-                    });
-
-                return true;
-            }
-
-            function validateCelularInput(inputElement) {
-                var inputValue = inputElement.value.replace(/\D/g, '');
-
-                // Ignorar si el valor es el mismo que el original
-                if (inputValue === originalCelular) {
-                    setInputValidity(inputElement, true);
-                    updateBtn.disabled = false;
-                    return true;
-                }
-
-                if (inputValue.length != 8) {
-                    inputElement.value = inputValue.slice(0, 8);
-                    setInputValidity(inputElement, false);
-                    updateBtn.disabled = true;
-                    return false;
-                }
-
-                fetch("/validate-celular?value=" + encodeURIComponent(inputValue))
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.exists) {
-                            setInputValidity(inputElement, false);
-                            updateBtn.disabled = true;
-                        } else {
-                            setInputValidity(inputElement, true);
-                            updateBtn.disabled = false;
-                        }
-                    });
-
-                return true;
-            }
-
-            nombreInput.addEventListener("input", function() {
-                validateTextInput(this);
             });
+        }
 
-            papellidoInput.addEventListener("input", function() {
-                validateTextInput(this);
+        function validateAllFields() {
+            let allValid = true;
+            Object.keys(fields).forEach(key => {
+                const field = fields[key];
+                if (touchedFields.has(key)) {
+                    switch (key) {
+                        case 'nombre':
+                        case 'papellido':
+                        case 'sapellido':
+                            validateTextInput(field);
+                            break;
+                        case 'carnet':
+                            validateCarnetInput(field);
+                            break;
+                        case 'celular':
+                            validateCelularInput(field);
+                            break;
+                    }
+                    if (field.classList.contains("is-invalid")) {
+                        allValid = false;
+                    }
+                }
             });
+            noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
+            toggleUpdateButton(allValid);
+        }
 
-            sapellidoInput.addEventListener("input", function() {
-                validateTextInput(this);
-            });
+        function toggleUpdateButton(allValid) {
+            const hasChanges = Object.keys(fields).some(key => fields[key].value.trim() !== originals[key].trim());
+            updateBtn.disabled = !hasChanges || !allValid;
+        }
 
-            carnetInput.addEventListener("input", function() {
-                validateCarnetInput(this);
-            });
+        function checkAllFieldsUntouched() {
+            return Object.keys(fields).every(key => fields[key].value.trim() === originals[key].trim());
+        }
 
-            celularInput.addEventListener("input", function() {
-                validateCelularInput(this);
+        Object.keys(fields).forEach(key => {
+            fields[key].addEventListener("input", function() {
+                handleInput(this, key === 'carnet' ? validateCarnetInput : key === 'celular' ? validateCelularInput : validateTextInput);
             });
         });
-    </script>
+
+        document.getElementById("update-form").addEventListener("reset", function() {
+            // Primero restaurar los valores originales
+            Object.keys(fields).forEach(key => {
+                const field = fields[key];
+                field.value = originals[key];
+            });
+
+            // Después restablecer el estado de los campos
+            resetTouchedFields();
+            // Asegurar que todos los campos se configuren como untouched
+            Object.keys(fields).forEach(key => {
+                resetFieldState(fields[key]);
+            });
+
+            noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
+            toggleUpdateButton(true); // Habilitar el botón de actualización si todos los campos están intactos
+        });
+
+        validateAllFields();
+    });
+</script>
+
+
+
 @endsection
