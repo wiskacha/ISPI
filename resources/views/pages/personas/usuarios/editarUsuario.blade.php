@@ -1,4 +1,36 @@
 @extends('layouts.backend')
+@section('css')
+    <style>
+        /* Ensures that hide-on-small class hides elements on small screens */
+        @media (max-width: 705px) {
+            .hide-on-small {
+                display: none !important;
+            }
+        }
+
+        /* For screens up to 767px */
+        @media (max-width: 764px) {
+            #no-changes-text {
+                display: none !important;
+            }
+
+            #no-changes-icon {
+                display: inline;
+            }
+        }
+
+        /* For screens 768px and up */
+        @media (min-width: 765px) {
+            #no-changes-text {
+                display: inline;
+            }
+
+            #no-changes-icon {
+                display: none !important;
+            }
+        }
+    </style>
+@endsection
 
 @section('content')
     <!-- Modal Structure -->
@@ -70,7 +102,7 @@
 
                         <div class="d-flex justify-content-between mb-4 align-items-center">
                             <!-- Botón de deshacer -->
-                            <button type="reset" id="reset-btn" class="btn btn-warning me-2">Deshacer</button>
+                            <button type="button" id="reset-btn" class="btn btn-warning me-2">Deshacer</button>
 
                             <div class="d-flex align-items-center">
                                 <!-- Texto "No se han realizado cambios" -->
@@ -128,6 +160,7 @@
                 passwordConfirm: document.getElementById("password-confirm")
             };
             const updateBtn = document.getElementById("update-btn");
+            const resetBtn = document.getElementById("reset-btn");
             const noChangesText = document.getElementById("no-changes-text");
             const noChangesIcon = document.getElementById("no-changes-icon");
 
@@ -142,12 +175,31 @@
             // Track touched fields and debounce timers
             let touchedFields = new Set();
             let debounceTimeouts = {};
-            let lastValidValues = {
-                ...originals
-            }; // Store last valid values
 
             /* ------------- Utility Functions ------------- */
+            function resetToOriginalValues() {
+                fields.nick.value = originals.nick;
+                fields.email.value = originals.email;
+                fields.password.value = '';
+                fields.passwordConfirm.value = '';
 
+                // Eliminar el estado touched y las clases de validación
+                touchedFields.clear();
+
+                // Restablecer el estado de los campos
+                resetFieldState(fields.nick);
+                resetFieldState(fields.email);
+                resetFieldState(fields.password);
+                resetFieldState(fields.passwordConfirm);
+
+                // Realizar la validación inicial después de restablecer
+                validateAllFields();
+            }
+
+            // Asignar el evento click al botón de Deshacer
+            resetBtn.addEventListener('click', function() {
+                resetToOriginalValues();
+            });
             // Debounce function to prevent excessive API requests
             function debounce(func, delay) {
                 return function(...args) {
@@ -171,6 +223,7 @@
                     input.classList.add("is-invalid");
                     errorSpan.textContent = existsMsg || formatMsg;
                 }
+                validateAllFields(); // Revalidate all fields on any change
             }
 
             // Reset the state of an input field
@@ -180,84 +233,117 @@
                 if (errorSpan) errorSpan.textContent = '';
             }
 
-            // Validate all touched fields to enable or disable the update button
+            // Check if there are any changes compared to the original values
+            function hasChanges() {
+                return fields.nick.value.trim() !== originals.nick.trim() ||
+                    fields.email.value.trim() !== originals.email.trim() ||
+                    fields.password.value.trim() !== "" ||
+                    fields.passwordConfirm.value.trim() !== "";
+            }
+
+            // Validate all touched fields and enable or disable the update button
             function validateAllFields() {
                 const allValid = Array.from(touchedFields).every(id => {
                     const input = fields[id];
-                    const errorSpan = document.getElementById(`${id}-error`);
-                    return input.classList.contains("is-valid") || errorSpan.textContent === '';
+                    return input.classList.contains("is-valid");
                 });
-                updateBtn.disabled = !allValid;
-                noChangesText.style.display = allValid ? 'none' : 'inline';
-                noChangesIcon.style.display = allValid ? 'none' : 'inline';
+
+                const changesMade = hasChanges();
+
+                // Enable button only if all fields are valid and changes are made
+                if (allValid && changesMade) {
+                    updateBtn.disabled = false;
+                    noChangesText.style.display = 'none';
+                    noChangesIcon.style.display = 'none';
+                } else {
+                    updateBtn.disabled = true;
+                    if (!changesMade) {
+                        noChangesText.style.display = 'inline';
+                        noChangesIcon.style.display = 'inline';
+                    } else {
+                        noChangesText.style.display = 'none';
+                        noChangesIcon.style.display = 'none';
+                    }
+                }
+            }
+
+            // Run validation on page load to ensure the button starts disabled
+            function initialValidation() {
+                validateAllFields();
             }
 
             /* ------------- Field Validation Functions ------------- */
-
-            // Validate 'nick' field by checking with API
+            // Validar campo 'nick' comprobando con la API
             function validateNickInput(input) {
-                const value = input.value.trim().toLowerCase(); // Convert to lowercase for comparison
+                const value = input.value.trim().toLowerCase(); // Convertir a minúsculas para comparación
 
-                // Bypass validation if the value matches the original (case-insensitive)
+                // Si el valor coincide con el original, restablecer el estado y marcar como untouched
                 if (value === originals.nick.toLowerCase()) {
                     resetFieldState(input);
-                    setInputValidity(input, true); // Treat as valid
                     touchedFields.delete(input.id);
+                    validateAllFields();
                     return;
                 }
 
+                // Llamada a la API para validar si el nick existe
                 fetch(`/validate-nick?value=${encodeURIComponent(value)}`)
                     .then(response => response.json())
                     .then(data => {
-                        lastValidValues.nick = value;
                         setInputValidity(input, !data.exists, '', "Este nick ya está registrado.");
-                        validateAllFields();
                     });
             }
 
-            // Validate 'email' field by checking with API
+            // Validar campo 'email' comprobando con la API
             function validateEmailInput(input) {
-                const value = input.value.trim().toLowerCase(); // Convert to lowercase for comparison
+                const value = input.value.trim().toLowerCase(); // Convertir a minúsculas para comparación
 
-                // Bypass validation if the value matches the original (case-insensitive)
+                // Si el valor coincide con el original, restablecer el estado y marcar como untouched
                 if (value === originals.email.toLowerCase()) {
                     resetFieldState(input);
-                    setInputValidity(input, true); // Treat as valid
                     touchedFields.delete(input.id);
+                    validateAllFields();
                     return;
                 }
 
+                // Llamada a la API para validar si el email existe
                 fetch(`/validate-email?value=${encodeURIComponent(value)}`)
                     .then(response => response.json())
                     .then(data => {
-                        lastValidValues.email = value;
                         setInputValidity(input, !data.exists, '',
-                        "Este correo electrónico ya está registrado.");
-                        validateAllFields();
+                            "Este correo electrónico ya está registrado.");
                     });
             }
 
-            // Validate 'password' field for length
-            function validatePasswordInput(input) {
-                const value = input.value.trim();
-                if (!value) {
-                    resetFieldState(input);
+            /* ------------- Password Validation ------------- */
+            function validatePasswordAndConfirmation() {
+                const passwordValue = fields.password.value.trim();
+                const confirmPasswordValue = fields.passwordConfirm.value.trim();
+
+                // Si ambos campos están vacíos, restablecer el estado a untouched
+                if (passwordValue === "" && confirmPasswordValue === "") {
+                    resetFieldState(fields.password);
+                    resetFieldState(fields.passwordConfirm);
+                    touchedFields.delete('password');
+                    touchedFields.delete('passwordConfirm');
+                    validateAllFields();
                     return;
                 }
-                const minLength = 8;
-                const isValid = value.length >= minLength;
-                setInputValidity(input, isValid, `La contraseña debe tener al menos ${minLength} caracteres.`);
-                if (isValid && fields.passwordConfirm.value) {
-                    validatePasswordConfirmation(fields.passwordConfirm);
-                }
-            }
 
-            // Validate 'password_confirm' field for matching password
-            function validatePasswordConfirmation(input) {
-                const value = input.value.trim();
-                const passwordValue = fields.password.value.trim();
-                const isValid = value === passwordValue;
-                setInputValidity(input, isValid, 'Las contraseñas no coinciden.');
+                // Validar la longitud de la contraseña
+                const minLength = 8;
+                const isPasswordValid = passwordValue.length >= minLength;
+                setInputValidity(fields.password, isPasswordValid,
+                    `La contraseña debe tener al menos ${minLength} caracteres.`);
+
+                // Validar la coincidencia de las contraseñas
+                const isConfirmValid = passwordValue === confirmPasswordValue && confirmPasswordValue !== '';
+                setInputValidity(fields.passwordConfirm, isConfirmValid, 'Las contraseñas no coinciden.');
+
+                // Marcar ambos campos como tocados
+                touchedFields.add('password');
+                touchedFields.add('passwordConfirm');
+
+                validateAllFields();
             }
 
             /* ------------- Event Listeners ------------- */
@@ -273,15 +359,8 @@
                 validateEmailInput(fields.email);
             }, 100));
 
-            fields.password.addEventListener('input', debounce(() => {
-                touchedFields.add('password');
-                validatePasswordInput(fields.password);
-            }, 100));
-
-            fields.passwordConfirm.addEventListener('input', debounce(() => {
-                touchedFields.add('passwordConfirm');
-                validatePasswordConfirmation(fields.passwordConfirm);
-            }, 100));
+            fields.password.addEventListener('input', debounce(validatePasswordAndConfirmation, 100));
+            fields.passwordConfirm.addEventListener('input', debounce(validatePasswordAndConfirmation, 100));
 
             // Prevent form submission if fields are invalid
             document.getElementById("update-form").addEventListener("submit", function(event) {
@@ -289,6 +368,9 @@
                     event.preventDefault();
                 }
             });
+
+            // Trigger initial validation on page load
+            initialValidation();
         });
     </script>
 @endsection

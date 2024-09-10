@@ -1,3 +1,27 @@
+<style>
+    @media (max-width: 700px) {
+        .modal-dialog {
+            max-width: 98%;
+            margin: 1%;
+        }
+        .modal-content {
+            border-radius: 0;
+            height: 100%;
+        }
+        .modal-body {
+            overflow-y: auto;
+        }
+        .modal-footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .modal-footer .btn {
+            margin-top: 10px;
+        }
+    }
+</style>
+
+
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
