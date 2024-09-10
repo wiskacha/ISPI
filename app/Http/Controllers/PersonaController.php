@@ -89,22 +89,6 @@ class PersonaController extends Controller
         return response()->json(['exists' => $exists]);
     }
 
-
-
-    //VISTA DE USUARIOS
-    public function users()
-    {
-        $personas = User::selectRaw("
-        CONCAT(nick, ' / ', COALESCE(email, '')) AS NICKEMAIL, 
-        CONCAT(personas.nombre, ' ', personas.papellido, ' ', COALESCE(personas.sapellido, '')) AS DUEÑO
-    ")
-            ->join('personas', 'users.id', '=', 'personas.id_persona')
-            ->whereNull('users.deleted_at')
-            ->orderBy('users.updated_at', 'DESC')
-            ->get();
-        return view('pages.personas.clientes.vistaClientes', ['personas' => $personas]);
-    }
-
     public function destroy($id)
     {
         $persona = Persona::find($id);

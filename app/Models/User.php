@@ -8,17 +8,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Persona;
 use App\Models\Movimiento;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    protected $table = 'users';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
-        'nick', 'email', 'password', 'rol', // Ensure 'rol' is included here
+        'nick',
+        'email',
+        'password',
+        'rol', // Ensure 'rol' is included here
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     protected $casts = [
@@ -32,8 +39,8 @@ class User extends Authenticatable
 
     public function persona()
     {
-        return $this->belongsTo(Persona::class, 'id');
-    }
+        return $this->belongsTo(Persona::class, 'id', 'id_persona');
+    }    
 
     public function movimientos()
     {

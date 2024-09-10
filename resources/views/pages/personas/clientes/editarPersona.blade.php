@@ -5,9 +5,32 @@
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
     <style>
+        /* Ensures that hide-on-small class hides elements on small screens */
         @media (max-width: 705px) {
             .hide-on-small {
-                display: none;
+                display: none !important;
+            }
+        }
+
+        /* For screens up to 767px */
+        @media (max-width: 764px) {
+            #no-changes-text {
+                display: none !important;
+            }
+
+            #no-changes-icon {
+                display: inline;
+            }
+        }
+
+        /* For screens 768px and up */
+        @media (min-width: 765px) {
+            #no-changes-text {
+                display: inline;
+            }
+
+            #no-changes-icon {
+                display: none !important;
             }
         }
     </style>
@@ -125,19 +148,21 @@
 
                             <div class="d-flex align-items-center">
                                 <!-- Texto "No se han realizado cambios" -->
-                                <span id="no-changes-text" class="text-muted font-italic me-3"
-                                    style="display: none; white-space: nowrap;">
+                                <span id="no-changes-text" class="text-muted font-italic me-3" style="white-space: nowrap;">
                                     No se han realizado cambios
                                 </span>
 
+                                <!-- Ícono para pantallas pequeñas -->
+                                <i id="no-changes-icon" class="fas fa-lock text-muted me-3" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="No se han realizado cambios" style="display: none;"></i>
                                 <!-- Botón de actualizar -->
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-primary" id="update-btn">Actualizar</button>
-                                    <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary"
-                                        id="cancelar-btn">Cancelar</a>
+                                    <button type="button" class="btn btn-primary" id="update-btn" data-bs-toggle="modal" data-bs-target="#confirmModal">Actualizar</button>
+                                    <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary" id="cancelar-btn">Cancelar</a>
                                 </div>
                             </div>
                         </div>
+
                     </form>
 
                 </div>
@@ -194,170 +219,186 @@
         });
     </script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const fields = {
-            nombre: document.getElementById("nombre"),
-            papellido: document.getElementById("papellido"),
-            sapellido: document.getElementById("sapellido"),
-            carnet: document.getElementById("carnet"),
-            celular: document.getElementById("celular")
-        };
-        const updateBtn = document.getElementById("update-btn");
-        const noChangesText = document.getElementById("no-changes-text");
-        const originals = {
-            nombre: "{{ $persona->nombre }}",
-            papellido: "{{ $persona->papellido }}",
-            sapellido: "{{ $persona->sapellido }}",
-            carnet: "{{ $persona->carnet }}",
-            celular: "{{ $persona->celular }}"
-        };
-        let touchedFields = new Set();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa los tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
 
-        function setInputValidity(input, isValid, formatMsg = '', existsMsg = '') {
-            const errorSpan = document.getElementById(`${input.id}-error`);
-            if (!isValid) {
-                const message = existsMsg || formatMsg;
-                input.classList.add("is-invalid");
-                input.classList.remove("is-valid");
-                errorSpan.textContent = message;
-            } else {
-                input.classList.add("is-valid");
-                input.classList.remove("is-invalid");
-                errorSpan.textContent = '';
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const fields = {
+                nombre: document.getElementById("nombre"),
+                papellido: document.getElementById("papellido"),
+                sapellido: document.getElementById("sapellido"),
+                carnet: document.getElementById("carnet"),
+                celular: document.getElementById("celular")
+            };
+            const updateBtn = document.getElementById("update-btn");
+            const noChangesText = document.getElementById("no-changes-text");
+            const noChangesIcon = document.getElementById("no-changes-icon");
+            const originals = {
+                nombre: "{{ $persona->nombre }}",
+                papellido: "{{ $persona->papellido }}",
+                sapellido: "{{ $persona->sapellido }}",
+                carnet: "{{ $persona->carnet }}",
+                celular: "{{ $persona->celular }}"
+            };
+            let touchedFields = new Set();
+
+            function setInputValidity(input, isValid, formatMsg = '', existsMsg = '') {
+                const errorSpan = document.getElementById(`${input.id}-error`);
+                if (!isValid) {
+                    const message = existsMsg || formatMsg;
+                    input.classList.add("is-invalid");
+                    input.classList.remove("is-valid");
+                    errorSpan.textContent = message;
+                } else {
+                    input.classList.add("is-valid");
+                    input.classList.remove("is-invalid");
+                    errorSpan.textContent = '';
+                }
             }
-        }
 
-        function resetFieldState(input) {
-            input.classList.remove("is-valid", "is-invalid");
-            document.getElementById(`${input.id}-error`).textContent = '';
-        }
-
-        function validateTextInput(input) {
-            const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
-            const isValid = regex.test(input.value.trim());
-            setInputValidity(input, isValid, "Este campo solo puede contener letras y espacios.");
-        }
-
-        function validateCarnetInput(input) {
-            const value = input.value.trim();
-            const isValidFormat = value.length >= 4 && value.length <= 11;
-            if (!isValidFormat) {
-                setInputValidity(input, false, "El carnet debe tener entre 4 y 11 caracteres.");
-                return;
+            function resetFieldState(input) {
+                input.classList.remove("is-valid", "is-invalid");
+                document.getElementById(`${input.id}-error`).textContent = '';
             }
-            if (value === originals.carnet) {
-                resetFieldState(input);
-                touchedFields.delete(input.id);
-                return;
+
+            function validateTextInput(input) {
+                const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
+                const isValid = regex.test(input.value.trim());
+                setInputValidity(input, isValid, "Este campo solo puede contener letras y espacios.");
             }
-            fetch(`/validate-carnet?value=${encodeURIComponent(value)}`)
-                .then(response => response.json())
-                .then(data => {
-                    setInputValidity(input, !data.exists, '', "Este carnet ya está registrado.");
-                    validateAllFields();
+
+            function validateCarnetInput(input) {
+                const value = input.value.trim();
+                const isValidFormat = value.length >= 4 && value.length <= 11;
+                if (!isValidFormat) {
+                    setInputValidity(input, false, "El carnet debe tener entre 4 y 11 caracteres.");
+                    return;
+                }
+                if (value === originals.carnet) {
+                    resetFieldState(input);
+                    touchedFields.delete(input.id);
+                    return;
+                }
+                fetch(`/validate-carnet?value=${encodeURIComponent(value)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        setInputValidity(input, !data.exists, '', "Este carnet ya está registrado.");
+                        validateAllFields();
+                    });
+            }
+
+            function validateCelularInput(input) {
+                const value = input.value.replace(/\D/g, '');
+                const isValidFormat = value.length === 8;
+                if (!isValidFormat) {
+                    setInputValidity(input, false, "El número de celular debe tener 8 dígitos.");
+                    return;
+                }
+                if (value === originals.celular) {
+                    resetFieldState(input);
+                    touchedFields.delete(input.id);
+                    return;
+                }
+                fetch(`/validate-celular?value=${encodeURIComponent(value)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        setInputValidity(input, !data.exists, '', "Este número de celular ya está registrado.");
+                        validateAllFields();
+                    });
+            }
+
+            function handleInput(input, validator) {
+                touchedFields.add(input.id);
+                validator(input);
+                validateAllFields();
+            }
+
+            function resetTouchedFields() {
+                Object.keys(fields).forEach(key => {
+                    const field = fields[key];
+                    if (field.value.trim() === originals[key].trim()) {
+                        resetFieldState(field);
+                        touchedFields.delete(key);
+                    }
                 });
-        }
+            }
 
-        function validateCelularInput(input) {
-            const value = input.value.replace(/\D/g, '');
-            const isValidFormat = value.length === 8;
-            if (!isValidFormat) {
-                setInputValidity(input, false, "El número de celular debe tener 8 dígitos.");
-                return;
-            }
-            if (value === originals.celular) {
-                resetFieldState(input);
-                touchedFields.delete(input.id);
-                return;
-            }
-            fetch(`/validate-celular?value=${encodeURIComponent(value)}`)
-                .then(response => response.json())
-                .then(data => {
-                    setInputValidity(input, !data.exists, '', "Este número de celular ya está registrado.");
-                    validateAllFields();
+            function validateAllFields() {
+                let allValid = true;
+                Object.keys(fields).forEach(key => {
+                    const field = fields[key];
+                    if (touchedFields.has(key)) {
+                        switch (key) {
+                            case 'nombre':
+                            case 'papellido':
+                            case 'sapellido':
+                                validateTextInput(field);
+                                break;
+                            case 'carnet':
+                                validateCarnetInput(field);
+                                break;
+                            case 'celular':
+                                validateCelularInput(field);
+                                break;
+                        }
+                        if (field.classList.contains("is-invalid")) {
+                            allValid = false;
+                        }
+                    }
                 });
-        }
+                noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
+                noChangesIcon.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
+                toggleUpdateButton(allValid);
+            }
 
-        function handleInput(input, validator) {
-            touchedFields.add(input.id);
-            validator(input);
+            function toggleUpdateButton(allValid) {
+                const hasChanges = Object.keys(fields).some(key => fields[key].value.trim() !== originals[key]
+                    .trim());
+                updateBtn.disabled = !hasChanges || !allValid;
+            }
+
+            function checkAllFieldsUntouched() {
+                return Object.keys(fields).every(key => fields[key].value.trim() === originals[key].trim());
+            }
+
+            Object.keys(fields).forEach(key => {
+                fields[key].addEventListener("input", function() {
+                    handleInput(this, key === 'carnet' ? validateCarnetInput : key === 'celular' ?
+                        validateCelularInput : validateTextInput);
+                });
+            });
+
+            document.getElementById("update-form").addEventListener("reset", function() {
+                // Primero restaurar los valores originales
+                Object.keys(fields).forEach(key => {
+                    const field = fields[key];
+                    field.value = originals[key];
+                });
+
+                // Después restablecer el estado de los campos
+                resetTouchedFields();
+                // Asegurar que todos los campos se configuren como untouched
+                Object.keys(fields).forEach(key => {
+                    resetFieldState(fields[key]);
+                });
+
+                noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
+                noChangesIcon.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
+                toggleUpdateButton(
+                    true); // Habilitar el botón de actualización si todos los campos están intactos
+            });
+
             validateAllFields();
-        }
-
-        function resetTouchedFields() {
-            Object.keys(fields).forEach(key => {
-                const field = fields[key];
-                if (field.value.trim() === originals[key].trim()) {
-                    resetFieldState(field);
-                    touchedFields.delete(key);
-                }
-            });
-        }
-
-        function validateAllFields() {
-            let allValid = true;
-            Object.keys(fields).forEach(key => {
-                const field = fields[key];
-                if (touchedFields.has(key)) {
-                    switch (key) {
-                        case 'nombre':
-                        case 'papellido':
-                        case 'sapellido':
-                            validateTextInput(field);
-                            break;
-                        case 'carnet':
-                            validateCarnetInput(field);
-                            break;
-                        case 'celular':
-                            validateCelularInput(field);
-                            break;
-                    }
-                    if (field.classList.contains("is-invalid")) {
-                        allValid = false;
-                    }
-                }
-            });
-            noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
-            toggleUpdateButton(allValid);
-        }
-
-        function toggleUpdateButton(allValid) {
-            const hasChanges = Object.keys(fields).some(key => fields[key].value.trim() !== originals[key].trim());
-            updateBtn.disabled = !hasChanges || !allValid;
-        }
-
-        function checkAllFieldsUntouched() {
-            return Object.keys(fields).every(key => fields[key].value.trim() === originals[key].trim());
-        }
-
-        Object.keys(fields).forEach(key => {
-            fields[key].addEventListener("input", function() {
-                handleInput(this, key === 'carnet' ? validateCarnetInput : key === 'celular' ? validateCelularInput : validateTextInput);
-            });
         });
-
-        document.getElementById("update-form").addEventListener("reset", function() {
-            // Primero restaurar los valores originales
-            Object.keys(fields).forEach(key => {
-                const field = fields[key];
-                field.value = originals[key];
-            });
-
-            // Después restablecer el estado de los campos
-            resetTouchedFields();
-            // Asegurar que todos los campos se configuren como untouched
-            Object.keys(fields).forEach(key => {
-                resetFieldState(fields[key]);
-            });
-
-            noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
-            toggleUpdateButton(true); // Habilitar el botón de actualización si todos los campos están intactos
-        });
-
-        validateAllFields();
-    });
-</script>
+    </script>
 
 
 

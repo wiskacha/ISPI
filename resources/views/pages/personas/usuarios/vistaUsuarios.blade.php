@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
     <style>
-        @media (max-width: 405px) {
+        @media (max-width: 605px) {
             .hide-on-small {
                 display: none;
             }
@@ -70,19 +70,35 @@
                 <thead>
                     <tr>
                         <th class="text-center hide-on-small" style="width: 5%;">#</th>
-                        <th style="width: 15%;">Nick/Email</th>
-                        <th style="width: 15%;">Dueño</th>
+                        <th style="width: 10%;">Nick/Email</th>
+                        <th style="width: 10%;">Dueño</th>
+                        <th class="text-center" style="width: 10%;">Acciones</th> <!-- New column for actions -->
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($personas as $index => $persona)
+                    @foreach ($usuarios as $index => $usuario)
                         <tr>
                             <td class="text-center hide-on-small">{{ $index + 1 }}</td>
-                            <td class="fw-semibold">
-                                {{ $persona->NICKEMAIL}}
-                            </td>
-                            <td class="text-muted">
-                                {{ $persona->DUEÑO }}
+                            <td class="fw-semibold">{{ $usuario->NICKEMAIL }}</td>
+                            <td class="text-muted">{{ $usuario->DUEÑO }}</td> <!-- Aquí mostramos el dueño -->
+                            <td class="text-center">
+                                <!-- Form to handle the delete action -->
+                                <form method="POST" action="{{ route('user.destroy', $usuario->id) }}"
+                                    style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('¿Está seguro que desea eliminar a {{ $usuario->NICKEMAIL }}?');">
+                                        <i class="fa fa-trash"></i>
+                                        <span class="hide-on-small">Eliminar</span>
+                                    </button>
+                                </form>
+
+                                <!-- Button to handle the edit action -->
+                                <a href="{{ route('personas.usuarios.editUsuario', $usuario) }}" class="btn btn-sm btn-primary">
+                                    <i class="fa fa-edit"></i>
+                                    <span class="hide-on-small">Editar</span>
+                                </a>
                             </td>
                         </tr>
                     @endforeach
