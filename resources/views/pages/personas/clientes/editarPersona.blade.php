@@ -68,6 +68,8 @@
 @endsection
 
 @section('content')
+    <!-- editarPersona.blade.php -->
+
     <!-- Modal Structure -->
     @include('partials.confirmation-modal', ['persona' => $persona])
 
@@ -75,162 +77,112 @@
         <div class="content content-full">
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center py-2">
                 <div class="flex-grow-1">
-                    <h1 class="h3 fw-bold mb-1">
-                        Editar Persona
-                    </h1>
+                    <h1 class="h3 fw-bold mb-1">Editar Persona</h1>
                 </div>
                 <nav class="flex-shrink-0 mt-3 mt-sm-0 ms-sm-3" aria-label="breadcrumb">
                     <ol class="breadcrumb breadcrumb-alt">
-                        <li class="breadcrumb-item">
-                            Personas
-                        </li>
-                        <li class="breadcrumb-item" aria-current="page">
-                            Editar Persona
-                        </li>
+                        <li class="breadcrumb-item">Personas</li>
+                        <li class="breadcrumb-item" aria-current="page">Editar Persona</li>
                     </ol>
                 </nav>
             </div>
         </div>
     </div>
+
     <div class="block block-rounded m-2">
         <div class="block-header block-header-default">
-            <h3 class="block-title">
-                Editar Persona
-            </h3>
+            <h3 class="block-title">Editar Persona</h3>
         </div>
         <div class="container mt-4">
-            <div class="">
-                <div class="card-body">
-                    <form id="update-form" action="{{ route('personas.updateCliente', $persona) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+            <div class="card-body">
+                <form id="update-form" action="{{ route('personas.updateCliente', $persona) }}" method="POST">
+                    @csrf
+                    @method('PUT')
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nombre" class="form-label">Nombre</label>
-                                <input type="text" id="nombre" name="nombre"
-                                    value="{{ old('nombre', $persona->nombre) }}" class="form-control" required>
-                                <span id="nombre-error" class="text-danger"></span>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="papellido" class="form-label">Primer Apellido</label>
-                                <input type="text" id="papellido" name="papellido"
-                                    value="{{ old('papellido', $persona->papellido) }}" class="form-control" required>
-                                <span id="papellido-error" class="text-danger"></span>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="sapellido" class="form-label">Segundo Apellido</label>
-                                <input type="text" id="sapellido" name="sapellido"
-                                    value="{{ old('sapellido', $persona->sapellido) }}" class="form-control">
-                                <span id="sapellido-error" class="text-danger"></span>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="carnet" class="form-label">Carnet</label>
-                                <input type="number" id="carnet" name="carnet"
-                                    value="{{ old('carnet', $persona->carnet) }}" class="form-control" required>
-                                <span id="carnet-error" class="text-danger"></span>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="celular" class="form-label">Celular</label>
-                                <input type="number" id="celular" name="celular"
-                                    value="{{ old('celular', $persona->celular) }}" class="form-control">
-                                <span id="celular-error" class="text-danger"></span>
-                            </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" id="nombre" name="nombre"
+                                value="{{ old('nombre', $persona->nombre) }}" class="form-control" required>
+                            <span id="nombre-error" class="text-danger"></span>
                         </div>
 
-                        <div class="d-flex justify-content-between mb-4 align-items-center">
-                            <!-- Botón de deshacer -->
-                            <button type="reset" id="reset-btn" class="btn btn-warning me-2">Deshacer</button>
-
-                            <div class="d-flex align-items-center">
-                                <!-- Texto "No se han realizado cambios" -->
-                                <span id="no-changes-text" class="text-muted font-italic me-3" style="white-space: nowrap;">
-                                    No se han realizado cambios
-                                </span>
-
-                                <!-- Ícono para pantallas pequeñas -->
-                                <i id="no-changes-icon" class="fas fa-lock text-muted me-3" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" title="No se han realizado cambios" style="display: none;"></i>
-                                <!-- Botón de actualizar -->
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-primary" id="update-btn" data-bs-toggle="modal" data-bs-target="#confirmModal">Actualizar</button>
-                                    <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary" id="cancelar-btn">Cancelar</a>
-                                </div>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="papellido" class="form-label">Primer Apellido</label>
+                            <input type="text" id="papellido" name="papellido"
+                                value="{{ old('papellido', $persona->papellido) }}" class="form-control" required>
+                            <span id="papellido-error" class="text-danger"></span>
                         </div>
 
-                    </form>
+                        <div class="col-md-6 mb-3">
+                            <label for="sapellido" class="form-label">Segundo Apellido</label>
+                            <input type="text" id="sapellido" name="sapellido"
+                                value="{{ old('sapellido', $persona->sapellido) }}" class="form-control">
+                            <span id="sapellido-error" class="text-danger"></span>
+                        </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label for="carnet" class="form-label">Carnet</label>
+                            <input type="number" id="carnet" name="carnet"
+                                value="{{ old('carnet', $persona->carnet) }}" class="form-control" required>
+                            <span id="carnet-error" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="celular" class="form-label">Celular</label>
+                            <input type="number" id="celular" name="celular"
+                                value="{{ old('celular', $persona->celular) }}" class="form-control">
+                            <span id="celular-error" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-4 align-items-center">
+                        <!-- Botón de deshacer -->
+                        <button type="reset-btn" id="reset-btn" class="btn btn-warning me-2">Deshacer</button>
+
+                        <div class="d-flex align-items-center">
+                            <!-- Texto "No se han realizado cambios" -->
+                            <span id="no-changes-text" class="text-muted font-italic me-3" style="white-space: nowrap;">No
+                                se han realizado cambios</span>
+
+                            <!-- Ícono para pantallas pequeñas -->
+                            <i id="no-changes-icon" class="fas fa-lock text-muted me-3" data-bs-toggle="tooltip"
+                                data-bs-placement="top" title="No se han realizado cambios" style="display: none;"></i>
+
+                            <!-- Botón de actualizar -->
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary" id="update-btn" data-bs-toggle="modal"
+                                    data-bs-target="#confirmModal">Actualizar</button>
+                                <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary"
+                                    id="cancelar-btn">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @if ($errors->any())
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+            <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-danger text-white">
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         </div>
-        @if ($errors->any())
-            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
-                <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header bg-danger text-white">
-                        <strong class="me-auto">Error</strong>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const updateBtn = document.getElementById('update-btn');
-            const form = document.getElementById('update-form');
-            const inputs = form.querySelectorAll('input[required], input[type="text"], input[type="number"]');
-
-            function validateForm() {
-                let isValid = true;
-                inputs.forEach(input => {
-                    if (input.dataset.touched === 'true') { // Solo si el usuario ha interactuado
-                        if (!input.checkValidity()) {
-                            input.classList.add('is-invalid');
-                            isValid = false;
-                        } else {
-                            input.classList.remove('is-invalid');
-                            input.classList.add('is-valid');
-                        }
-                    }
-                });
-                updateBtn.disabled = !isValid;
-            }
-
-
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    this.dataset.touched = 'true';
-                    validateForm();
-                });
-            });
-        });
-    </script>
+    @endif
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializa los tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
             const fields = {
                 nombre: document.getElementById("nombre"),
                 papellido: document.getElementById("papellido"),
@@ -239,8 +191,11 @@
                 celular: document.getElementById("celular")
             };
             const updateBtn = document.getElementById("update-btn");
+            const resetBtn = document.getElementById("reset-btn");
             const noChangesText = document.getElementById("no-changes-text");
             const noChangesIcon = document.getElementById("no-changes-icon");
+
+            // Original values for comparison
             const originals = {
                 nombre: "{{ $persona->nombre }}",
                 papellido: "{{ $persona->papellido }}",
@@ -248,158 +203,200 @@
                 carnet: "{{ $persona->carnet }}",
                 celular: "{{ $persona->celular }}"
             };
-            let touchedFields = new Set();
 
+            let touchedFields = new Set();
+            let debounceTimeouts = {};
+
+            /* ------------- Utility Functions ------------- */
+
+            // Debounce function to prevent excessive API requests
+            function debounce(func, delay) {
+                return function(...args) {
+                    const key = args[0].id;
+                    if (debounceTimeouts[key]) {
+                        clearTimeout(debounceTimeouts[key]);
+                    }
+                    debounceTimeouts[key] = setTimeout(() => func(...args), delay);
+                };
+            }
+
+            // Set the validity state and error message for an input
             function setInputValidity(input, isValid, formatMsg = '', existsMsg = '') {
                 const errorSpan = document.getElementById(`${input.id}-error`);
-                if (!isValid) {
-                    const message = existsMsg || formatMsg;
-                    input.classList.add("is-invalid");
-                    input.classList.remove("is-valid");
-                    errorSpan.textContent = message;
-                } else {
-                    input.classList.add("is-valid");
+                if (isValid) {
                     input.classList.remove("is-invalid");
+                    input.classList.add("is-valid");
                     errorSpan.textContent = '';
+                } else {
+                    input.classList.remove("is-valid");
+                    input.classList.add("is-invalid");
+                    errorSpan.textContent = existsMsg || formatMsg;
+                }
+                validateAllFields(); // Revalidate all fields on any change
+            }
+
+            // Reset the state of an input field
+            function resetFieldState(input) {
+                input.classList.remove("is-valid", "is-invalid");
+                const errorSpan = document.getElementById(`${input.id}-error`);
+                if (errorSpan) errorSpan.textContent = '';
+            }
+
+            // Check if there are any changes compared to the original values
+            function hasChanges() {
+                return fields.nombre.value.trim() !== originals.nombre.trim() ||
+                    fields.papellido.value.trim() !== originals.papellido.trim() ||
+                    fields.sapellido.value.trim() !== originals.sapellido.trim() ||
+                    fields.carnet.value.trim() !== originals.carnet.trim() ||
+                    fields.celular.value.trim() !== originals.celular.trim();
+            }
+
+            // Validate all touched fields and enable or disable the update button
+            function validateAllFields() {
+                const allValid = Array.from(touchedFields).every(id => {
+                    const input = fields[id];
+                    return input.classList.contains("is-valid");
+                });
+
+                const changesMade = hasChanges();
+
+                // Enable button only if all fields are valid and changes are made
+                if (allValid && changesMade) {
+                    updateBtn.disabled = false;
+                    noChangesText.style.display = 'none';
+                    noChangesIcon.style.display = 'none';
+                } else {
+                    updateBtn.disabled = true;
+                    if (!changesMade) {
+                        noChangesText.style.display = 'inline';
+                        noChangesIcon.style.display = 'inline';
+                    } else {
+                        noChangesText.style.display = 'none';
+                        noChangesIcon.style.display = 'none';
+                    }
                 }
             }
 
-            function resetFieldState(input) {
-                input.classList.remove("is-valid", "is-invalid");
-                document.getElementById(`${input.id}-error`).textContent = '';
+            // Reset the form to its original values and clear validation states
+            function resetToOriginalValues() {
+                fields.nombre.value = originals.nombre;
+                fields.papellido.value = originals.papellido;
+                fields.sapellido.value = originals.sapellido;
+                fields.carnet.value = originals.carnet;
+                fields.celular.value = originals.celular;
+
+                // Clear validation states and touched fields
+                Object.keys(fields).forEach(key => {
+                    resetFieldState(fields[key]);
+                });
+                touchedFields.clear();
+
+                // Revalidate the fields after resetting
+                validateAllFields();
             }
 
+            /* ------------- Field Validation Functions ------------- */
+
+            // Validate text inputs for only alphabetic characters and spaces
             function validateTextInput(input) {
                 const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
                 const isValid = regex.test(input.value.trim());
                 setInputValidity(input, isValid, "Este campo solo puede contener letras y espacios.");
             }
 
+            // Validate carnet input by checking the length and API uniqueness check
             function validateCarnetInput(input) {
                 const value = input.value.trim();
                 const isValidFormat = value.length >= 4 && value.length <= 11;
+
                 if (!isValidFormat) {
                     setInputValidity(input, false, "El carnet debe tener entre 4 y 11 caracteres.");
                     return;
                 }
+
+                // Only make API call if the value has changed from the original
                 if (value === originals.carnet) {
                     resetFieldState(input);
                     touchedFields.delete(input.id);
                     return;
                 }
+
+                // API call to validate if carnet exists
                 fetch(`/validate-carnet?value=${encodeURIComponent(value)}`)
                     .then(response => response.json())
                     .then(data => {
                         setInputValidity(input, !data.exists, '', "Este carnet ya está registrado.");
-                        validateAllFields();
                     });
             }
 
+            // Validate celular input by checking for 8 digits and API uniqueness check
             function validateCelularInput(input) {
-                const value = input.value.replace(/\D/g, '');
+                const value = input.value.replace(/\D/g, ''); // Remove non-digit characters
                 const isValidFormat = value.length === 8;
+
                 if (!isValidFormat) {
                     setInputValidity(input, false, "El número de celular debe tener 8 dígitos.");
                     return;
                 }
+
+                // Only make API call if the value has changed from the original
                 if (value === originals.celular) {
                     resetFieldState(input);
                     touchedFields.delete(input.id);
                     return;
                 }
+
+                // API call to validate if celular exists
                 fetch(`/validate-celular?value=${encodeURIComponent(value)}`)
                     .then(response => response.json())
                     .then(data => {
                         setInputValidity(input, !data.exists, '', "Este número de celular ya está registrado.");
-                        validateAllFields();
                     });
             }
 
-            function handleInput(input, validator) {
-                touchedFields.add(input.id);
-                validator(input);
-                validateAllFields();
-            }
+            /* ------------- Event Listeners ------------- */
 
-            function resetTouchedFields() {
-                Object.keys(fields).forEach(key => {
-                    const field = fields[key];
-                    if (field.value.trim() === originals[key].trim()) {
-                        resetFieldState(field);
-                        touchedFields.delete(key);
-                    }
-                });
-            }
+            // Add event listeners to input fields with debounce
+            fields.nombre.addEventListener('input', debounce(() => {
+                touchedFields.add('nombre');
+                validateTextInput(fields.nombre);
+            }, 100));
 
-            function validateAllFields() {
-                let allValid = true;
-                Object.keys(fields).forEach(key => {
-                    const field = fields[key];
-                    if (touchedFields.has(key)) {
-                        switch (key) {
-                            case 'nombre':
-                            case 'papellido':
-                            case 'sapellido':
-                                validateTextInput(field);
-                                break;
-                            case 'carnet':
-                                validateCarnetInput(field);
-                                break;
-                            case 'celular':
-                                validateCelularInput(field);
-                                break;
-                        }
-                        if (field.classList.contains("is-invalid")) {
-                            allValid = false;
-                        }
-                    }
-                });
-                noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
-                noChangesIcon.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
-                toggleUpdateButton(allValid);
-            }
+            fields.papellido.addEventListener('input', debounce(() => {
+                touchedFields.add('papellido');
+                validateTextInput(fields.papellido);
+            }, 100));
 
-            function toggleUpdateButton(allValid) {
-                const hasChanges = Object.keys(fields).some(key => fields[key].value.trim() !== originals[key]
-                    .trim());
-                updateBtn.disabled = !hasChanges || !allValid;
-            }
+            fields.sapellido.addEventListener('input', debounce(() => {
+                touchedFields.add('sapellido');
+                validateTextInput(fields.sapellido);
+            }, 100));
 
-            function checkAllFieldsUntouched() {
-                return Object.keys(fields).every(key => fields[key].value.trim() === originals[key].trim());
-            }
+            fields.carnet.addEventListener('input', debounce(() => {
+                touchedFields.add('carnet');
+                validateCarnetInput(fields.carnet);
+            }, 100));
 
-            Object.keys(fields).forEach(key => {
-                fields[key].addEventListener("input", function() {
-                    handleInput(this, key === 'carnet' ? validateCarnetInput : key === 'celular' ?
-                        validateCelularInput : validateTextInput);
-                });
+            fields.celular.addEventListener('input', debounce(() => {
+                touchedFields.add('celular');
+                validateCelularInput(fields.celular);
+            }, 100));
+
+            // Prevent form submission if fields are invalid
+            document.getElementById("update-form").addEventListener("submit", function(event) {
+                if (updateBtn.disabled) {
+                    event.preventDefault();
+                }
             });
 
-            document.getElementById("update-form").addEventListener("reset", function() {
-                // Primero restaurar los valores originales
-                Object.keys(fields).forEach(key => {
-                    const field = fields[key];
-                    field.value = originals[key];
-                });
-
-                // Después restablecer el estado de los campos
-                resetTouchedFields();
-                // Asegurar que todos los campos se configuren como untouched
-                Object.keys(fields).forEach(key => {
-                    resetFieldState(fields[key]);
-                });
-
-                noChangesText.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
-                noChangesIcon.style.display = checkAllFieldsUntouched() ? 'inline' : 'none';
-                toggleUpdateButton(
-                    true); // Habilitar el botón de actualización si todos los campos están intactos
+            // Add event listener for the reset button
+            resetBtn.addEventListener('click', function() {
+                resetToOriginalValues();
             });
 
+            // Initial validation on page load
             validateAllFields();
         });
     </script>
-
-
 
 @endsection
