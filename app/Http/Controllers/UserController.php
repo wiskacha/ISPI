@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Persona;
 use App\Models\User;
 use App\Http\Requests\UpdateRequestUsuario;
+use App\Http\Requests\RegisterRequestUsuario;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash; // Import the Hash facade
+use Illuminate\Support\Facades\Log;
+
 
 class UserController extends Controller
 {
@@ -56,6 +61,49 @@ class UserController extends Controller
 
         return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuaio actualizado correctamente.');
     }
+
+
+    // REGISTRO DE USUARIO
+    // Show the form to register both persona and user in a single view
+    public function registerpage()
+    {
+        return view('pages.personas.usuarios.registroUsuario');
+    }
+
+    // Handle the registration of both persona and user in a single transaction
+    public function register(RegisterRequestUsuario $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Create the persona
+            $personaData = $request->only('nombre', 'papellido', 'sapellido', 'carnet', 'celular');
+            $persona = Persona::create($personaData);
+
+
+            // Check if persona ID is valid
+            if (!$persona->id_persona) {
+                throw new \Exception('Failed to retrieve Persona ID.');
+            }
+
+            // Create the user linked to the persona
+            $userData = [
+                'id' => $persona->id_persona,
+                'nick' => $request->nick,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ];
+
+            $user = User::create($userData);
+
+            // Commit the transaction
+            DB::commit();
+
+            // Redirect with success message
+            return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuario registrado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Error al registrar el usuario.'])->withInput();
+        }
+    }
 }
-
-

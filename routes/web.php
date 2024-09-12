@@ -21,6 +21,9 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/personas/usuarios/{user}/edit', [UserController::class, 'editUsuario'])->name('personas.usuarios.editUsuario');
     Route::put('personas/usuarios/{user}', [UserController::class, 'updateUsuario'])->name('personas.updateUsuario');
 
+    Route::get('/personas/usuarios/registro', [UserController::class, 'registerpage'])->name('personas.usuarios.registroClientes');
+    Route::post('/personas/usuarios/register', [UserController::class, 'register'])->name('personas.usuarios.register');
+
     Route::delete('/usuarios/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
     // Ruta para validar el campo de nick
