@@ -27,6 +27,10 @@
             padding: .75rem 1.25rem;
         }
 
+        .form-group {
+            margin-bottom: 15px;
+        }
+
         /* Hide default buttons */
         #wizard .actions {
             display: none;
@@ -82,7 +86,6 @@
             @csrf
             <div id="wizard">
 
-
                 <!-- Step 1: Persona Registration -->
                 <h3 style="display:none;">Registrar Persona</h3> <!-- Keep this for jQuery Steps, but hide it -->
                 <div id="custom-tabs" class="text-center mb-4">
@@ -105,31 +108,31 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <!-- Required Inputs -->
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="nombre">Nombre</label>
                                             <input type="text" class="form-control form-control-lg form-control-alt"
                                                 id="nombre" name="nombre" placeholder="Nombre"
                                                 value="{{ old('nombre') }}" required>
-                                            <label for="nombre">Nombre</label>
                                             @error('nombre')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="papellido">Primer Apellido</label>
                                             <input type="text" class="form-control form-control-lg form-control-alt"
                                                 id="papellido" name="papellido" placeholder="Primer Apellido"
                                                 value="{{ old('papellido') }}" required>
-                                            <label for="papellido">Primer Apellido</label>
                                             @error('papellido')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="carnet">Carnet</label>
                                             <input type="text" class="form-control form-control-lg form-control-alt"
                                                 id="carnet" name="carnet" placeholder="Carnet"
                                                 value="{{ old('carnet') }}" required>
-                                            <label for="carnet">Carnet</label>
                                             @error('carnet')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -138,27 +141,29 @@
 
                                     <div class="col-md-6">
                                         <!-- Optional Inputs -->
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="sapellido">Segundo Apellido (Opcional)</label>
                                             <input type="text" class="form-control form-control-lg form-control-alt"
                                                 id="sapellido" name="sapellido" placeholder="Segundo Apellido"
                                                 value="{{ old('sapellido') }}">
-                                            <label for="sapellido">Segundo Apellido (Opcional)</label>
                                             @error('sapellido')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="celular">Celular (Opcional)</label>
                                             <input type="text" class="form-control form-control-lg form-control-alt"
                                                 id="celular" name="celular" placeholder="Celular"
                                                 value="{{ old('celular') }}">
-                                            <label for="celular">Celular (Opcional)</label>
                                             @error('celular')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     </div>
                                 </div>
+                                <br>
+                                <br>
                             </div>
                         </div>
                     </div>
@@ -175,21 +180,21 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="nick">Nick</label>
                                             <input type="text" class="form-control form-control-lg form-control-alt"
                                                 id="nick" name="nick" placeholder="Nick"
                                                 value="{{ old('nick') }}">
-                                            <label for="nick">Nick</label>
                                             @error('nick')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="email">Correo Electrónico</label>
                                             <input type="email" class="form-control form-control-lg form-control-alt"
                                                 id="email" name="email" placeholder="Correo Electrónico"
                                                 value="{{ old('email') }}">
-                                            <label for="email">Correo Electrónico</label>
                                             @error('email')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -197,36 +202,41 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="password">Contraseña</label>
                                             <input type="password" class="form-control form-control-lg form-control-alt"
                                                 id="password" name="password" placeholder="Contraseña">
-                                            <label for="password">Contraseña</label>
                                             @error('password')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        <div class="form-floating">
+                                        <div class="form-group">
+                                            <label for="password_confirmation">Confirmar Contraseña</label>
                                             <input type="password" class="form-control form-control-lg form-control-alt"
                                                 id="password_confirmation" name="password_confirmation"
                                                 placeholder="Confirmar Contraseña">
-                                            <label for="password_confirmation">Confirmar Contraseña</label>
                                         </div>
                                     </div>
                                 </div>
+                                <br>
+                                <br>
+                                <br>
                             </div>
                         </div>
                     </div>
                 </section>
-                <div id="custom-buttons" class="text-center">
-                    <div class="btn-group" role="group">
-                        <button id="custom-prev" class="btn btn-secondary">Anterior</button>
-                        <button id="custom-next" class="btn btn-primary">Siguiente</button>
-                        <button id="custom-finish" class="btn btn-success" style="display: none;">Registrar
-                            Usuario</button>
-                    </div>
-                </div>
+            </div>
         </form>
+
+        <div id="custom-buttons" class="text-center">
+            <div class="btn-group" role="group">
+                <button id="custom-prev" class="btn btn-secondary">Anterior</button>
+                <button id="custom-next" class="btn btn-primary">Siguiente</button>
+                <button id="custom-finish" class="btn btn-success" style="display: none;">Registrar
+                    Usuario</button>
+            </div>
+        </div>
     </div>
 
     @if ($errors->any())
@@ -254,84 +264,248 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-steps/1.1.0/jquery.steps.min.js"></script>
     <script>
         $(document).ready(function() {
-            $("#wizard").steps({
-                headerTag: "h3",
-                bodyTag: "section",
-                transitionEffect: "fade",
-                enableAllSteps: true,
-                autoFocus: true,
-                onFinished: function(event, currentIndex) {
-                    $("#registerForm").submit(); // Submit the form on finish
+            // Custom regex validation for names, etc.
+            $.validator.addMethod("regex", function(value, element, regexpr) {
+                return regexpr.test(value);
+            });
+
+            // Initialize form validation
+            $("#registerForm").validate({
+                rules: {
+                    // Persona fields
+                    nombre: {
+                        required: true,
+                        regex: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(?:\s[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*$/,
+                        maxlength: 100
+                    },
+                    papellido: {
+                        required: true,
+                        regex: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(?:\s[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*$/,
+                        maxlength: 100
+                    },
+                    sapellido: {
+                        regex: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(?:\s[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*$/,
+                        maxlength: 100
+                    },
+                    carnet: {
+                        required: true,
+                        regex: /^\d{4,11}$/,
+                        maxlength: 100
+                    },
+                    celular: {
+                        regex: /^\d{8,11}$/
+                    },
+                    // User fields
+                    nick: {
+                        required: true,
+                        maxlength: 255
+                    },
+                    email: {
+                        required: true,
+                        email: true,
+                        maxlength: 255
+                    },
+                    password: {
+                        required: true,
+                        minlength: 8
+                    },
+                    password_confirmation: {
+                        required: true,
+                        equalTo: "#password"
+                    }
                 },
-                labels: {
-                    finish: "Registrar Usuario",
-                    next: "Siguiente",
-                    previous: "Anterior"
+                messages: {
+                    // Persona messages
+                    nombre: {
+                        required: "El nombre es requerido.",
+                        regex: "El nombre solo puede contener letras y espacios.",
+                        maxlength: "El nombre no puede tener más de 100 caracteres."
+                    },
+                    papellido: {
+                        required: "El primer apellido es requerido.",
+                        regex: "Solo puede contener letras y espacios.",
+                        maxlength: "El primer apellido no puede tener más de 100 caracteres."
+                    },
+                    sapellido: {
+                        regex: "Solo puede contener letras y espacios."
+                    },
+                    carnet: {
+                        required: "El carnet es requerido.",
+                        regex: "El carnet debe contener entre 4 y 11 dígitos.",
+                        maxlength: "El carnet no puede tener más de 100 caracteres."
+                    },
+                    celular: {
+                        regex: "El celular debe contener entre 8 y 11 dígitos."
+                    },
+                    // User messages
+                    nick: {
+                        required: "El nick es requerido.",
+                        maxlength: "El nick no puede tener más de 255 caracteres."
+                    },
+                    email: {
+                        required: "El correo electrónico es requerido.",
+                        email: "Por favor ingrese un correo electrónico válido.",
+                        maxlength: "El correo electrónico no puede tener más de 255 caracteres."
+                    },
+                    password: {
+                        required: "La contraseña es requerida.",
+                        minlength: "La contraseña debe tener al menos 8 caracteres."
+                    },
+                    password_confirmation: {
+                        required: "Por favor confirme su contraseña.",
+                        equalTo: "Las contraseñas no coinciden."
+                    }
                 },
-                onInit: function(event, currentIndex) {
-                    customizeWizardButtons();
-                    updateCustomTabs(currentIndex);
+                onkeyup: function(element) {
+                    $(element).valid(); // Trigger validation
+                    toggleButtons(); // Check button states
                 },
-                onStepChanged: function(event, currentIndex, priorIndex) {
-                    customizeWizardButtons();
-                    updateCustomTabs(currentIndex);
+                onfocusout: function(element) {
+                    $(element).valid(); // Trigger validation
+                    toggleButtons(); // Check button states
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('text-danger');
+                    if (element.val() === "" && (element.attr('name') === "sapellido" || element.attr(
+                            'name') === "celular")) {
+                        // Remove errors if the field is empty
+                        error.remove();
+                    } else if (element.is(":focus")) {
+                        // Show errors for currently focused element
+                        error.insertAfter(element);
+                    } else {
+                        // Initially hide errors and only show after interaction
+                        error.hide();
+                    }
+                },
+                showErrors: function(errorMap, errorList) {
+                    // Show errors only after user interaction
+                    $.each(this.errorList, function(index, error) {
+                        $(error.element).data('previous-error', error.message);
+                    });
+                    this.defaultShowErrors();
+
+                    // Manage specific case for empty fields
+                    $("#registerForm").find(":input").each(function() {
+                        var name = $(this).attr("name");
+                        if ((name === "sapellido" || name === "celular") && $(this).val() ===
+                            "") {
+                            $(this).removeData('previous-error');
+                            $(this).next('label.error')
+                                .remove(); // Remove any existing error message
+                        }
+                    });
                 }
             });
 
-            // Function to customize the wizard buttons with Bootstrap classes
-            function customizeWizardButtons() {
-                let prevBtn = $('#custom-prev');
-                let nextBtn = $('#custom-next');
-                let finishBtn = $('#custom-finish');
+            // Toggle buttons based on validation
+            function toggleButtons() {
+                var isValid = true;
+                $("#registerForm").find(":input").each(function() {
+                    var name = $(this).attr("name");
+                    if (name !== "sapellido" && name !== "celular") {
+                        if (!$("#registerForm").validate().element($(this))) {
+                            isValid = false;
+                        }
+                    } else {
+                        if ($(this).val() !== "" && !$("#registerForm").validate().element($(this))) {
+                            isValid = false;
+                        }
+                    }
+                });
 
-                prevBtn.addClass('btn btn-secondary'); // Style 'Anterior' as secondary
-                nextBtn.addClass('btn btn-primary'); // Style 'Siguiente' as primary
-                finishBtn.addClass('btn btn-success'); // Style 'Registrar Usuario' as primary
+                $("#custom-next").prop('disabled', !isValid);
+                $("#custom-finish").prop('disabled', !isValid);
+            }
 
-                let currentIndex = $("#wizard").steps("getCurrentIndex");
-                let totalSteps = $("#wizard").find('.steps ul li').length;
+            // Handle the next, prev, and finish button logic
+            var currentStep = 1;
+            var totalSteps = 2;
 
-                if (currentIndex === 0) {
-                    prevBtn.prop('disabled', true); // Disable 'Anterior' on first step
+            $("#custom-next").click(function() {
+                if (currentStep < totalSteps) {
+                    var isValid = true;
+                    $("#registerForm").find(":input").each(function() {
+                        var name = $(this).attr("name");
+                        if (name !== "sapellido" && name !== "celular") {
+                            if (!$("#registerForm").validate().element($(this))) {
+                                isValid = false;
+                            }
+                        }
+                    });
+                    if (isValid) {
+                        currentStep++;
+                        showStep(currentStep);
+                    }
+                }
+            });
+
+            $("#custom-prev").click(function() {
+                if (currentStep > 1) {
+                    currentStep--;
+                    showStep(currentStep);
+                }
+            });
+
+            // This should always allow going to the previous step
+            $("#custom-prev").prop('disabled', currentStep === 1);
+
+            $("#custom-finish").click(function() {
+                if ($("#registerForm").valid()) {
+                    $("#registerForm").submit();
+                }
+            });
+            
+            $("#registerForm").on('submit', function() {
+                var email = $("#email").val();
+                var nick = $("#nick").val();
+
+                if (email) {
+                    $("#email").val(email.toLowerCase());
+                }
+                if (nick) {
+                    $("#nick").val(nick.toLowerCase());
+                }
+            });
+            // Show specific step
+            function showStep(step) {
+                // Update the active tab
+                $(".nav-link").removeClass('active');
+                $(".nav-link[href='#step-" + step + "']").addClass('active');
+
+                // Show the current step and hide others
+                $("section").hide();
+                $("section:nth-of-type(" + step + ")").show();
+
+                // Show or hide the finish button based on the step
+                if (step === totalSteps) {
+                    $("#custom-finish").show();
+                    $("#custom-next").hide();
                 } else {
-                    prevBtn.prop('disabled', false); // Enable 'Anterior' otherwise
+                    $("#custom-finish").hide();
+                    $("#custom-next").show();
                 }
 
-                if (currentIndex === totalSteps - 1) {
-                    nextBtn.hide(); // Hide 'Siguiente' on the last step
-                    finishBtn.show(); // Show 'Registrar Usuario' on the last step
-                } else {
-                    nextBtn.show(); // Show 'Siguiente' otherwise
-                    finishBtn.hide(); // Hide 'Registrar Usuario' otherwise
+                // Update previous button state
+                $("#custom-prev").prop('disabled', step === 1);
+
+                // Ensure 'Siguiente' button is enabled if the current step is valid
+                if (step === 1) {
+                    // Check if step 1 is valid
+                    $("#custom-next").prop('disabled', !$("#registerForm").validate().element("#nombre") ||
+                        !$("#registerForm").validate().element("#papellido") ||
+                        !$("#registerForm").validate().element("#carnet"));
+                } else if (step === 2) {
+                    // Check if step 2 is valid
+                    $("#custom-next").prop('disabled', !$("#registerForm").valid());
                 }
             }
 
-            // Function to update custom tabs based on the current step
-            function updateCustomTabs(currentIndex) {
-                $("#custom-tabs .nav-link").removeClass('active');
-                $("#custom-tabs .nav-link").eq(currentIndex).addClass('active');
-            }
+            // Initialize steps visibility
+            showStep(currentStep);
 
-            // Bind custom button click events
-            $('#custom-prev').on('click', function() {
-                $("#wizard").steps("previous"); // Go to previous step
-            });
-
-            $('#custom-next').on('click', function() {
-                $("#wizard").steps("next"); // Go to next step
-            });
-
-            $('#custom-finish').on('click', function() {
-                $("#wizard").steps("finish"); // Complete the wizard
-            });
-
-            // Handle click events on custom tabs
-            $("#custom-tabs .nav-link").on('click', function(e) {
-                e.preventDefault(); // Prevent default anchor behavior
-                let target = $(this).attr('href'); // Get href of clicked tab
-                let stepIndex = $("#wizard").find('section').index($(target)); // Get the step index
-                $("#wizard").steps('setStep', stepIndex); // Set the step index
-            });
+            // Disable next button initially
+            toggleButtons();
         });
     </script>
 @endsection

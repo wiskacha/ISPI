@@ -350,11 +350,14 @@
 
             // Add event listeners to input fields with debounce
             fields.nick.addEventListener('input', debounce(() => {
+                fields.nick.value = fields.nick.value.toLowerCase(); // Convert to lowercase on input
+
                 touchedFields.add('nick');
                 validateNickInput(fields.nick);
             }, 100));
 
             fields.email.addEventListener('input', debounce(() => {
+                fields.email.value = fields.email.value.toLowerCase(); 
                 touchedFields.add('email');
                 validateEmailInput(fields.email);
             }, 100));
