@@ -59,7 +59,7 @@
 @endsection
 
 @section('content')
-<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <div class="bg-body-light">
         <div class="content content-full">
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center py-2">
@@ -76,13 +76,16 @@
             </div>
         </div>
     </div>
+    <br>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">{{ __('Registrar Usuario') }}</div>
-
-                    <div class="card-body">
+            <div class="col-md-12">
+                <div class="block block-rounded">
+                    <div class="block-header block-header-default">
+                        <h3 class="block-title">{{ __('Registrar Usuario') }}</h3>
+                    </div>
+                    <br>
+                    <div class="container">
                         @if ($errors->any())
                             <div class="alert alert-danger">
                                 <ul>
@@ -95,68 +98,92 @@
 
                         <form method="POST" id="newUserForm" action="{{ route('personas.usuarios.registerE') }}">
                             @csrf
+                            <div class="row">
+                                <!-- Nick Field -->
+                                <div class="col-md-6 order-1 order-md-1">
+                                    <div class="form-group">
+                                        <label for="nick">Nick</label>
+                                        <input type="text" class="form-control form-control-lg form-control-alt"
+                                            id="nick" name="nick" placeholder="Nick" required>
+                                        @error('nick')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="nick">Nick</label>
-                                <input type="text" class="form-control form-control-lg form-control-alt" id="nick"
-                                    name="nick" value="{{ old('nick') }}">
-                                @error('nick')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <!-- Email Field -->
+                                <div class="col-md-6 order-2 order-md-2">
+                                    <div class="form-group">
+                                        <label for="email">Correo Electrónico</label>
+                                        <input type="email" class="form-control form-control-lg form-control-alt"
+                                            id="email" name="email" placeholder="Correo Electrónico" required>
+                                        @error('email')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="email">Correo Electrónico</label>
-                                <input type="email" class="form-control form-control-lg form-control-alt" id="email"
-                                    name="email" value="{{ old('email') }}">
-                                @error('email')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <!-- Password Field -->
+                                <div class="col-md-6 order-3 order-md-3">
+                                    <div class="form-group">
+                                        <label for="password">Contraseña</label>
+                                        <input type="password" class="form-control form-control-lg form-control-alt"
+                                            id="password" name="password" placeholder="Contraseña" required>
+                                        @error('password')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="password">Contraseña</label>
-                                <input type="password" class="form-control form-control-lg form-control-alt" id="password"
-                                    name="password">
-                                @error('password')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <!-- Password Confirmation Field -->
+                                <div class="col-md-6 order-4 order-md-4">
+                                    <div class="form-group">
+                                        <label for="password_confirmation">Confirmar Contraseña</label>
+                                        <input type="password" class="form-control form-control-lg form-control-alt"
+                                            id="password_confirmation" name="password_confirmation"
+                                            placeholder="Confirmar Contraseña" required>
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="password_confirmation">Confirmar Contraseña</label>
-                                <input type="password" class="form-control form-control-lg form-control-alt"
-                                    id="password_confirmation" name="password_confirmation">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="id_persona">Persona</label>
-                                <select class="js-example-basic-single form-control" id="id_persona" name="id_persona"
-                                    required>
-                                    <option value="" disabled selected>Selecciona una persona</option>
-                                    @foreach ($personas as $persona)
-                                        <option value="{{ $persona->id_persona }}">
-                                            [{{ $persona->carnet }}] {{ $persona->papellido }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('id_persona')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            <div class="form-group row mb-0">
-                                <div class="col-md-6 offset-md-4">
-                                    <button type="submit" class="btn btn-primary" disabled>Registrar</button>
+                                <!-- Persona Field -->
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="id_persona">Persona</label>
+                                        <div class="col-md-5 col-12">
+                                            <select class="js-example-basic-single form-control form-control-lg"
+                                                id="id_persona" name="id_persona" required>
+                                                <option value="" disabled selected>Selecciona una persona</option>
+                                                @foreach ($personas as $persona)
+                                                    <option value="{{ $persona->id_persona }}">
+                                                        [{{ $persona->carnet }}] {{ $persona->papellido }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @error('id_persona')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Submit Button -->
+                            <div class="form-group row mb-0">
+                                <div class="col-md-3 offset-md-9 col-12 text-center text-md-right">
+                                    <button type="submit" class="btn btn-primary w-100 w-md-25" disabled>Registrar</button>
+                                </div>
+                            </div>
+
+                            <br>
                         </form>
+
 
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('js')
@@ -170,9 +197,8 @@
             $('#id_persona').select2({
                 placeholder: "Selecciona una persona",
                 allowClear: true,
-                width: 'resolve'
+                // width: 'resolve'
             });
-
             // jQuery Validation for the form
             $("#newUserForm").validate({
                 ignore: [], // Ensures Select2 is not ignored
