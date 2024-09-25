@@ -7,6 +7,7 @@ use App\Models\Persona;
 use App\Models\User;
 use App\Http\Requests\UpdateRequestUsuario;
 use App\Http\Requests\RegisterRequestUsuario;
+use App\Http\Requests\RegisterRequestUsuarioE;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash; // Import the Hash facade
 use Illuminate\Support\Facades\Log;
@@ -70,6 +71,20 @@ class UserController extends Controller
         return view('pages.personas.usuarios.registroUsuario');
     }
 
+    public function registerpageF()
+    {
+        return view('pages.personas.usuarios.create.freshUsuario');
+    }
+
+    public function registerpageE()
+    {
+        // Obtener todas las personas que no tienen un usuario asociado
+        $personas = Persona::whereDoesntHave('usuario')->get(); // Cambia 'user' por 'usuario' para usar la relación definida
+
+        return view('pages.personas.usuarios.create.existingUsuario', compact('personas'));
+    }
+
+
     // Handle the registration of both persona and user in a single transaction
     public function register(RegisterRequestUsuario $request)
     {
@@ -101,6 +116,26 @@ class UserController extends Controller
 
             // Redirect with success message
             return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuario registrado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Error al registrar el usuario.'])->withInput();
+        }
+    }
+
+    /*Register function for create and assign a user to a person*/
+    public function registerE(RegisterRequestUsuarioE $request)
+    {
+        DB::beginTransaction();
+        try {
+            $userData = [
+                'id' => $request->id_persona,
+                'nick' => $request->nick,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ];
+            $user = User::create($userData);
+            DB::commit();
+            return redirect('/personas/usuarios/vista')->with('success', 'Cuenta creada satisfactoriamente');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'Error al registrar el usuario.'])->withInput();
