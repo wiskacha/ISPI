@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdjuntosTable extends Migration
+class CreateProductoAdjuntosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,21 @@ class CreateAdjuntosTable extends Migration
      */
     public function up()
     {
-        Schema::create('adjuntos', function (Blueprint $table) {
+        Schema::create('producto_adjuntos', function (Blueprint $table) {
             $table->increments('id_adjunto');
-            $table->string('uri', 200);
-            $table->string('descripcion', 100);
-            $table->unsignedInteger('id_producto');
+            $table->text('uri'); // Usar TEXT para almacenar rutas más largas
+            $table->string('descripcion', 255)->nullable(); // Descripción más larga y opcional
+            $table->unsignedInteger('id_producto'); // Cambiar a unsignedBigInteger si es necesario
+            $table->string('mime_type', 100)->nullable(); // Almacenar el tipo de archivo si es necesario
             $table->timestamps();
             $table->softDeletes();
-            
-            $table->foreign('id_producto', 'adjuntos_ibfk_1')->references('id_producto')->on('productos');
+
+            // Clave foránea
+            $table->foreign('id_producto', 'producto_adjuntos_ibfk_1')->references('id_producto')->on('productos');
+
+            // Índices
+            $table->index('id_producto');
+            $table->index('uri');
         });
     }
 
@@ -32,6 +38,6 @@ class CreateAdjuntosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('adjuntos');
+        Schema::dropIfExists('producto_adjuntos');
     }
 }

@@ -21,9 +21,10 @@ class CreateProductosTable extends Migration
             $table->string('presentacion', 200)->default('unidad');
             $table->string('unidad', 100);
             $table->unsignedInteger('id_empresa')->nullable(); // Use unsignedInteger for referencing an integer primary key
+            $table->json('tags')->nullable(); // Add JSON column for tags
             $table->timestamps();
             $table->softDeletes();
-            
+
             // Define foreign key constraint
             $table->foreign('id_empresa')->references('id_empresa')->on('empresas');
         });

@@ -31,13 +31,6 @@
 
     <body>
         <script data-pace-options='{ "ajax": false }' src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
-
-        <script>
-            $(document).ready(function() {
-                // Remove loading class once the page is fully loaded
-                $("body").removeClass("loading");
-            });
-        </script>
         {{-- <script>
             // Apply dark mode class as early as possible
             (function() {
@@ -365,6 +358,32 @@
                                     @endif
                                 </ul>
                             </li>
+                            
+                            @if (Auth::check() && Auth::user()->hasRole('admin'))
+                                <li
+                                    class="nav-main-item{{ request()->is('productos/*') ? ' open' : '' }}">
+                                    <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu"
+                                        aria-haspopup="true" aria-expanded="true" href="#">
+                                        <i class="nav-main-link-icon si si-bag"></i>
+                                        <span class="nav-main-link-name">Productos</span>
+                                    </a>
+                                    <ul class="nav-main-submenu">
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('productos/vista') ? ' active' : '' }}"
+                                                href="/productos/vista">
+                                                <span class="nav-main-link-name">Ver productos</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('productos/registro') ? ' active' : '' }}"
+                                                href="/productos/registro">
+                                                <span class="nav-main-link-name">Registrar Productos</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
+
                             <li class="nav-main-heading">Various</li>
                             <li class="nav-main-item{{ request()->is('pages/*') ? ' open' : '' }}">
                                 <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
