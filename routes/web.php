@@ -62,9 +62,15 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/productos/registro', [ProductoController::class, 'register'])->name('productos.registro');
     Route::get('/productos/{producto}/edit', [ProductoController::class, 'edit'])->name('productos.edit');
     Route::get('/productos/vista', [ProductoController::class, 'index'])->name('productos.vista');
-    
+
     //Registro de Productos
     Route::post('/productos/register', [ProductoController::class, 'store'])->name('productos.store');
+
+    //Destroy producto
+    Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])->name('productos.destroy');
+
+    //actualizar producto
+    Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
 });
 
 // Rutas de Usuario Autenticado

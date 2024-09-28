@@ -71,6 +71,21 @@ class pageTablesDatatables {
       pageLength: 8,
       autoWidth: false,
     });
+
+    jQuery(".js-dataTable-responsive").DataTable({
+      pagingType: "simple_numbers",
+      layout: {
+        topStart: {
+          buttons: ["copy", "excel", "csv", "pdf", "print"],
+          pageLength: {
+            menu: [5, 10, 15, 20],
+          },
+        },
+      },
+      pageLength: 10,
+      autoWidth: false,
+      responsive: true,
+    });
   }
 
   /*

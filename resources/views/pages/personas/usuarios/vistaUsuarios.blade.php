@@ -62,7 +62,7 @@
     <div class="block block-rounded">
         <div class="block-header block-header-default">
             <h3 class="block-title">
-                Users List <small>Export Buttons</small>
+                Lista de USUARIOS <small></small>
             </h3>
         </div>
         <div class="block-content block-content-full">

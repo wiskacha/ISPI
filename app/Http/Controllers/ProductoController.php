@@ -18,6 +18,17 @@ use Illuminate\Support\Facades\DB;
 
 class ProductoController extends Controller
 {
+    public function destroy($id)
+    {
+        $producto = Producto::find($id);
+
+        if ($producto) {
+            $producto->delete(); // Soft delete
+            return redirect()->route('productos.vista')->with('success', 'Persona eliminada correctamente.');
+        } else {
+            return redirect()->route('productos.vista')->with('error', 'Persona no encontrada.');
+        }
+    }
     // Show the form for registering a new product
     public function register()
     {
@@ -27,19 +38,45 @@ class ProductoController extends Controller
     }
 
     // Show the form for editing a product
-    public function edit(Producto $producto)
+    public function edit($id)
     {
-        return view('pages.productos.editarProductos', compact('producto'));
+        $producto = Producto::findOrFail($id);
+
+        // Derive folder name
+        $folderName = substr($producto->nombre, 0, 4) . '_' . $producto->created_at->format('YmdHis');
+        $imagePath = 'storage/productos/' . $folderName . '/main/main.png';
+
+        // Pass the derived image path and product data to the view
+        return view('pages.productos.editarProductos', [
+            'producto' => $producto,
+            'imagePath' => $imagePath,
+            'empresas' => Empresa::all(), // Assuming you're passing 'empresas' to select from
+        ]);
     }
+
 
     // Show the list of products
     public function index()
     {
-        $productos = Producto::all(); // Fetch all products
+        $productos = Producto::all();
+
+        foreach ($productos as $producto) {
+            Log::info('Producto: ', [
+                'nombre' => $producto->nombre,
+                'image_base64' => $producto->image_base64 ? 'Image exists' : 'No Image'
+            ]);
+            $imagePath = 'public/productos/' . substr($producto->nombre, 0, 4) . '_' . $producto->created_at->format('YmdHis') . '/main/main.png';
+
+            if (Storage::exists($imagePath)) {
+                // Cargar la imagen y codificarla en Base64
+                $producto->image_base64 = base64_encode(Storage::get($imagePath));
+            } else {
+                $producto->image_base64 = null;
+            }
+        }
+
         return view('pages.productos.vistaProductos', compact('productos'));
     }
-
-
     public function store(RegisterRequestProducto $request)
     {
         // Start by initializing the folderName at the beginning
@@ -50,14 +87,19 @@ class ProductoController extends Controller
         try {
             $validatedData = $request->validated();
 
+            // Convert tags from comma-separated string to JSON array
+            if (isset($validatedData['tags'])) {
+                $validatedData['tags'] = json_encode(array_map('trim', explode(',', $validatedData['tags'])));
+            }
+
             // Create the product
             $producto = Producto::create($validatedData);
 
             // Generate a unique folder name based on the product name and created_at date
             $folderName = substr($producto->nombre, 0, 4) . '_' . $producto->created_at->format('YmdHis');
-            $mainFolderPath = 'productos/' . $folderName . '/main';
-            $photosFolderPath = 'productos/' . $folderName . '/photos';
-            $documentsFolderPath = 'productos/' . $folderName . '/documents';
+            $mainFolderPath = 'public/productos/' . $folderName . '/main';  // Using 'public' disk
+            $photosFolderPath = 'public/productos/' . $folderName . '/photos';
+            $documentsFolderPath = 'public/productos/' . $folderName . '/documents';
 
             // Create the folders
             Storage::makeDirectory($mainFolderPath);
@@ -83,14 +125,14 @@ class ProductoController extends Controller
 
                         // Log the URI and product ID before creating the Adjunto
                         Log::info('Creating Adjunto entry: ', [
-                            'uri' => $mainFolderPath . '/main.png',
+                            'uri' => 'storage/productos/' . $folderName . '/main/main.png',  // Correct URL for serving via /storage
                             'descripcion' => 'main.png',
                             'id_producto' => $producto->id_producto,
                         ]);
 
                         // Create the Adjunto
                         Adjunto::create([
-                            'uri' => $mainFolderPath . '/main.png',
+                            'uri' => 'storage/productos/' . $folderName . '/main/main.png',  // Correct path for the Adjunto
                             'descripcion' => 'main.png',
                             'id_producto' => $producto->id_producto,
                         ]);
@@ -112,7 +154,7 @@ class ProductoController extends Controller
 
             // If the folderName is set (i.e., product was created), delete directories
             if ($folderName) {
-                Storage::deleteDirectory('productos/' . $folderName);
+                Storage::deleteDirectory('public/productos/' . $folderName);
             }
 
             return redirect()->back()->withErrors('There was an error registering the product. Please try again.');
@@ -121,26 +163,52 @@ class ProductoController extends Controller
 
 
 
+
     // Update the specified product in storage
-    public function update(UpdateRequestProducto $request, Producto $producto)
+    public function update(UpdateRequestProducto $request, $id_producto)
     {
-        $validatedData = $request->validated(); // Using the validated data from the request
+        $producto = Producto::findOrFail($id_producto);
 
-        // Update the product
-        $producto->update($validatedData);
+        DB::beginTransaction();
 
-        // Handle file uploads for attachments
-        if ($request->hasFile('adjuntos')) {
-            foreach ($request->file('adjuntos') as $file) {
-                $uri = $file->store('adjuntos'); // Save the file
-                Adjunto::create([
-                    'uri' => $uri,
-                    'descripcion' => $file->getClientOriginalName(),
-                    'id_producto' => $producto->id_producto,
-                ]);
+        try {
+            $validatedData = $request->validated();
+
+            // Convert tags from comma-separated string to JSON array
+            if (isset($validatedData['tags'])) {
+                $validatedData['tags'] = json_encode(array_map('trim', explode(',', $validatedData['tags'])));
             }
-        }
 
-        return redirect()->route('productos.index')->with('success', 'Producto actualizado exitosamente.');
+            // Update the product
+            $producto->update($validatedData);
+
+            // Generate the folder name again
+            $folderName = substr($producto->nombre, 0, 4) . '_' . $producto->created_at->format('YmdHis');
+            $mainFolderPath = 'public/productos/' . $folderName . '/main';
+
+            // Handle image upload
+            if ($request->hasFile('image') && $request->file('image')->isValid()) {
+                $image = Image::read($request->file('image'));
+                $image->resize(512, 512);
+                $image->save(storage_path('app/' . $mainFolderPath . '/main.png'));
+
+                // Update or create the Adjunto entry
+                Adjunto::updateOrCreate(
+                    ['id_producto' => $producto->id_producto, 'descripcion' => 'main.png'],
+                    ['uri' => 'storage/productos/' . $folderName . '/main/main.png']
+                );
+            }
+
+            // Handle image deletion
+            if ($request->has('delete_image')) {
+                Storage::delete($mainFolderPath . '/main.png'); // Delete the main.png file
+            }
+
+            DB::commit();
+            return redirect()->route('productos.vista')->with('success', 'Producto actualizado exitosamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors('Error al actualizar el producto.');
+        }
     }
 }

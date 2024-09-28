@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class UpdateRequestProducto extends FormRequest
 {
@@ -23,16 +25,18 @@ class UpdateRequestProducto extends FormRequest
      */
     public function rules()
     {
-        $id = $this->route('producto'); // Get the product ID from the route
-
+        $id_producto = $this->route('producto');
+        Log::info('Product ID being validated:', ['id_producto' => $id_producto]);
         return [
-            'codigo' => 'required|string|max:100|unique:productos,codigo,' . $id . ',id_producto', // Ignore current product
-            'nombre' => 'required|string|max:100|unique:productos,nombre,' . $id . ',id_producto',
+            'codigo' => 'required|string|max:100|unique:productos,codigo,' . $id_producto . ',id_producto',
+            'nombre' => 'required|string|max:100|unique:productos,nombre,' . $id_producto . ',id_producto',
             'precio' => 'required|numeric',
             'presentacion' => 'nullable|string|max:200',
             'unidad' => 'required|string|max:100',
             'id_empresa' => 'nullable|integer|exists:empresas,id_empresa',
             'tags' => 'nullable|string',
         ];
+        
+
     }
 }
