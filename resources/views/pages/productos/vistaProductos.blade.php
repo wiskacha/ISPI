@@ -111,7 +111,7 @@
                             <td class="text-center fs-sm" style="display: none">{{ $index + 1 }}</td>
                             <td>
                                 @if ($producto->image_base64)
-                                    <img src="data:image/png;base64,{{ $producto->image_base64 }}"
+                                    <img src="data:image/jpeg;base64,{{ $producto->image_base64 }}"
                                         alt="{{ $producto->nombre }}" style="max-width: 100px; max-height: 100px;">
                                 @else
                                     <img src="https://via.placeholder.com/100" alt="No Image"

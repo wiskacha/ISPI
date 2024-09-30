@@ -25,18 +25,16 @@ class UpdateRequestProducto extends FormRequest
      */
     public function rules()
     {
-        $id_producto = $this->route('producto');
-        Log::info('Product ID being validated:', ['id_producto' => $id_producto]);
         return [
-            'codigo' => 'required|string|max:100|unique:productos,codigo,' . $id_producto . ',id_producto',
-            'nombre' => 'required|string|max:100|unique:productos,nombre,' . $id_producto . ',id_producto',
+            'nombre' => 'required|string|max:255',
+            'codigo' => 'required|string|max:255',
             'precio' => 'required|numeric',
-            'presentacion' => 'nullable|string|max:200',
-            'unidad' => 'required|string|max:100',
-            'id_empresa' => 'nullable|integer|exists:empresas,id_empresa',
+            'unidad' => 'required|string|max:255',
+            'presentacion' => 'required|string|max:255',
             'tags' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'documentos.*' => 'nullable|file|mimes:pdf|max: 5124', // Max size 2MB
         ];
-        
-
     }
 }

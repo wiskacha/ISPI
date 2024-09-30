@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Adjunto extends Model
 {
-	use SoftDeletes;
 	protected $table = 'producto_adjuntos';
 	protected $primaryKey = 'id_adjunto';
 
