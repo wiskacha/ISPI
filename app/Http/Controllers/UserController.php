@@ -88,6 +88,7 @@ class UserController extends Controller
     // Handle the registration of both persona and user in a single transaction
     public function register(RegisterRequestUsuario $request)
     {
+        Log::info('Register request:', $request->all());
         DB::beginTransaction();
 
         try {
@@ -127,6 +128,7 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            // dd((int)$request->id_persona);
             $userData = [
                 'id' => $request->id_persona,
                 'nick' => $request->nick,
@@ -138,7 +140,7 @@ class UserController extends Controller
             return redirect('/personas/usuarios/vista')->with('success', 'Cuenta creada satisfactoriamente');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Error al registrar el usuario.'])->withInput();
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
 }

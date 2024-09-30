@@ -167,6 +167,7 @@ class ProductoController extends Controller
     // Update the specified product in storage
     public function update(UpdateRequestProducto $request, $id_producto)
     {
+
         $producto = Producto::findOrFail($id_producto);
 
         DB::beginTransaction();
@@ -264,6 +265,7 @@ class ProductoController extends Controller
                 }
             }
 
+            Log::info($request);
             // Handle multiple images
             if ($request->hasFile('imagenes')) {
                 foreach ($request->file('imagenes') as $key => $photo) {

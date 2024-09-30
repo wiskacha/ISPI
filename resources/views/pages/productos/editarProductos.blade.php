@@ -122,7 +122,7 @@
                                     @endif
                                 </div>
                                 <label for="image" class="form-label">Subir nueva imagen</label>
-                                <input class="form-control" type="file" id="image" name="image">
+                                <input class="form-control" type="file" id="image" name="image" accept=".png, .jpg, .jpeg">
                             </div>
 
                             <!-- Checkbox to delete the current image -->
@@ -173,7 +173,7 @@
                                             </div>
                                             <input type="file" class="form-control form-control-lg form-control-alt"
                                                 name="imagenes[{{ $i }}]" id="imagenes-{{ $i }}"
-                                                accept="image/*">
+                                                accept=".png, .jpg, .jpeg">
                                         </div>
                                     </div>
                                 @endfor
@@ -578,6 +578,7 @@
 
             document.getElementById('confirm-submit').addEventListener('click', function() {
                 // Close the modal before submitting the form
+                
                 const modalElement = document.getElementById('confirmationModal');
                 const modal = bootstrap.Modal.getInstance(modalElement);
                 modal.hide(); // Close the modal

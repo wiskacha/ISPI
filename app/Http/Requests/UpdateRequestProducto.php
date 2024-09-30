@@ -25,6 +25,9 @@ class UpdateRequestProducto extends FormRequest
      */
     public function rules()
     {
+
+        // dd('Inicialización deL ARRAY DE RULES', $this->all());
+
         return [
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:255',

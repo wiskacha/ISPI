@@ -174,7 +174,7 @@
                                     <div class="form-group">
                                         <label for="adjuntos">Imagen</label>
                                         <input type="file" class="form-control form-control-lg form-control-alt"
-                                            name="adjuntos[]" id="adjuntos" accept="image/*">
+                                            name="adjuntos[]" id="adjuntos" accept=".png, .jpg, .jpeg">
                                         <small class="form-text text-muted">Debe ser un archivo de imágen.</small>
                                         @error('adjuntos')
                                             <span class="text-danger">{{ $message }}</span>
