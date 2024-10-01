@@ -64,10 +64,10 @@
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center py-2">
                 <div class="flex-grow-1">
                     <h1 class="h3 fw-bold mb-1">
-                        Registrar Producto
+                        Ver Productos
                     </h1>
                     <h2 class="fs-base lh-base fw-medium text-muted mb-0">
-                        Nuevo registro
+                        Visualizar productos
                     </h2>
                 </div>
                 <nav class="flex-shrink-0 mt-3 mt-sm-0 ms-sm-3" aria-label="breadcrumb">
@@ -76,7 +76,7 @@
                             Productos
                         </li>
                         <li class="breadcrumb-item" aria-current="page">
-                            Registro de Producto
+                            Vista de Productos
                         </li>
                     </ol>
                 </nav>
@@ -86,7 +86,7 @@
     <div class="block block-rounded">
         <div class="block-header block-header-default">
             <h3 class="block-title">
-                Lista de PRODUCTOS <small>DataTables Responsive Mode</small>
+                Lista de PRODUCTOS <small>Exportable</small>
             </h3>
         </div>
         <div class="block-content block-content-full overflow-x-auto">
@@ -101,7 +101,7 @@
                             <th style="width: 6%;">Tags</th>
                             <th style="width: 10%;">Código</th>
                             <th style="width: 10%;">Precio</th>
-                            <th style="width: 20%;">Presentación</th>
+                            <th style="width: 10%;">Presentación</th>
                             <th style="width: 20%;">Empresa</th> <!-- New column -->
                             <th class="text-center" style="width: auto">Acciones</th>
                         </tr>

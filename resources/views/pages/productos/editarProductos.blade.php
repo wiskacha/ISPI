@@ -88,7 +88,7 @@
                             <!-- Tags -->
                             <div class="mb-4">
                                 <label class="form-label" for="tags">Tags</label>
-                                <textarea class="form-control" id="tags" name="tags">{{ old('tags', implode("\n", json_decode($producto->tags, true) ?? [])) }}</textarea>
+                                <textarea class="form-control" style="height: 5rem;" id="tags" name="tags">{{ old('tags', implode("\n", json_decode($producto->tags, true) ?? [])) }}</textarea>
                                 <small class="text-muted">Escribe cada tag en una nueva línea.</small>
                             </div>
                         </div>
@@ -155,13 +155,13 @@
                                                     'img' . $i . '.jpeg',
                                                 );
                                             @endphp
-                                            <div style="width: auto; margin-bottom: 1.2rem;">
+                                            <div style="width: 160px; height: 160px; overflow: hidden; border-radius: 0.5rem; border: 1px solid #e9ecef; margin-bottom: 1.2rem;">
                                                 @if ($adjunto)
                                                     <img src="{{ asset($adjunto->uri) }}"
-                                                        alt="Imagen img{{ $i }}" height="160">
+                                                        alt="Imagen img{{ $i }}"
+                                                        style="width: 100%; height: 100%; object-fit: cover;">
                                                 @else
-                                                    <img src="https://via.placeholder.com/100" alt="Placeholder"
-                                                        width="160">
+                                                <div style="height: 200px; width: 100%; background-color: #e9ecef"></div>
                                                 @endif
                                             </div>
                                             <div class="form-check">
@@ -225,9 +225,8 @@
                                                         style="align-content: center; align-items: center; text-align: center">
                                                         <span>No Documento</span>
                                                     </div>
-                                                    {{-- //Put a placeholder space to compensate when there's no document so it mantains a proper height --}}
-                                                    <embed src="https://via.placeholder.com/470" type="application/pdf"
-                                                        width="100%" height="200px" />
+                                                    {{-- Put a placeholder space to compensate when there's no document so it mantains a proper height --}}
+                                                    <div style="height: 200px; width: 100%; background-color: #e9ecef"></div>
                                                 @endif
                                             </div>
                                             <div class="form-check">
@@ -256,11 +255,10 @@
                     <input type="hidden" name="deleted_documents" value="">
 
                     <!-- Update Button -->
-                    <div class="mb-4 mt-4">
-                        <button type="button" class="btn btn-alt-primary" data-bs-toggle="modal"
+                    <div class="col-12 col-lg-3 ms-auto text-lg-end">
+                        <button type="button" class="btn btn-alt-primary w-100 w-lg-auto" style="margin-bottom: 1rem;" data-bs-toggle="modal"
                             data-bs-target="#confirmationModal">Actualizar</button>
                     </div>
-
                 </form>
 
                 <!-- Confirmation Modal -->
@@ -326,7 +324,7 @@
             $('#empresa').select2({
                 placeholder: "Selecciona una empresa",
                 allowClear: false,
-                
+
             });
         });
     </script>
@@ -339,7 +337,8 @@
             const imageInput = document.getElementById(`imagenes-${index}`); // Reference to the image input
 
             if (checkbox.checked) {
-                document.getElementById('image-preview-' + index).style.filter = 'sepia(1) saturate(10) hue-rotate(-50deg)'; // Red filter effect
+                document.getElementById('image-preview-' + index).style.filter =
+                'sepia(1) saturate(10) hue-rotate(-50deg)'; // Red filter effect
                 if (checkbox.value) {
                     currentDeletedImages.push(checkbox.value);
                 }
@@ -368,7 +367,8 @@
             const currentDeletedDocuments = deletedDocumentsInput.value.split(',').filter(Boolean); // Remove empty values
 
             if (checkbox.checked) {
-                documentPreview.style.filter = 'sepia(1) saturate(10) hue-rotate(-50deg)'; // Apply sepia filter to document preview
+                documentPreview.style.filter =
+                'sepia(1) saturate(10) hue-rotate(-50deg)'; // Apply sepia filter to document preview
                 currentDeletedDocuments.push(checkbox.value);
                 // Disable the input and clear it
                 documentInput.disabled = true;
@@ -583,7 +583,7 @@
                     // Display "No se han realizado cambios" if no changes were made
                     if (!changesMade) {
                         const noChangesItem = document.createElement('li');
-                        noChangesItem.textContent = "No se han realizado cambios EN EL AREA DE ADJUNTOS.";
+                        noChangesItem.textContent = "No se han realizado cambios EN EL AREA DE ADJUNTOS.\n" + "Posibles cambios en los campos de texto";
                         changesList.appendChild(noChangesItem);
                     }
                 });
