@@ -167,13 +167,13 @@ class ProductoController extends Controller
     // Update the specified product in storage
     public function update(UpdateRequestProducto $request, $id_producto)
     {
-
         $producto = Producto::findOrFail($id_producto);
 
         DB::beginTransaction();
         $folderName = null;
 
         try {
+
             $validatedData = $request->validated();
 
             // Handle tags conversion to JSON
@@ -270,7 +270,6 @@ class ProductoController extends Controller
             if ($request->hasFile('imagenes')) {
                 foreach ($request->file('imagenes') as $key => $photo) {
                     $imageCount = $key; // The key should correspond to the image input number
-
                     Log::info("Processing image input number: {$imageCount}");
 
                     if ($imageCount <= 3 && $photo->isValid()) {
@@ -323,7 +322,8 @@ class ProductoController extends Controller
 
                         Log::info("Updated or created Adjunto record for image {$imageCount}, Adjunto ID: {$adjunto->id_adjunto}");
                     } else {
-                        Log::warning("Image {$imageCount} is either invalid or exceeds the limit.");
+                        Log::error("Image {$key} is invalid or failed to upload.");
+                        return redirect()->back()->withErrors("Error: Image {$key} failed to upload.");
                     }
                 }
             }
