@@ -71,10 +71,11 @@
                                 <div class="col-md-6">
                                     <!-- Empresa -->
                                     <div class="mb-4">
-                                        <label class="form-label" for="empresa">Empresa</label>
-                                        <select class="form-control" id="empresa" name="id_empresa">
+                                        <label class="col-8 form-label" for="empresa">Empresa</label>
+                                        <select class="col-12 col-md-12 js-example-basic-single form-control-lg"
+                                            id="empresa" name="id_empresa">
                                             @foreach ($empresas as $empresa)
-                                                <option value="{{ $empresa->id_empresa }}"
+                                                <option class="col-12" value="{{ $empresa->id_empresa }}"
                                                     {{ $producto->id_empresa == $empresa->id_empresa ? 'selected' : '' }}>
                                                     {{ $empresa->nombre }}
                                                 </option>
@@ -122,7 +123,8 @@
                                     @endif
                                 </div>
                                 <label for="image" class="form-label">Subir nueva imagen</label>
-                                <input class="form-control" type="file" id="image" name="image" accept=".png, .jpg, .jpeg">
+                                <input class="form-control" type="file" id="image" name="image"
+                                    accept=".png, .jpg, .jpeg">
                             </div>
 
                             <!-- Checkbox to delete the current image -->
@@ -319,6 +321,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
     <script>
+        $(document).ready(function() {
+            // Apply Select2 to the ID Empresa field
+            $('#empresa').select2({
+                placeholder: "Selecciona una empresa",
+                allowClear: false,
+                
+            });
+        });
+    </script>
+    <script>
         // First block: Functions for image and document toggling
         function toggleDeleteImage(index) {
             const checkbox = document.getElementById(`delete-image-${index}`);
@@ -327,7 +339,7 @@
             const imageInput = document.getElementById(`imagenes-${index}`); // Reference to the image input
 
             if (checkbox.checked) {
-                document.getElementById('image-preview-' + index).style.filter = 'sepia(1)'; // Red filter effect
+                document.getElementById('image-preview-' + index).style.filter = 'sepia(1) saturate(10) hue-rotate(-50deg)'; // Red filter effect
                 if (checkbox.value) {
                     currentDeletedImages.push(checkbox.value);
                 }
@@ -356,7 +368,7 @@
             const currentDeletedDocuments = deletedDocumentsInput.value.split(',').filter(Boolean); // Remove empty values
 
             if (checkbox.checked) {
-                documentPreview.style.filter = 'sepia(1)'; // Apply sepia filter to document preview
+                documentPreview.style.filter = 'sepia(1) saturate(10) hue-rotate(-50deg)'; // Apply sepia filter to document preview
                 currentDeletedDocuments.push(checkbox.value);
                 // Disable the input and clear it
                 documentInput.disabled = true;
@@ -379,10 +391,10 @@
             const checkbox = document.getElementById('delete_image');
             const mainImagePreview = document.getElementById('main-image-preview');
             const mainImageInput = document.getElementById(
-            'image'); // Reference to the main image input (change index if necessary)
+                'image'); // Reference to the main image input (change index if necessary)
 
             if (checkbox.checked) {
-                mainImagePreview.style.filter = 'sepia(1)'; // Apply sepia filter
+                mainImagePreview.style.filter = 'sepia(1) saturate(10) hue-rotate(-50deg)'; // Apply sepia filter
                 // Disable the input and clear it
                 mainImageInput.disabled = true;
                 mainImageInput.value = ''; // Clear the previous upload
@@ -472,7 +484,7 @@
                     // Check for new MAIN image uploads
                     const mainImageInput = document.getElementById(`image`);
                     const originalMainImage = mainImageInput.dataset
-                    .originalName; // Assuming you have this attribute set in HTML
+                        .originalName; // Assuming you have this attribute set in HTML
                     if (mainImageInput.files.length > 0) {
                         if (originalMainImage) {
                             const listItem = document.createElement('li');
@@ -511,7 +523,7 @@
                     for (let i = 1; i <= 3; i++) {
                         const imageInput = document.getElementById(`imagenes-${i}`);
                         const originalImageName = imageInput.dataset
-                        .originalName; // Assuming you have this attribute set in HTML
+                            .originalName; // Assuming you have this attribute set in HTML
                         if (imageInput.files.length > 0) {
                             if (originalImageName) {
                                 const listItem = document.createElement('li');
@@ -551,7 +563,7 @@
                     for (let i = 1; i <= 2; i++) {
                         const docInput = document.getElementById(`documentos-${i}`);
                         const originalDocName = docInput.dataset
-                        .originalName; // Assuming you have this attribute set in HTML
+                            .originalName; // Assuming you have this attribute set in HTML
                         if (docInput.files.length > 0) {
                             if (originalDocName) {
                                 const listItem = document.createElement('li');
@@ -578,7 +590,7 @@
 
             document.getElementById('confirm-submit').addEventListener('click', function() {
                 // Close the modal before submitting the form
-                
+
                 const modalElement = document.getElementById('confirmationModal');
                 const modal = bootstrap.Modal.getInstance(modalElement);
                 modal.hide(); // Close the modal
