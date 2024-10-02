@@ -24,9 +24,9 @@ class ProductoController extends Controller
 
         if ($producto) {
             $producto->delete(); // Soft delete
-            return redirect()->route('productos.vista')->with('success', 'Persona eliminada correctamente.');
+            return redirect()->route('productos.vista')->with('success', 'Producto eliminado correctamente.');
         } else {
-            return redirect()->route('productos.vista')->with('error', 'Persona no encontrada.');
+            return redirect()->route('productos.vista')->with('error', 'Producto no encontrado.');
         }
     }
     // Show the form for registering a new product

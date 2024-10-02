@@ -16,7 +16,6 @@ class CreateEmpresasTable extends Migration
         Schema::create('empresas', function (Blueprint $table) {
             $table->increments('id_empresa');
             $table->string('nombre', 100)->unique();
-            $table->string('imagen', 200)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

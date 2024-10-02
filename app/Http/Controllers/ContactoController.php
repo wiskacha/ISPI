@@ -13,30 +13,16 @@ use Illuminate\Support\Facades\Hash; // Import the Hash facade
 use Illuminate\Support\Facades\Log;
 
 
-class UserController extends Controller
+class ContactoController extends Controller
 {
 
 
-    //VISTA DE USUARIOS
+    //VISTA DE CONTACTOS
     public function index(Request $request)
     {
-        $usuarios = User::with('persona') // Eager load de la relación 'persona'
-            ->selectRaw("CONCAT(nick, ' / ', COALESCE(email, '')) AS NICKEMAIL, id") // Necesitamos 'id' para la relación
-            ->whereNull('deleted_at')
-            ->orderBy('updated_at', 'DESC')
-            ->get();
+        $contactos = Persona::with('contactos');
 
-        // Map para agregar 'DUEÑO' (persona asociada) a cada usuario
-        $usuarios->map(function ($usuario) {
-            if ($usuario->persona) { // Verificamos si hay una persona relacionada
-                $usuario->DUEÑO = "{$usuario->persona->nombre} {$usuario->persona->papellido} " . ($usuario->persona->sapellido ?? '');
-            } else {
-                $usuario->DUEÑO = 'No asignado'; // En caso de que no exista persona relacionada
-            }
-            return $usuario;
-        });
-
-        return view('pages.personas.usuarios.vistaUsuarios', ['usuarios' => $usuarios]);
+        return view('pages.personas.usuarios.vistaUsuarios', ['contactos' => $contactos]);
     }
 
     public function destroy($id)

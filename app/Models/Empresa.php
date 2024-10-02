@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * 
  * @property int $id_empresa
  * @property string $nombre
- * @property string|null $imagen
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property string|null $deleted_at
@@ -34,7 +33,6 @@ class Empresa extends Model
 
 	protected $fillable = [
 		'nombre',
-		'imagen'
 	];
 
 	public function contactos()
