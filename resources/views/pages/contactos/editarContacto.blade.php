@@ -4,6 +4,7 @@
     <!-- Page JS Plugins CSS -->
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         /* Ensures that hide-on-small class hides elements on small screens */
         @media (max-width: 705px) {
@@ -68,6 +69,9 @@
 @endsection
 
 @section('content')
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+
     <!-- editarPersona.blade.php -->
 
     <!-- Modal Structure -->
@@ -153,7 +157,7 @@
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-primary" id="update-btn" data-bs-toggle="modal"
                                     data-bs-target="#confirmModal">Actualizar</button>
-                                <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary"
+                                <a href="{{ route('contactos.vistaContactos') }}" class="btn btn-secondary"
                                     id="cancelar-btn">Cancelar</a>
                             </div>
                         </div>
@@ -167,6 +171,13 @@
             <h3 class="block-title">
                 Lista de Contactos
             </h3>
+            <div class="ms-3">
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                    data-bs-target="#modal-block-vcenter">
+                    <i class="fa fa-plus"></i>
+                    <span class="d-none d-sm-inline">Nuevo Contacto</span>
+                </button>
+            </div>
         </div>
         <div class="block-content block-content-full">
             <div class="table-responsive">
@@ -203,9 +214,9 @@
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            ¿Está seguro de que desea eliminar el contacto de: 
+                                            ¿Está seguro de que desea eliminar el contacto de:
                                             <br>
-                                            <strong>{{ $contacto->persona->nombre}}</strong> 
+                                            <strong>{{ $contacto->persona->nombre }}</strong>
                                             <br>
                                             de la empresa:
                                             <br>
@@ -231,7 +242,6 @@
             </div>
         </div>
     </div>
-
     @if ($errors->any())
         <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
             <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
@@ -249,223 +259,294 @@
             </div>
         </div>
     @endif
+    <div class="modal fade" id="modal-block-vcenter" tabindex="-1" role="dialog"
+        aria-labelledby="modal-block-vcenter" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-block-vcenter">Añadir Contacto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('contactos.QregisterE') }}" method="POST">
+                        @csrf
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fields = {
-                nombre: document.getElementById("nombre"),
-                papellido: document.getElementById("papellido"),
-                sapellido: document.getElementById("sapellido"),
-                carnet: document.getElementById("carnet"),
-                celular: document.getElementById("celular")
-            };
-            const updateBtn = document.getElementById("update-btn");
-            const resetBtn = document.getElementById("reset-btn");
-            const noChangesText = document.getElementById("no-changes-text");
-            const noChangesIcon = document.getElementById("no-changes-icon");
+                        <div class="row">
+                            <div class="col-12 col-md-6" style="margin-bottom: 2rem;">
+                                <div class="form-group">
+                                    <label for="id_persona" style="margin-bottom: 1rem;">Persona</label>
+                                    <select class="js-example-basic-single form-control form-control-lg" id="id_persona"
+                                        name="id_persona" required>
+                                        <option value="{{ $persona->id_persona }}">{{ $persona->papellido }}
+                                            [{{ $persona->carnet }}]</option>
+                                    </select>
+                                    @error('id_persona')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label for="id_empresa" class="w-100" style="margin-bottom: 1rem;">Empresa</label>
+                                    <select class="js-example-basic-single form-control form-control-lg" id="id_empresa"
+                                        name="id_empresa" required style="width: 100%;">
+                                        <option value="" disabled selected>Selecciona una empresa</option>
+                                        @foreach ($empresas as $empresa)
+                                            <option value="{{ $empresa->id_empresa }}">{{ $empresa->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('id_empresa')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
 
-            // Original values for comparison
-            const originals = {
-                nombre: "{{ $persona->nombre }}",
-                papellido: "{{ $persona->papellido }}",
-                sapellido: "{{ $persona->sapellido }}",
-                carnet: "{{ $persona->carnet }}",
-                celular: "{{ $persona->celular }}"
-            };
+                        </div>
+                        <br>
+                        <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" style="margin-bottom: 1rem;"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-alt-primary"
+                                style="margin-bottom: 1rem;">Registrar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-            let touchedFields = new Set();
-            let debounceTimeouts = {};
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
 
-            /* ------------- Utility Functions ------------- */
-
-            // Debounce function to prevent excessive API requests
-            function debounce(func, delay) {
-                return function(...args) {
-                    const key = args[0].id;
-                    if (debounceTimeouts[key]) {
-                        clearTimeout(debounceTimeouts[key]);
-                    }
-                    debounceTimeouts[key] = setTimeout(() => func(...args), delay);
-                };
-            }
-
-            // Set the validity state and error message for an input
-            function setInputValidity(input, isValid, formatMsg = '', existsMsg = '') {
-                const errorSpan = document.getElementById(`${input.id}-error`);
-                if (isValid) {
-                    input.classList.remove("is-invalid");
-                    input.classList.add("is-valid");
-                    errorSpan.textContent = '';
-                } else {
-                    input.classList.remove("is-valid");
-                    input.classList.add("is-invalid");
-                    errorSpan.textContent = existsMsg || formatMsg;
+                if (window.jQuery) {
+                    // Initialize Select2 for the empresa and persona select fields
+                    $('#id_empresa').select2({
+                        default: "{{ $persona->id_persona }}",
+                        placeholder: "Selecciona una empresa",
+                        allowClear: false,
+                        dropdownParent: $(
+                            '#modal-block-vcenter'), // Ensure the dropdown is relative to the modal
+                    });
                 }
-                validateAllFields(); // Revalidate all fields on any change
-            }
+                @if (session('modal'))
+                    var myModal = new bootstrap.Modal(document.getElementById('modal-block-vcenter'));
+                    myModal.show();
+                @endif
+                const fields = {
+                    nombre: document.getElementById("nombre"),
+                    papellido: document.getElementById("papellido"),
+                    sapellido: document.getElementById("sapellido"),
+                    carnet: document.getElementById("carnet"),
+                    celular: document.getElementById("celular")
+                };
+                const updateBtn = document.getElementById("update-btn");
+                const resetBtn = document.getElementById("reset-btn");
+                const noChangesText = document.getElementById("no-changes-text");
+                const noChangesIcon = document.getElementById("no-changes-icon");
 
-            // Reset the state of an input field
-            function resetFieldState(input) {
-                input.classList.remove("is-valid", "is-invalid");
-                const errorSpan = document.getElementById(`${input.id}-error`);
-                if (errorSpan) errorSpan.textContent = '';
-            }
+                // Original values for comparison
+                const originals = {
+                    nombre: "{{ $persona->nombre }}",
+                    papellido: "{{ $persona->papellido }}",
+                    sapellido: "{{ $persona->sapellido }}",
+                    carnet: "{{ $persona->carnet }}",
+                    celular: "{{ $persona->celular }}"
+                };
 
-            // Check if there are any changes compared to the original values
-            function hasChanges() {
-                return fields.nombre.value.trim() !== originals.nombre.trim() ||
-                    fields.papellido.value.trim() !== originals.papellido.trim() ||
-                    fields.sapellido.value.trim() !== originals.sapellido.trim() ||
-                    fields.carnet.value.trim() !== originals.carnet.trim() ||
-                    fields.celular.value.trim() !== originals.celular.trim();
-            }
+                let touchedFields = new Set();
+                let debounceTimeouts = {};
 
-            // Validate all touched fields and enable or disable the update button
-            function validateAllFields() {
-                const allValid = Array.from(touchedFields).every(id => {
-                    const input = fields[id];
-                    return input.classList.contains("is-valid");
-                });
+                /* ------------- Utility Functions ------------- */
 
-                const changesMade = hasChanges();
+                // Debounce function to prevent excessive API requests
+                function debounce(func, delay) {
+                    return function(...args) {
+                        const key = args[0].id;
+                        if (debounceTimeouts[key]) {
+                            clearTimeout(debounceTimeouts[key]);
+                        }
+                        debounceTimeouts[key] = setTimeout(() => func(...args), delay);
+                    };
+                }
 
-                // Enable button only if all fields are valid and changes are made
-                if (allValid && changesMade) {
-                    updateBtn.disabled = false;
-                    noChangesText.style.display = 'none';
-                    noChangesIcon.style.display = 'none';
-                } else {
-                    updateBtn.disabled = true;
-                    if (!changesMade) {
-                        noChangesText.style.display = 'inline';
-                        noChangesIcon.style.display = 'inline';
+                // Set the validity state and error message for an input
+                function setInputValidity(input, isValid, formatMsg = '', existsMsg = '') {
+                    const errorSpan = document.getElementById(`${input.id}-error`);
+                    if (isValid) {
+                        input.classList.remove("is-invalid");
+                        input.classList.add("is-valid");
+                        errorSpan.textContent = '';
                     } else {
+                        input.classList.remove("is-valid");
+                        input.classList.add("is-invalid");
+                        errorSpan.textContent = existsMsg || formatMsg;
+                    }
+                    validateAllFields(); // Revalidate all fields on any change
+                }
+
+                // Reset the state of an input field
+                function resetFieldState(input) {
+                    input.classList.remove("is-valid", "is-invalid");
+                    const errorSpan = document.getElementById(`${input.id}-error`);
+                    if (errorSpan) errorSpan.textContent = '';
+                }
+
+                // Check if there are any changes compared to the original values
+                function hasChanges() {
+                    return fields.nombre.value.trim() !== originals.nombre.trim() ||
+                        fields.papellido.value.trim() !== originals.papellido.trim() ||
+                        fields.sapellido.value.trim() !== originals.sapellido.trim() ||
+                        fields.carnet.value.trim() !== originals.carnet.trim() ||
+                        fields.celular.value.trim() !== originals.celular.trim();
+                }
+
+                // Validate all touched fields and enable or disable the update button
+                function validateAllFields() {
+                    const allValid = Array.from(touchedFields).every(id => {
+                        const input = fields[id];
+                        return input.classList.contains("is-valid");
+                    });
+
+                    const changesMade = hasChanges();
+
+                    // Enable button only if all fields are valid and changes are made
+                    if (allValid && changesMade) {
+                        updateBtn.disabled = false;
                         noChangesText.style.display = 'none';
                         noChangesIcon.style.display = 'none';
+                    } else {
+                        updateBtn.disabled = true;
+                        if (!changesMade) {
+                            noChangesText.style.display = 'inline';
+                            noChangesIcon.style.display = 'inline';
+                        } else {
+                            noChangesText.style.display = 'none';
+                            noChangesIcon.style.display = 'none';
+                        }
                     }
                 }
-            }
 
-            // Reset the form to its original values and clear validation states
-            function resetToOriginalValues() {
-                fields.nombre.value = originals.nombre;
-                fields.papellido.value = originals.papellido;
-                fields.sapellido.value = originals.sapellido;
-                fields.carnet.value = originals.carnet;
-                fields.celular.value = originals.celular;
+                // Reset the form to its original values and clear validation states
+                function resetToOriginalValues() {
+                    fields.nombre.value = originals.nombre;
+                    fields.papellido.value = originals.papellido;
+                    fields.sapellido.value = originals.sapellido;
+                    fields.carnet.value = originals.carnet;
+                    fields.celular.value = originals.celular;
 
-                // Clear validation states and touched fields
-                Object.keys(fields).forEach(key => {
-                    resetFieldState(fields[key]);
+                    // Clear validation states and touched fields
+                    Object.keys(fields).forEach(key => {
+                        resetFieldState(fields[key]);
+                    });
+                    touchedFields.clear();
+
+                    // Revalidate the fields after resetting
+                    validateAllFields();
+                }
+
+                /* ------------- Field Validation Functions ------------- */
+
+                // Validate text inputs for only alphabetic characters and spaces
+                function validateTextInput(input) {
+                    const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
+                    const isValid = regex.test(input.value.trim());
+                    setInputValidity(input, isValid, "Este campo solo puede contener letras y espacios.");
+                }
+
+                // Validate carnet input by checking the length and API uniqueness check
+                function validateCarnetInput(input) {
+                    const value = input.value.trim();
+                    const isValidFormat = value.length >= 4 && value.length <= 11;
+
+                    if (!isValidFormat) {
+                        setInputValidity(input, false, "El carnet debe tener entre 4 y 11 caracteres.");
+                        return;
+                    }
+
+                    // Only make API call if the value has changed from the original
+                    if (value === originals.carnet) {
+                        resetFieldState(input);
+                        touchedFields.delete(input.id);
+                        return;
+                    }
+
+                    // API call to validate if carnet exists
+                    fetch(`/validate-carnet?value=${encodeURIComponent(value)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            setInputValidity(input, !data.exists, '', "Este carnet ya está registrado.");
+                        });
+                }
+
+                // Validate celular input by checking for 8 digits and API uniqueness check
+                function validateCelularInput(input) {
+                    const value = input.value.replace(/\D/g, ''); // Remove non-digit characters
+                    const isValidFormat = value.length === 8;
+
+                    if (!isValidFormat) {
+                        setInputValidity(input, false, "El número de celular debe tener 8 dígitos.");
+                        return;
+                    }
+
+                    // Only make API call if the value has changed from the original
+                    if (value === originals.celular) {
+                        resetFieldState(input);
+                        touchedFields.delete(input.id);
+                        return;
+                    }
+
+                    // API call to validate if celular exists
+                    fetch(`/validate-celular?value=${encodeURIComponent(value)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            setInputValidity(input, !data.exists, '',
+                                "Este número de celular ya está registrado.");
+                        });
+                }
+
+                /* ------------- Event Listeners ------------- */
+
+                // Add event listeners to input fields with debounce
+                fields.nombre.addEventListener('input', debounce(() => {
+                    touchedFields.add('nombre');
+                    validateTextInput(fields.nombre);
+                }, 100));
+
+                fields.papellido.addEventListener('input', debounce(() => {
+                    touchedFields.add('papellido');
+                    validateTextInput(fields.papellido);
+                }, 100));
+
+                fields.sapellido.addEventListener('input', debounce(() => {
+                    touchedFields.add('sapellido');
+                    validateTextInput(fields.sapellido);
+                }, 100));
+
+                fields.carnet.addEventListener('input', debounce(() => {
+                    touchedFields.add('carnet');
+                    validateCarnetInput(fields.carnet);
+                }, 100));
+
+                fields.celular.addEventListener('input', debounce(() => {
+                    touchedFields.add('celular');
+                    validateCelularInput(fields.celular);
+                }, 100));
+
+                // Prevent form submission if fields are invalid
+                document.getElementById("update-form").addEventListener("submit", function(event) {
+                    if (updateBtn.disabled) {
+                        event.preventDefault();
+                    }
                 });
-                touchedFields.clear();
 
-                // Revalidate the fields after resetting
+                // Add event listener for the reset button
+                resetBtn.addEventListener('click', function() {
+                    resetToOriginalValues();
+                });
+
+                // Initial validation on page load
                 validateAllFields();
-            }
-
-            /* ------------- Field Validation Functions ------------- */
-
-            // Validate text inputs for only alphabetic characters and spaces
-            function validateTextInput(input) {
-                const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
-                const isValid = regex.test(input.value.trim());
-                setInputValidity(input, isValid, "Este campo solo puede contener letras y espacios.");
-            }
-
-            // Validate carnet input by checking the length and API uniqueness check
-            function validateCarnetInput(input) {
-                const value = input.value.trim();
-                const isValidFormat = value.length >= 4 && value.length <= 11;
-
-                if (!isValidFormat) {
-                    setInputValidity(input, false, "El carnet debe tener entre 4 y 11 caracteres.");
-                    return;
-                }
-
-                // Only make API call if the value has changed from the original
-                if (value === originals.carnet) {
-                    resetFieldState(input);
-                    touchedFields.delete(input.id);
-                    return;
-                }
-
-                // API call to validate if carnet exists
-                fetch(`/validate-carnet?value=${encodeURIComponent(value)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        setInputValidity(input, !data.exists, '', "Este carnet ya está registrado.");
-                    });
-            }
-
-            // Validate celular input by checking for 8 digits and API uniqueness check
-            function validateCelularInput(input) {
-                const value = input.value.replace(/\D/g, ''); // Remove non-digit characters
-                const isValidFormat = value.length === 8;
-
-                if (!isValidFormat) {
-                    setInputValidity(input, false, "El número de celular debe tener 8 dígitos.");
-                    return;
-                }
-
-                // Only make API call if the value has changed from the original
-                if (value === originals.celular) {
-                    resetFieldState(input);
-                    touchedFields.delete(input.id);
-                    return;
-                }
-
-                // API call to validate if celular exists
-                fetch(`/validate-celular?value=${encodeURIComponent(value)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        setInputValidity(input, !data.exists, '', "Este número de celular ya está registrado.");
-                    });
-            }
-
-            /* ------------- Event Listeners ------------- */
-
-            // Add event listeners to input fields with debounce
-            fields.nombre.addEventListener('input', debounce(() => {
-                touchedFields.add('nombre');
-                validateTextInput(fields.nombre);
-            }, 100));
-
-            fields.papellido.addEventListener('input', debounce(() => {
-                touchedFields.add('papellido');
-                validateTextInput(fields.papellido);
-            }, 100));
-
-            fields.sapellido.addEventListener('input', debounce(() => {
-                touchedFields.add('sapellido');
-                validateTextInput(fields.sapellido);
-            }, 100));
-
-            fields.carnet.addEventListener('input', debounce(() => {
-                touchedFields.add('carnet');
-                validateCarnetInput(fields.carnet);
-            }, 100));
-
-            fields.celular.addEventListener('input', debounce(() => {
-                touchedFields.add('celular');
-                validateCelularInput(fields.celular);
-            }, 100));
-
-            // Prevent form submission if fields are invalid
-            document.getElementById("update-form").addEventListener("submit", function(event) {
-                if (updateBtn.disabled) {
-                    event.preventDefault();
-                }
             });
+        </script>
 
-            // Add event listener for the reset button
-            resetBtn.addEventListener('click', function() {
-                resetToOriginalValues();
-            });
-
-            // Initial validation on page load
-            validateAllFields();
-        });
-    </script>
-
-@endsection
+    @endsection

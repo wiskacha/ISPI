@@ -28,21 +28,78 @@
     <script src="{{ asset('js/plugins/datatables-buttons/buttons.print.min.js') }}"></script>
     <script src="{{ asset('js/plugins/datatables-buttons/buttons.html5.min.js') }}"></script>
 
+    <!-- Custom Script Merged -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var toastElementList = [].slice.call(document.querySelectorAll('.toast'))
+            // Initialize Bootstrap toast
+            var toastElementList = [].slice.call(document.querySelectorAll('.toast'));
             var toastList = toastElementList.map(function(toastEl) {
                 return new bootstrap.Toast(toastEl, {
                     autohide: true,
                     delay: 5000
-                })
+                });
             });
             toastList.forEach(toast => toast.show());
+
+            // Input validation script
+            var nombreInput = document.getElementById("nombre");
+            var papellidoInput = document.getElementById("papellido");
+            var sapellidoInput = document.getElementById("sapellido");
+            var carnetInput = document.getElementById("carnet");
+            var celularInput = document.getElementById("celular");
+
+            function validateInput(inputElement) {
+                var inputValue = inputElement.value.trim();
+                var regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
+                if (!regex.test(inputValue)) {
+                    inputElement.value = "";
+                }
+            }
+
+            if (nombreInput) {
+                nombreInput.addEventListener("input", function() {
+                    validateInput(this);
+                });
+            }
+            if (papellidoInput) {
+                papellidoInput.addEventListener("input", function() {
+                    validateInput(this);
+                });
+            }
+            if (sapellidoInput) {
+                sapellidoInput.addEventListener("input", function() {
+                    validateInput(this);
+                });
+            }
+            if (carnetInput) {
+                carnetInput.addEventListener("input", function() {
+                    if (this.value.length > 100) {
+                        this.value = this.value.slice(0, 100); // Limit to 100 characters
+                    }
+                });
+            }
+            if (celularInput) {
+                celularInput.addEventListener("input", function() {
+                    this.value = this.value.replace(/\D/g, ''); // Remove non-numeric characters
+                    if (this.value.length > 8) {
+                        this.value = this.value.slice(0, 8); // Limit to 8 digits
+                    }
+                });
+            }
+        });
+
+        $(document).ready(function() {
+            // Handle form submission on checkbox change
+            $('#excludeUsers').on('change', function() {
+                $('#filterForm').submit();
+            });
         });
     </script>
+
     <!-- Page JS Code -->
     @vite(['resources/js/pages/datatables.js'])
 @endsection
+
 
 @section('content')
     <!-- Toast Container -->
@@ -170,7 +227,6 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 
@@ -239,15 +295,6 @@
             </div>
         </div>
     </div>
-    </div>
-    <script>
-        $(document).ready(function() {
-            // Handle form submission on checkbox change
-            $('#excludeUsers').on('change', function() {
-                $('#filterForm').submit();
-            });
-        });
-    </script>
     @if ($errors->any())
         <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
             <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
@@ -266,50 +313,4 @@
         </div>
     @endif
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var nombreInput = document.getElementById("nombre");
-            var papellidoInput = document.getElementById("papellido");
-            var sapellidoInput = document.getElementById("sapellido");
-            var carnetInput = document.getElementById("carnet");
-            var celularInput = document.getElementById("celular");
-
-            function validateInput(inputElement) {
-                var inputValue = inputElement.value.trim();
-                var regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+(?:\s+[a-zA-ZñÑáéíóúÁÉÍÓÚ]+)*$/;
-                if (!regex.test(inputValue)) {
-                    inputElement.value = "";
-                }
-            }
-
-            nombreInput.addEventListener("input", function() {
-                validateInput(this);
-            });
-
-            papellidoInput.addEventListener("input", function() {
-                validateInput(this);
-            });
-
-            sapellidoInput.addEventListener("input", function() {
-                validateInput(this);
-            });
-
-            carnetInput.addEventListener("input", function() {
-                if (this.value.length > 100) {
-                    this.value = this.value.slice(0, 100); // Limit to 100 characters
-                }
-            });
-
-            celularInput.addEventListener("input", function() {
-                // Remove any non-numeric characters
-                this.value = this.value.replace(/\D/g, '');
-
-                // Limit to 11 digits
-                if (this.value.length > 8) {
-                    this.value = this.value.slice(0, 8);
-                }
-            });
-
-        });
-    </script>
 @endsection

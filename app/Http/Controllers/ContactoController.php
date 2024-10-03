@@ -107,6 +107,41 @@ class ContactoController extends Controller
         }
     }
 
+    // Registro rápido
+    public function QregisterE(RegisterRequestContactoE $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Ensure that the relation between Persona and Empresa does not already exist
+            $existingContacto = Contacto::where('id_persona', $request->id_persona)
+                ->where('id_empresa', $request->id_empresa)
+                ->first();
+
+            if ($existingContacto) {
+                // Pass error and open modal again
+                return redirect()->back()->withErrors(['Este contacto ya existe.'])->withInput()->with('modal', true);
+            }
+
+            // Create the Contacto
+            Contacto::create([
+                'id_persona' => $request->id_persona,
+                'id_empresa' => $request->id_empresa,
+            ]);
+
+            DB::commit();
+
+            // Flash success message and reopen modal if needed
+            return redirect()->back()->with('success', 'Contacto asociado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Flash error message and reopen modal if needed
+            return redirect()->back()->withErrors(['error' => 'Error al asociar el contacto.'])->withInput()->with('modal', true);
+        }
+    }
+
+
     // Soft delete contacto
     public function destroy($id_persona, $id_empresa)
     {
@@ -121,9 +156,10 @@ class ContactoController extends Controller
     // Edit contacto
     public function edit(Persona $persona)
     {
+        $empresas = Empresa::all();
         $contactos = Contacto::where('id_persona', $persona->id_persona)
             ->get();
-        return view('pages.contactos.editarContacto', compact('persona', 'contactos'));
+        return view('pages.contactos.editarContacto', compact('persona', 'contactos', 'empresas'));
     }
 
 

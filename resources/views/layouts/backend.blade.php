@@ -99,8 +99,8 @@
 
             /* CSS for dark mode transition */
             /* #page-container {
-                                                                                            transition: background-color 0.5s ease, color 0.5s ease;
-                                                                                        } */
+                                                                                                    transition: background-color 0.5s ease, color 0.5s ease;
+                                                                                                } */
 
             .hero,
             .modal-content,
@@ -126,50 +126,50 @@
 
         <!-- Page Container -->
         <!--
-                                                                                        Available classes for #page-container:
+                                                                                                Available classes for #page-container:
 
-                                                                                        GENERIC
+                                                                                                GENERIC
 
-                                                                                          'remember-theme'                            Remembers active color theme and dark mode between pages using localStorage when set through
-                                                                                                                                      - Theme helper buttons [data-toggle="theme"],
-                                                                                                                                      - Layout helper buttons [data-toggle="layout" data-action="dark_mode_[on/off/toggle]"]
-                                                                                                                                      - ..and/or One.layout('dark_mode_[on/off/toggle]')
+                                                                                                  'remember-theme'                            Remembers active color theme and dark mode between pages using localStorage when set through
+                                                                                                                                              - Theme helper buttons [data-toggle="theme"],
+                                                                                                                                              - Layout helper buttons [data-toggle="layout" data-action="dark_mode_[on/off/toggle]"]
+                                                                                                                                              - ..and/or One.layout('dark_mode_[on/off/toggle]')
 
-                                                                                        SIDEBAR & SIDE OVERLAY
+                                                                                                SIDEBAR & SIDE OVERLAY
 
-                                                                                          'sidebar-r'                                 Right Sidebar and left Side Overlay (default is left Sidebar and right Side Overlay)
-                                                                                          'sidebar-mini'                              Mini hoverable Sidebar (screen width > 991px)
-                                                                                          'sidebar-o'                                 Visible Sidebar by default (screen width > 991px)
-                                                                                          'sidebar-o-xs'                              Visible Sidebar by default (screen width < 992px)
-                                                                                          'sidebar-dark'                              Dark themed sidebar
+                                                                                                  'sidebar-r'                                 Right Sidebar and left Side Overlay (default is left Sidebar and right Side Overlay)
+                                                                                                  'sidebar-mini'                              Mini hoverable Sidebar (screen width > 991px)
+                                                                                                  'sidebar-o'                                 Visible Sidebar by default (screen width > 991px)
+                                                                                                  'sidebar-o-xs'                              Visible Sidebar by default (screen width < 992px)
+                                                                                                  'sidebar-dark'                              Dark themed sidebar
 
-                                                                                          'side-overlay-hover'                        Hoverable Side Overlay (screen width > 991px)
-                                                                                          'side-overlay-o'                            Visible Side Overlay by default
+                                                                                                  'side-overlay-hover'                        Hoverable Side Overlay (screen width > 991px)
+                                                                                                  'side-overlay-o'                            Visible Side Overlay by default
 
-                                                                                          'enable-page-overlay'                       Enables a visible clickable Page Overlay (closes Side Overlay on click) when Side Overlay opens
+                                                                                                  'enable-page-overlay'                       Enables a visible clickable Page Overlay (closes Side Overlay on click) when Side Overlay opens
 
-                                                                                          'side-scroll'                               Enables custom scrolling on Sidebar and Side Overlay instead of native scrolling (screen width > 991px)
+                                                                                                  'side-scroll'                               Enables custom scrolling on Sidebar and Side Overlay instead of native scrolling (screen width > 991px)
 
-                                                                                        HEADER
+                                                                                                HEADER
 
-                                                                                          ''                                          Static Header if no class is added
-                                                                                          'page-header-fixed'                         Fixed Header
+                                                                                                  ''                                          Static Header if no class is added
+                                                                                                  'page-header-fixed'                         Fixed Header
 
-                                                                                        HEADER STYLE
+                                                                                                HEADER STYLE
 
-                                                                                          ''                                          Light themed Header
-                                                                                          'page-header-dark'                          Dark themed Header
+                                                                                                  ''                                          Light themed Header
+                                                                                                  'page-header-dark'                          Dark themed Header
 
-                                                                                        MAIN CONTENT LAYOUT
+                                                                                                MAIN CONTENT LAYOUT
 
-                                                                                          ''                                          Full width Main Content if no class is added
-                                                                                          'main-content-boxed'                        Full width Main Content with a specific maximum width (screen width > 1200px)
-                                                                                          'main-content-narrow'                       Full width Main Content with a percentage width (screen width > 1200px)
+                                                                                                  ''                                          Full width Main Content if no class is added
+                                                                                                  'main-content-boxed'                        Full width Main Content with a specific maximum width (screen width > 1200px)
+                                                                                                  'main-content-narrow'                       Full width Main Content with a percentage width (screen width > 1200px)
 
-                                                                                        DARK MODE
+                                                                                                DARK MODE
 
-                                                                                          'sidebar-dark page-header-dark dark-mode'   Enable dark mode (light sidebar/header is not supported with dark mode)
-                                                                                        -->
+                                                                                                  'sidebar-dark page-header-dark dark-mode'   Enable dark mode (light sidebar/header is not supported with dark mode)
+                                                                                                -->
         <div id="page-container"
             class="sidebar-o enable-page-overlay sidebar-dark side-scroll page-header-fixed main-content-narrow">
             <!-- Side Overlay-->
@@ -210,16 +210,16 @@
 
             <!-- Sidebar -->
             <!--
-                                                                                            Sidebar Mini Mode - Display Helper classes
+                                                                                                    Sidebar Mini Mode - Display Helper classes
 
-                                                                                            Adding 'smini-hide' class to an element will make it invisible (opacity: 0) when the sidebar is in mini mode
-                                                                                            Adding 'smini-show' class to an element will make it visible (opacity: 1) when the sidebar is in mini mode
-                                                                                                If you would like to disable the transition animation, make sure to also add the 'no-transition' class to your element
+                                                                                                    Adding 'smini-hide' class to an element will make it invisible (opacity: 0) when the sidebar is in mini mode
+                                                                                                    Adding 'smini-show' class to an element will make it visible (opacity: 1) when the sidebar is in mini mode
+                                                                                                        If you would like to disable the transition animation, make sure to also add the 'no-transition' class to your element
 
-                                                                                            Adding 'smini-hidden' to an element will hide it when the sidebar is in mini mode
-                                                                                            Adding 'smini-visible' to an element will show it (display: inline-block) only when the sidebar is in mini mode
-                                                                                            Adding 'smini-visible-block' to an element will show it (display: block) only when the sidebar is in mini mode
-                                                                                        -->
+                                                                                                    Adding 'smini-hidden' to an element will hide it when the sidebar is in mini mode
+                                                                                                    Adding 'smini-visible' to an element will show it (display: inline-block) only when the sidebar is in mini mode
+                                                                                                    Adding 'smini-visible-block' to an element will show it (display: block) only when the sidebar is in mini mode
+                                                                                                -->
 
             <nav id="sidebar" aria-label="Main Navigation">
                 <!-- Side Header -->
@@ -431,6 +431,53 @@
                                                     </a>
                                                 </li>
                                             </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-main-item{{ request()->is('almacenes/*') ? ' open' : '' }}">
+                                    <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu"
+                                        aria-haspopup="true" aria-expanded="true" href="#">
+                                        <i class="nav-main-link-icon si si-social-dropbox"></i>
+                                        <span class="nav-main-link-name">Almacenes</span>
+                                    </a>
+                                    <ul class="nav-main-submenu">
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('almacenes/vista') ? ' active' : '' }}"
+                                                href="/almacenes/vista">
+                                                <i class="nav-main-link-icon si si-list"></i>
+                                                <span class="nav-main-link-name">Ver almacenes</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('almacenes/registro') ? ' active' : '' }}"
+                                                href="/almacenes/registro">
+                                                <i class="nav-main-link-icon si si-plus"></i>
+                                                <span class="nav-main-link-name">Registrar Almacenes</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                ////
+                                <li class="nav-main-item{{ request()->is('recintos/*') ? ' open' : '' }}">
+                                    <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu"
+                                        aria-haspopup="true" aria-expanded="true" href="#">
+                                        <i class="nav-main-link-icon si si-pin"></i>
+                                        <span class="nav-main-link-name">Recintos</span>
+                                    </a>
+                                    <ul class="nav-main-submenu">
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('recintos/vista') ? ' active' : '' }}"
+                                                href="/recintos/vista">
+                                                <i class="nav-main-link-icon si si-list"></i>
+                                                <span class="nav-main-link-name">Ver recintos</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('recintos/registro') ? ' active' : '' }}"
+                                                href="/recintos/registro">
+                                                <i class="nav-main-link-icon si si-plus"></i>
+                                                <span class="nav-main-link-name">Registrar Recintos</span>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
@@ -705,7 +752,6 @@
 
             <!-- Main Container -->
             <main id="main-container">
-                @yield('content')
                 @if (session('success'))
                     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
                         <div id="successToast" class="toast show" role="alert" aria-live="assertive"
@@ -721,7 +767,7 @@
                         </div>
                     </div>
                 @endif
-
+                @yield('content')
             </main>
             <!-- END Main Container -->
 

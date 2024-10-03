@@ -160,8 +160,10 @@
                                 </div>
                             </div>
                             <br>
-                            <div class="col-12 col-lg-3 ms-auto text-lg-end">
-                                <button type="submit" class="btn btn-alt-primary w-100 w-lg-auto"
+                            <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                                <a href="{{ route('empresas.vista') }}" class="btn btn-secondary me-2"
+                                    style="margin-bottom: 1rem;">Cancelar</a>
+                                <button type="submit" class="btn btn-alt-primary"
                                     style="margin-bottom: 1rem;">Registrar</button>
                             </div>
                         </form>

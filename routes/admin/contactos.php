@@ -30,6 +30,9 @@ Route::prefix('contactos')->group(function () {
     // Registrar contacto (persona existente y empresa existente)
     Route::post('/registerE', [ContactoController::class, 'registerE'])->name('contactos.registerE');
 
+    //Registrar contactoE desde el modal del edición de contacto
+    Route::post('/QregisterE', [ContactoController::class, 'QregisterE'])->name('contactos.QregisterE');
+
     // Eliminar contacto
     Route::delete('/{id_persona}/{id_empresa}', [ContactoController::class, 'destroy'])->name('contactos.destroy');
 });
