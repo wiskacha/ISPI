@@ -83,7 +83,8 @@
             </div>
         </div>
     </div>
-    <div class="block block-rounded">
+    <div class="block block-rounded" style="margin-top: 1rem; margin-left: 1rem; margin-right: 1rem;">
+
         <div class="block-header block-header-default">
             <h3 class="block-title">
                 Lista de PRODUCTOS <small>Exportable</small>

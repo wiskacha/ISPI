@@ -2,131 +2,145 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Persona;
-use App\Models\User;
-use App\Http\Requests\UpdateRequestUsuario;
-use App\Http\Requests\RegisterRequestUsuario;
-use App\Http\Requests\RegisterRequestUsuarioE;
+use App\Models\Empresa;
+use App\Models\Contacto;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash; // Import the Hash facade
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\RegisterRequestContactoE;
 
 
 class ContactoController extends Controller
 {
-
-
-    //VISTA DE CONTACTOS
-    public function index(Request $request)
+    // Index to list all contactos
+    public function index()
     {
-        $contactos = Persona::with('contactos');
+        // Get unique personas with their associated empresas
+        $contactos = Contacto::with(['persona', 'empresa'])
+            ->get()
+            ->groupBy('id_persona');
 
-        return view('pages.personas.usuarios.vistaUsuarios', ['contactos' => $contactos]);
-    }
-
-    public function destroy($id)
-    {
-        $user = User::find($id);
-        if ($user) {
-            $user->delete(); // Soft delete
-            return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuario eliminado correctamente.');
-        } else {
-            return redirect()->route('personas.usuarios.vistaUsuarios')->with('error', 'Usuario no encontrao.');
-        }
+        return view('pages.contactos.vistaContactos', compact('contactos'));
     }
 
 
-    public function editUsuario(User $user)
-    {
-        return view('pages.personas.usuarios.editarUsuario', compact('user'));
-    }
 
-    public function updateUsuario(UpdateRequestUsuario $request, User $user)
-    {
-        $user->update($request->validated()); // Update the instance with validated data
-
-        return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuaio actualizado correctamente.');
-    }
-
-
-    // REGISTRO DE USUARIO
-    // Show the form to register both persona and user in a single view
+    // Register view to create a new Persona and associate it with an existing Empresa
     public function registerpage()
     {
-        return view('pages.personas.usuarios.registroUsuario');
-    }
-
-    public function registerpageF()
-    {
-        return view('pages.personas.usuarios.create.freshUsuario');
+        // Retrieve all existing empresas to choose from
+        $empresas = Empresa::all(); // SoftDeletes already excludes "deleted" records
+        return view('pages.contactos.registroContacto', compact('empresas'));
     }
 
     public function registerpageE()
     {
-        // Obtener todas las personas que no tienen un usuario asociado
-        $personas = Persona::whereDoesntHave('usuario')->get(); // Cambia 'user' por 'usuario' para usar la relación definida
-
-        return view('pages.personas.usuarios.create.existingUsuario', compact('personas'));
+        // Get all personas and empresas without worrying about deleted records
+        $personas = Persona::all();
+        $empresas = Empresa::all();
+        return view('pages.contactos.create.existingContacto', compact('personas', 'empresas'));
     }
 
-
-    // Handle the registration of both persona and user in a single transaction
-    public function register(RegisterRequestUsuario $request)
+    public function registerpageF()
     {
-        Log::info('Register request:', $request->all());
+        // Get all personas and empresas without worrying about deleted records
+        $personas = Persona::all();
+        $empresas = Empresa::all();
+        return view('pages.contactos.create.freshContacto', compact('personas', 'empresas'));
+    }
+
+    // Register a new Persona and associate with an existing Empresa
+    public function register(Request $request)
+    {
         DB::beginTransaction();
 
         try {
-            // Create the persona
+            // Create a new Persona
             $personaData = $request->only('nombre', 'papellido', 'sapellido', 'carnet', 'celular');
             $persona = Persona::create($personaData);
-
-
-            // Check if persona ID is valid
+            // Ensure that the persona was created successfully
             if (!$persona->id_persona) {
-                throw new \Exception('Failed to retrieve Persona ID.');
+                throw new \Exception('Error creating Persona.');
             }
+            // Create a new Contacto associating the persona with an existing empresa
+            Contacto::create([
+                'id_persona' => $persona->id_persona,
+                'id_empresa' => $request->id_empresa,
+            ]);
 
-            // Create the user linked to the persona
-            $userData = [
-                'id' => $persona->id_persona,
-                'nick' => $request->nick,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ];
-
-            $user = User::create($userData);
-
-            // Commit the transaction
             DB::commit();
-
-            // Redirect with success message
-            return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuario registrado correctamente.');
+            return redirect()->route('contactos.vistaContactos')->with('success', 'Contacto creado correctamente.');
         } catch (\Exception $e) {
+            log::error($e->getMessage());
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Error al registrar el usuario.'])->withInput();
+            return redirect()->back()->withErrors(['error' => 'Error al registrar el contacto.'])->withInput();
         }
     }
 
-    /*Register function for create and assign a user to a person*/
-    public function registerE(RegisterRequestUsuarioE $request)
+    // Associate an existing Persona with an existing Empresa
+    public function registerE(RegisterRequestContactoE $request)
     {
         DB::beginTransaction();
+
         try {
-            // dd((int)$request->id_persona);
-            $userData = [
-                'id' => $request->id_persona,
-                'nick' => $request->nick,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ];
-            $user = User::create($userData);
+
+            // Ensure that the relation between Persona and Empresa does not already exist
+            $existingContacto = Contacto::where('id_persona', $request->id_persona)
+                ->where('id_empresa', $request->id_empresa)
+                ->first();
+
+            if ($existingContacto) {
+                return redirect()->back()->withErrors(['Este contacto ya existe.'])->withInput();
+            }
+            // Create the Contacto
+            Contacto::create([
+                'id_persona' => $request->id_persona,
+                'id_empresa' => $request->id_empresa,
+            ]);
+
             DB::commit();
-            return redirect('/personas/usuarios/vista')->with('success', 'Cuenta creada satisfactoriamente');
+            return redirect()->route('contactos.vistaContactos')->with('success', 'Contacto asociado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['error' => 'Error al asociar el contacto.'])->withInput();
+        }
+    }
+
+    // Soft delete contacto
+    public function destroy($id_persona, $id_empresa)
+    {
+        $contacto = Contacto::where('id_persona', $id_persona)
+            ->where('id_empresa', $id_empresa)
+            ->delete();
+
+        return redirect()->back()->with('success', 'Contacto eliminado correctamente.');
+    }
+
+
+    // Edit contacto
+    public function edit(Persona $persona)
+    {
+        $contactos = Contacto::where('id_persona', $persona->id_persona)
+            ->get();
+        return view('pages.contactos.editarContacto', compact('persona', 'contactos'));
+    }
+
+
+    // Update contacto
+    public function update(Request $request, $id_persona, $id_empresa)
+    {
+        $contacto = Contacto::where('id_persona', $id_persona)
+            ->where('id_empresa', $id_empresa)
+            ->first();
+
+        if ($contacto) {
+            $contacto->update([
+                'id_empresa' => $request->id_empresa, // Allow changing the associated empresa
+            ]);
+            return redirect()->route('contactos.vistaContactos')->with('success', 'Contacto actualizado correctamente.');
+        } else {
+            return redirect()->route('contactos.vistaContactos')->with('error', 'Contacto no encontrado.');
         }
     }
 }

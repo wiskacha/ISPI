@@ -26,13 +26,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Contacto extends Model
 {
-	use SoftDeletes;
+	// Indicate that the primary key is a composite key
+	protected $primaryKey = ['id_persona', 'id_empresa'];
+
 	protected $table = 'contactos';
 	public $incrementing = false;
 
 	protected $casts = [
 		'id_persona' => 'int',
 		'id_empresa' => 'int'
+	];
+
+	protected $fillable = [
+		'id_persona',
+		'id_empresa'
 	];
 
 	public function persona()
