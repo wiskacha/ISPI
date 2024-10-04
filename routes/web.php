@@ -25,8 +25,11 @@ Route::middleware('role:admin')->group(function () {
     //Incluir las rutas de contactos
     require_once base_path('routes/admin/contactos.php');
 
-    //Incluir las rutas de almacens
+    //Incluir las rutas de almacenes
     require_once base_path('routes/admin/almacenes.php');
+    
+    //Incluir las rutas de recintos
+    require_once base_path('routes/admin/recintos.php');
 });
 
 // Rutas de Usuario Autenticado

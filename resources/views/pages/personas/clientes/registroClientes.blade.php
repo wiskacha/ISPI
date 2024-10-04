@@ -144,17 +144,12 @@
                         </div>
 
                         <!-- Button Centering -->
-                        <div class="col-12">
-                            <div class="d-flex justify-content-center mt-4">
-                                <button type="submit" class="btn w-100 btn-alt-primary">
-                                    <i class="fa fa-fw fa-sign-in-alt me-1 opacity-50"></i>
-                                    Registrar
-                                </button>
-                            </div>
+                        <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                            <a href="{{ route('personas.clientes.vistaClientes') }}" class="btn btn-secondary me-2"
+                                style="margin-bottom: 1rem;">Cancelar</a>
+                            <button type="submit" class="btn btn-alt-primary"
+                                style="margin-bottom: 1rem;">Registrar</button>
                         </div>
-                        <br><br>
-                        <br>
-                        <br>
                     </div>
                 </div>
             </div>
