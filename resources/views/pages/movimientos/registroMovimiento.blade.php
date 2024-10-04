@@ -370,26 +370,28 @@
                 <p><strong>Cliente:</strong> ${cliente}</p>
                 <p><strong>Recinto:</strong> ${recinto}</p>
                 <h5>Detalles</h5>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Precio</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${detalles.map(det => `
-                                    <tr>
-                                        <td>${det.producto}</td>
-                                        <td>${det.cantidad}</td>
-                                        <td>${det.precio}</td>
-                                        <td>${det.subtotal}</td>
-                                    </tr>
-                                `).join('')}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${detalles.map(det => `
+                                        <tr>
+                                            <td>${det.producto}</td>
+                                            <td>${det.cantidad}</td>
+                                            <td>${det.precio}</td>
+                                            <td>${det.subtotal}</td>
+                                        </tr>
+                                    `).join('')}
+                        </tbody>
+                    </table>
+                </div>
                 <p><strong>Total:</strong> ${total}</p>
                 <p><strong>Glose:</strong> ${glose}</p>
             `;
