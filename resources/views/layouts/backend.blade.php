@@ -480,7 +480,55 @@
                                         </li>
                                     </ul>
                                 </li>
+                                <li class="nav-main-item{{ request()->is('movimientos/*') ? ' open' : '' }}">
+                                    <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu"
+                                        aria-haspopup="true" aria-expanded="true" href="#">
+                                        <i class="nav-main-link-icon si si-shuffle"></i>
+                                        <span class="nav-main-link-name">Movimientos</span>
+                                    </a>
+                                    <ul class="nav-main-submenu">
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('movimientos/vista') ? ' active' : '' }}"
+                                                href="/movimientos/vista">
+                                                <i class="nav-main-link-icon si si-list"></i>
+                                                <span class="nav-main-link-name">Ver Movimientos</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-main-item">
+                                            <a class="nav-main-link{{ request()->is('movimientos/registro') ? ' active' : '' }}"
+                                                href="/movimientos/registro">
+                                                <i class="nav-main-link-icon si si-plus"></i>
+                                                <span class="nav-main-link-name">Registrar Movimiento</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
                             @endif
+
+                            <li class="nav-main-heading">Modulos - OPERACIÓN</li>
+                            <li class="nav-main-item{{ request()->is('movimientos/*') ? ' open' : '' }}">
+                                <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu"
+                                    aria-haspopup="true" aria-expanded="true" href="#">
+                                    <i class="nav-main-link-icon si si-pin"></i>
+                                    <span class="nav-main-link-name">Movimientos</span>
+                                </a>
+                                <ul class="nav-main-submenu">
+                                    <li class="nav-main-item">
+                                        <a class="nav-main-link{{ request()->is('recintos/vista') ? ' active' : '' }}"
+                                            href="/recintos/vista">
+                                            <i class="nav-main-link-icon si si-list"></i>
+                                            <span class="nav-main-link-name">Ver Movimientos</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-main-item">
+                                        <a class="nav-main-link{{ request()->is('recintos/registro') ? ' active' : '' }}"
+                                            href="/recintos/registro">
+                                            <i class="nav-main-link-icon si si-plus"></i>
+                                            <span class="nav-main-link-name">Registrar Movimientos</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
 
                             <li class="nav-main-heading">Various</li>
                             <li class="nav-main-item{{ request()->is('pages/*') ? ' open' : '' }}">

@@ -30,6 +30,9 @@ Route::middleware('role:admin')->group(function () {
     
     //Incluir las rutas de recintos
     require_once base_path('routes/admin/recintos.php');
+
+    //Incluir las rutas de movimientos
+    require_once base_path('routes/admin/movimientos.php');
 });
 
 // Rutas de Usuario Autenticado
