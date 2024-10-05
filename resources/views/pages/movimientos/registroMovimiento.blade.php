@@ -10,6 +10,7 @@
             display: block;
         }
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endsection
 
 @section('content')
@@ -47,7 +48,10 @@
             <div class="step-container active-step" id="step-1">
                 <h4>Operación a cargo de:</h4>
                 <p>{{ Auth::user()->persona->papellido }} - [{{ Auth::user()->persona->carnet }}]</p>
-                <button class="btn btn-primary" onclick="nextStep(2)">Next</button>
+                <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                    <button class="btn btn-alt-primary" onclick="nextStep(2)"
+                        style="margin-bottom: 1rem;">Siguiente</button>
+                </div>
             </div>
 
             <!-- Step 2: Almacene and Tipo -->
@@ -67,8 +71,12 @@
                         <option value="SALIDA">SALIDA</option>
                     </select>
                 </div>
-                <button class="btn btn-secondary" onclick="previousStep(1)">Back</button>
-                <button class="btn btn-primary" onclick="nextStep(3)">Next</button>
+                <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                    <button class="btn btn-secondary me-2" onclick="previousStep(1)"
+                        style="margin-bottom: 1rem;">Atrás</button>
+                    <button class="btn btn-alt-primary" onclick="nextStep(3)"
+                        style="margin-bottom: 1rem;">Siguiente</button>
+                </div>
             </div>
 
             <!-- Step 3: Based on Tipo -->
@@ -101,15 +109,18 @@
                         @endforeach
                     </select>
                 </div>
-                <button class="btn btn-secondary" onclick="previousStep(2)">Back</button>
-                <button class="btn btn-primary" onclick="nextStep(4)">Next</button>
+                <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                    <button class="btn btn-secondary me-2" onclick="previousStep(2)"
+                        style="margin-bottom: 1rem; margin-top: 1rem;">Atrás</button>
+                    <button class="btn btn-alt-primary" onclick="nextStep(4)"
+                        style="margin-bottom: 1rem; margin-top: 1rem;">Siguiente</button>
+                </div>
             </div>
 
             <!-- Step 4: Detalles Table -->
             <div class="step-container" id="step-4">
                 <h4>Detalles</h4>
                 <div class="table-responsive">
-
                     <table id="detalle-table" class="table">
                         <thead>
                             <tr>
@@ -120,7 +131,7 @@
                                 <th>Acción</th>
                             </tr>
                         </thead>
-                        <tbody> <!-- Ensure the rows are added inside this tbody -->
+                        <tbody>
                             <!-- Dynamic rows will be added here -->
                         </tbody>
                         <tfoot>
@@ -132,14 +143,19 @@
                         </tfoot>
                     </table>
                 </div>
-                <button class="btn btn-secondary" onclick="addDetalleRow()">Add Row</button>
+                <button class="btn btn-alt-success" onclick="addDetalleRow()"> <i class="fa fa-plus"></i> Añadir
+                    producto</button>
 
                 <div class="mt-4">
                     <label for="glose" class="form-label">Glose:</label>
                     <textarea id="glose" name="glose" class="form-control" style="margin-bottom: 1rem;"></textarea>
                 </div>
-                <button class="btn btn-secondary" onclick="previousStep(3)">Back</button>
-                <button class="btn btn-primary" onclick="nextStep(5)">Next</button>
+                <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                    <button class="btn btn-secondary me-2" onclick="previousStep(3)"
+                        style="margin-bottom: 1rem;">Atrás</button>
+                    <button class="btn btn-alt-primary" onclick="nextStep(5)"
+                        style="margin-bottom: 1rem;">Siguiente</button>
+                </div>
             </div>
 
             <!-- Step 5: Preview -->
@@ -163,22 +179,29 @@
                     <input type="hidden" name="total" id="total-hidden">
                 </form>
 
-                <button type="button" class="btn btn-success" id="confirm-button" data-bs-toggle="modal" data-bs-target="#confirmationModal">Confirmar Movimiento</button>
-                <button class="btn btn-secondary" onclick="previousStep(4)">Back</button>
+                <div class="col-12 col-lg-6 ms-auto d-flex justify-content-end">
+                    <button class="btn btn-secondary" onclick="previousStep(4)"
+                        style="margin-bottom: 1rem; margin-right: 1rem;">Atrás</button>
+                    <button type="button" class="btn btn-success me-2" id="confirm-button" data-bs-toggle="modal"
+                        data-bs-target="#confirmationModal" style="margin-bottom: 1rem;">Confirmar Movimiento</button>
+                </div>
 
                 <!-- Confirmation Modal -->
-                <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="confirmationModalLabel">Confirmar Movimiento</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 ¿Está seguro de que deseas confirmar este movimiento?
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
                                 <button type="button" class="btn btn-success" id="submit-confirm">Confirmar</button>
                             </div>
                         </div>
@@ -192,6 +215,49 @@
                         });
                     });
                 </script>
+            </div>
+            <div class="col-12 col-lg-6 ms-left d-flex" style="justify-content: flex-start;">
+                <button class="btn btn-danger" data-bs-toggle="modal"
+                    data-bs-target="#cancelConfirmationModal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Cancel Confirmation Modal -->
+    <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-labelledby="cancelConfirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelConfirmationModalLabel">Cancelar Movimiento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro de que desea cancelar este movimiento?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="submit-cancel"
+                        onclick="window.location.href='{{ route('movimientos.vista') }}'">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Invalid Row Modal -->
+    <div class="modal fade" id="invalidRowModal" tabindex="-1" aria-labelledby="invalidRowModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header rounded-top bg-warning">
+                    <h5 class="modal-title" id="invalidRowModalLabel">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="invalidRowsModalBody">
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -216,6 +282,8 @@
 @endsection
 
 @section('js')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             handleTipoChange(); // This ensures the correct fields are shown based on the default selection.
@@ -224,6 +292,57 @@
             };
         });
     </script>
+
+    <script>
+        $(document).ready(function() {
+            // Apply Select2 to all select elements on the page
+            $('select').select2({
+                placeholder: function() {
+                    // Apply different placeholders based on the select element's ID
+                    if ($(this).attr('id') === 'almacene') {
+                        return "Seleccione un almacén";
+                    } else if ($(this).attr('id') === 'tipo') {
+                        return "Seleccione el tipo de movimiento";
+                    } else if ($(this).attr('id') === 'proveedor') {
+                        return "Seleccione un proveedor";
+                    } else if ($(this).attr('id') === 'cliente') {
+                        return "Seleccione un cliente";
+                    } else if ($(this).attr('id') === 'recinto') {
+                        return "Seleccione un recinto";
+                    } else {
+                        return "Seleccione una opción";
+                    }
+                },
+                allowClear: false // You can toggle this to true if you'd like a clear button for selects
+            });
+
+            // Reapply Select2 when navigating through steps to ensure Select2 is applied
+            $('button').on('click', function() {
+                setTimeout(function() {
+                    $('select').select2({
+                        placeholder: function() {
+                            // Apply different placeholders based on the select element's ID
+                            if ($(this).attr('id') === 'almacene') {
+                                return "Seleccione un almacén";
+                            } else if ($(this).attr('id') === 'tipo') {
+                                return "Seleccione el tipo de movimiento";
+                            } else if ($(this).attr('id') === 'proveedor') {
+                                return "Seleccione un proveedor";
+                            } else if ($(this).attr('id') === 'cliente') {
+                                return "Seleccione un cliente";
+                            } else if ($(this).attr('id') === 'recinto') {
+                                return "Seleccione un recinto";
+                            } else {
+                                return "Seleccione una opción";
+                            }
+                        },
+                        allowClear: false
+                    });
+                }, 100); // Ensure the step is fully rendered before reapplying Select2
+            });
+        });
+    </script>
+
     <script>
         let currentStep = 1;
 
@@ -268,7 +387,7 @@
                 <td><input type="number" class="form-control" name="cantidad[]" onchange="calculateSubtotal(this)" min="0" value="0" /></td>
                 <td class="precio">0</td>
                 <td class="subtotal">0</td>
-                <td><button class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+                <td><button class="btn btn-danger" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button></td>
             `;
             tbody.appendChild(row);
         }
@@ -328,7 +447,10 @@
             invalidRows.forEach(row => row.remove());
 
             if (!hasValidRow) {
-                alert('At least one valid product with quantity greater than 0 is required.');
+                const invalidRowsModal = new bootstrap.Modal(document.getElementById('invalidRowModal'));
+                document.getElementById('invalidRowsModalBody').innerHTML =
+                    'Al menos debe existir un producto con cantidad y subtotal válido.';
+                invalidRowsModal.show();
                 isValid = false;
             }
 
@@ -382,13 +504,13 @@
                         </thead>
                         <tbody>
                             ${detalles.map(det => `
-                                        <tr>
-                                            <td>${det.producto}</td>
-                                            <td>${det.cantidad}</td>
-                                            <td>${det.precio}</td>
-                                            <td>${det.subtotal}</td>
-                                        </tr>
-                                    `).join('')}
+                                                                                <tr>
+                                                                                    <td>${det.producto}</td>
+                                                                                    <td>${det.cantidad}</td>
+                                                                                    <td>${det.precio}</td>
+                                                                                    <td>${det.subtotal}</td>
+                                                                                </tr>
+                                                                            `).join('')}
                         </tbody>
                     </table>
                 </div>

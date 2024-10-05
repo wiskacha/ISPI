@@ -29,5 +29,12 @@ Route::prefix('movimientos')->group(function () {
 
     // Mostrar formulario para editar Movimiento
     Route::get('/{movimiento}/edit', [MovimientoController::class, 'edit'])->name('movimientos.edit'); // Mostrar formulario para editar Movimiento
+    
+    // Display the view for assigning cuotas
+    Route::get('/movimientos/{id_movimiento}/asignar-cuotas', [MovimientoController::class, 'asignarCuotas'])
+        ->name('movimientos.asignarCuotas');
 
+    // Handle the form submission for storing cuotas
+    Route::post('/movimientos/cuotas/store', [MovimientoController::class, 'storeCuotas'])
+        ->name('movimientos.storeCuotas');
 });

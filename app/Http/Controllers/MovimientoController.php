@@ -10,10 +10,13 @@ use App\Models\Almacene;
 use App\Models\Recinto;
 use App\Models\Persona;
 use App\Models\Producto;
-use App\Models\Contacto;
 use App\Models\Detalle;
+use App\Models\Cuota;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use App\Http\Requests\RegisterCuotasRequest;
+
 
 class MovimientoController extends Controller
 {
@@ -40,7 +43,6 @@ class MovimientoController extends Controller
         return view('pages.movimientos.registroMovimiento', compact('almacenes', 'clientes', 'recintos', 'productos', 'proveedores')); // Página para seleccionar el tipo de Movimiento
     }
 
-    //Registro de Movimiento
     public function store(Request $request)
     {
         Log::info(request()->all());
@@ -53,10 +55,6 @@ class MovimientoController extends Controller
             'cliente' => 'nullable|exists:personas,id_persona',
             'recinto' => 'nullable|exists:recintos,id_recinto',
             'glose' => 'nullable|string',
-            // 'productos.*' => 'required|string',  // Ensure it's a string
-            // 'cantidad.*' => 'required|integer|min:1',
-            // 'precio.*' => 'required|numeric|min:0',
-            // 'subtotal.*' => 'required|numeric|min:0',
         ]);
 
         // Decode the product data
@@ -124,7 +122,12 @@ class MovimientoController extends Controller
             // Commit the transaction
             DB::commit();
 
-            // Redirect or return a response
+            // Redirect based on the tipo of the movimiento
+            if ($movimiento->tipo === 'SALIDA') {
+                return $this->asignarCuotas($movimiento->id_movimiento);
+            }
+
+            // If tipo is not SALIDA, redirect to the normal view
             return redirect()->route('movimientos.vista')->with('success', 'Movimiento registrado satisfactoriamente en el código: ' . $movimiento->codigo);
         } catch (\Exception $e) {
             // Rollback the transaction if something goes wrong
@@ -133,4 +136,110 @@ class MovimientoController extends Controller
             return back()->withErrors(['error' => 'There was a problem registering the movimiento.']);
         }
     }
+
+    public function asignarCuotas($id_movimiento)
+    {
+
+        // Retrieve the Movimiento details based on the ID
+        $movimiento = Movimiento::findOrFail($id_movimiento);
+        $detalles = $movimiento->detalles; // Assuming the relationship is defined
+        $clientes = Persona::all();
+        // dd($movimiento);
+        // Calculate the total amount from Detalles
+        $total = $detalles->sum('total');
+
+        // Return the view with the necessary data
+        return view('pages.movimientos.cuotas.asignarCuotas', [
+            'movimiento' => $movimiento,
+            'total' => $total,
+            'clientes' => $clientes,
+        ]);
+    }
+
+    public function storeCuotas(RegisterCuotasRequest $request)
+    {
+        // Retrieve the Movimiento to which the cuotas will be related
+        $movimiento = Movimiento::findOrFail($request->id_movimiento);
+    
+        // Check if there are existing cuotas for this movimiento
+        if ($movimiento->cuotas()->exists()) {
+            return redirect()->route('movimientos.vista')->withErrors(['error' => 'Ya existen cuotas asignadas para este movimiento.']);
+        }
+    
+        // Retrieve detalles related to the movimiento
+        $detalles = $movimiento->detalles; // Assuming the relationship is defined
+    
+        // Calculate the total amount from Detalles
+        $total = $detalles->sum('total');
+        $codigoBase = 'CT0-' . now()->timestamp;
+    
+        if ($request->tipo_pago === 'CONTADO') {
+            // Handle CONTADO payment type
+            $descuento = $request->descuento ?? 0;
+            $montoPagar = $total - $descuento;
+    
+            // Create the cuota for CONTADO
+            Cuota::create([
+                'numero' => 1,
+                'codigo' => $codigoBase,
+                'concepto' => 'Pago único',
+                'fecha_venc' => now(),
+                'monto_pagar' => $montoPagar,
+                'monto_pagado' => $montoPagar,
+                'monto_adeudado' => 0,
+                'condicion' => 'PAGADA',
+                'id_movimiento' => $movimiento->id_movimiento,
+            ]);
+        } elseif ($request->tipo_pago === 'CRÉDITO') {
+            // Handle CRÉDITO payment type
+            $aditivo = $request->aditivo ?? 0;
+            $cantidadCuotas = $request->cantidad_cuotas;
+            $primerPago = $request->primer_pago;
+            $totalConAditivo = $total + $aditivo;
+            $montoPagar = ceil($totalConAditivo / $cantidadCuotas); // Calculate amount per cuota
+    
+            // Initialize remaining payment
+            $montoPagado = $primerPago;
+    
+            for ($i = 1; $i <= $cantidadCuotas; $i++) {
+                $montoAdeudado = $montoPagar; // Initial amount due for this cuota
+                $estado = 'PENDIENTE'; // Default condition
+    
+                // If there is enough payment to cover this cuota
+                if ($montoPagado >= $montoPagar) {
+                    $montoPagado -= $montoPagar; // Deduct the cuota amount from primer_pago
+                    $montoPagadoCuota = $montoPagar; // Full cuota is paid
+                    $montoAdeudado = 0; // No amount due
+                    $estado = 'PAGADA'; // Mark cuota as paid
+                } else {
+                    // Not enough to cover the full cuota
+                    $montoPagadoCuota = $montoPagado; // Use the remaining amount for this cuota
+                    $montoAdeudado = $montoPagar - $montoPagado; // Remaining amount after payment
+                    $montoPagado = 0; // All remaining payment is used
+                }
+                $codigoBase = 'CT'. $i .'-' . now()->timestamp;
+                // Create each cuota
+                Cuota::create([
+                    'numero' => $i,
+                    'codigo' => $codigoBase,
+                    'concepto' => 'Cuota #' . $i,
+                    'fecha_venc' => now()->addMonths($i - 1),
+                    'monto_pagar' => $montoPagar,
+                    'monto_pagado' => $montoPagadoCuota,
+                    'monto_adeudado' => $montoAdeudado,
+                    'condicion' => $estado,
+                    'id_movimiento' => $movimiento->id_movimiento,
+                ]);
+    
+                // If the cuota was fully paid, there's no need to continue
+                if ($estado === 'PAGADA' && $montoAdeudado === 0) {
+                    continue; // Move to the next cuota
+                }
+            }
+        }
+    
+        return redirect()->route('movimientos.vista')->with('success', 'Cuotas asignadas exitosamente.');
+    }
+    
+    
 }
