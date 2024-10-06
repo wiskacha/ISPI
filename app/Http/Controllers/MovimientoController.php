@@ -12,6 +12,7 @@ use App\Models\Persona;
 use App\Models\Producto;
 use App\Models\Detalle;
 use App\Models\Cuota;
+use App\Models\Contacto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -42,6 +43,99 @@ class MovimientoController extends Controller
 
         return view('pages.movimientos.registroMovimiento', compact('almacenes', 'clientes', 'recintos', 'productos', 'proveedores')); // Página para seleccionar el tipo de Movimiento
     }
+
+    public function verificarStock(Request $request)
+    {
+        $id_almacen = $request->almacene;
+        $productoNombre = $request->producto; // Get the product name
+        $cantidad_solicitada = $request->cantidad; // Get the requested quantity
+
+        // Find the product ID by name
+        $producto = Producto::where('nombre', $productoNombre)->first();
+
+        if (!$producto) {
+            return response()->json(['available' => false, 'productName' => $productoNombre, 'message' => 'Producto no encontrado.']);
+        }
+
+        $id_producto = $producto->id_producto; // Get the product ID
+
+        // Sumar total de entradas
+        $total_entradas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
+            ->where('movimientos.id_almacen', $id_almacen)
+            ->where('detalles.id_producto', $id_producto) // Use product ID for stock checking
+            ->where('movimientos.tipo', 'ENTRADA')
+            ->sum('detalles.cantidad');
+
+        // Sumar total de salidas
+        $total_salidas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
+            ->where('movimientos.id_almacen', $id_almacen)
+            ->where('detalles.id_producto', $id_producto) // Use product ID for stock checking
+            ->where('movimientos.tipo', 'SALIDA')
+            ->sum('detalles.cantidad');
+
+        // Calcular existencias actuales
+        $existencias_actuales = $total_entradas - $total_salidas;
+
+        // Validar si hay suficiente stock
+        if ($cantidad_solicitada > $existencias_actuales) {
+            return response()->json([
+                'available' => false,
+                'productName' => $productoNombre,
+                'cantidadDisponible' => $existencias_actuales // Include available quantity in the response
+            ]);
+        }
+
+        return response()->json(['available' => true]); // Stock sufficient
+    }
+
+    // Verificar relación entre que la empresa del producto tiene una relación de contacto con el proveedor
+    public function verificarContacto(Request $request)
+    {
+        $id_proveedor = $request->proveedor; // Get the proveedor ID
+        $productoNombre = $request->producto; // Get the product name from the request
+
+        // Find the product by its name
+        $producto = Producto::where('nombre', $productoNombre)->first();
+
+        // If product is not found, return a response indicating failure
+        if (!$producto) {
+            return response()->json(['contacto' => false, 'productName' => $productoNombre, 'message' => 'Producto no encontrado.']);
+        }
+
+        // Get the Empresa that owns the Producto
+        $empresa = $producto->empresa; // Assuming the 'Producto' model has a 'empresa' relationship
+
+        // If no Empresa is associated with the product, return an error
+        if (!$empresa) {
+            return response()->json(['contacto' => false, 'productName' => $productoNombre, 'message' => 'Empresa no encontrada para este producto.']);
+        }
+
+        // Get the Empresa ID
+        $id_empresa = $empresa->id_empresa;
+
+        // Check if there is a Contacto relation between the Proveedor (Persona) and the Empresa
+        $existe_relacion = Contacto::where('id_persona', $id_proveedor)
+            ->where('id_empresa', $id_empresa)
+            ->exists();
+
+        // Return a JSON response based on whether the Contacto relation exists
+        if ($existe_relacion) {
+            return response()->json([
+                'available' => true,
+                'productName' => $productoNombre,
+                'empresaName' => $empresa->nombre,
+                'message' => 'Relación de contacto encontrada.'
+            ]);
+        } else {
+            return response()->json([
+                'available' => false,
+                'productName' => $productoNombre,
+                'empresaName' => $empresa->nombre,
+                'message' => 'No existe relación de contacto.'
+            ]);
+        }
+    }
+
 
     public function store(Request $request)
     {
@@ -160,24 +254,24 @@ class MovimientoController extends Controller
     {
         // Retrieve the Movimiento to which the cuotas will be related
         $movimiento = Movimiento::findOrFail($request->id_movimiento);
-    
+
         // Check if there are existing cuotas for this movimiento
         if ($movimiento->cuotas()->exists()) {
             return redirect()->route('movimientos.vista')->withErrors(['error' => 'Ya existen cuotas asignadas para este movimiento.']);
         }
-    
+
         // Retrieve detalles related to the movimiento
         $detalles = $movimiento->detalles; // Assuming the relationship is defined
-    
+
         // Calculate the total amount from Detalles
         $total = $detalles->sum('total');
         $codigoBase = 'CT0-' . now()->timestamp;
-    
+
         if ($request->tipo_pago === 'CONTADO') {
             // Handle CONTADO payment type
             $descuento = $request->descuento ?? 0;
             $montoPagar = $total - $descuento;
-    
+
             // Create the cuota for CONTADO
             Cuota::create([
                 'numero' => 1,
@@ -197,14 +291,14 @@ class MovimientoController extends Controller
             $primerPago = $request->primer_pago;
             $totalConAditivo = $total + $aditivo;
             $montoPagar = ceil($totalConAditivo / $cantidadCuotas); // Calculate amount per cuota
-    
+
             // Initialize remaining payment
             $montoPagado = $primerPago;
-    
+
             for ($i = 1; $i <= $cantidadCuotas; $i++) {
                 $montoAdeudado = $montoPagar; // Initial amount due for this cuota
                 $estado = 'PENDIENTE'; // Default condition
-    
+
                 // If there is enough payment to cover this cuota
                 if ($montoPagado >= $montoPagar) {
                     $montoPagado -= $montoPagar; // Deduct the cuota amount from primer_pago
@@ -217,7 +311,7 @@ class MovimientoController extends Controller
                     $montoAdeudado = $montoPagar - $montoPagado; // Remaining amount after payment
                     $montoPagado = 0; // All remaining payment is used
                 }
-                $codigoBase = 'CT'. $i .'-' . now()->timestamp;
+                $codigoBase = 'CT' . $i . '-' . now()->timestamp;
                 // Create each cuota
                 Cuota::create([
                     'numero' => $i,
@@ -230,16 +324,14 @@ class MovimientoController extends Controller
                     'condicion' => $estado,
                     'id_movimiento' => $movimiento->id_movimiento,
                 ]);
-    
+
                 // If the cuota was fully paid, there's no need to continue
                 if ($estado === 'PAGADA' && $montoAdeudado === 0) {
                     continue; // Move to the next cuota
                 }
             }
         }
-    
+
         return redirect()->route('movimientos.vista')->with('success', 'Cuotas asignadas exitosamente.');
     }
-    
-    
 }

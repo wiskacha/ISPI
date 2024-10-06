@@ -9,6 +9,29 @@
         .active-step {
             display: block;
         }
+
+        @media (max-width: 768px) {
+
+            /* Adjust max-width to your specific breakpoint */
+            .select-producto {
+                width: auto;
+                /* Keep the select width as auto */
+            }
+
+            /* Target the Select2 dropdown when it's open */
+            .select-producto.select2-container--open .select2-results {
+                min-width: 100vw;
+                /* Set the dropdown to be 100% of the viewport width */
+                width: auto !important;
+                /* Ensure it can grow wider than the select */
+            }
+
+            .select-producto.select2-container--open .select2-selection--single {
+                width: auto !important;
+                /* Allow the dropdown to expand wider */
+            }
+        }
+        }
     </style>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endsection
@@ -262,6 +285,69 @@
         </div>
     </div>
 
+    <!-- Unavailable Products Modal -->
+    <div class="modal fade" id="unavailableProductsModal" tabindex="-1" aria-labelledby="unavailableProductsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header rounded-top bg-warning">
+                    <h5 class="modal-title" id="unavailableProductsModalLabel">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="unavailableProductsModalBody"></p>
+                    <table class="table table-bordered mt-2">
+                        <thead>
+                            <tr style="font-weight: bold">
+                                <th>Producto</th>
+                                <th>Cnt. Solicitada</th>
+                                <th>Cnt. Disponible</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unavailableProductsTableBody">
+                            <!-- Unavailable products will be appended here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Unexistent Contact Relation Modal -->
+    <div class="modal fade" id="unexistentContactRelationModal" tabindex="-1"
+        aria-labelledby="unexistentContactRelationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header rounded-top bg-warning">
+                    <h5 class="modal-title" id="unexistentContactRelationModalLabel">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="unexistentContactRelationModalBody"></p>
+                    <table class="table table-bordered mt-2">
+                        <thead>
+                            <tr style="font-weight: bold">
+                                <th>Producto</th>
+                                <th>Empresa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unexistentContactRelationTableBody">
+                            <!-- Unexistent contact relation will be appended here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+                    <a href="{{ route('contactos.create.existingContacto') }}" target="_blank" class="btn btn-primary">Página
+                        de asignación</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
     @if ($errors->any())
         <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
             <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
@@ -296,7 +382,7 @@
     <script>
         $(document).ready(function() {
             // Apply Select2 to all select elements on the page
-            $('select').select2({
+            $('select:not(.select-producto)').select2({
                 placeholder: function() {
                     // Apply different placeholders based on the select element's ID
                     if ($(this).attr('id') === 'almacene') {
@@ -319,7 +405,7 @@
             // Reapply Select2 when navigating through steps to ensure Select2 is applied
             $('button').on('click', function() {
                 setTimeout(function() {
-                    $('select').select2({
+                    $('select:not(.select-producto)').select2({
                         placeholder: function() {
                             // Apply different placeholders based on the select element's ID
                             if ($(this).attr('id') === 'almacene') {
@@ -349,8 +435,20 @@
         function nextStep(step) {
             // If moving to the preview step, validate first
             if (step === 5) {
+                // Only validate if tipo is 'SALIDA'
+                const tipo = document.getElementById('tipo').value;
+                if (tipo === 'SALIDA') {
+                    if (!validateProductAvailability()) {
+                        return; // Don't proceed if validation fails
+                    }
+                } else if (tipo === 'ENTRADA') {
+                    if (!validateProveedorEmpresaRelation()) {
+                        return; // Don't proceed if validation fails
+                    }
+                }
+
                 if (!validateAndCleanupRows()) {
-                    return; // Don't proceed if validation fails
+                    return; // Don't proceed if row validation fails
                 }
                 generatePreview(); // Move preview generation here after validation
             }
@@ -358,6 +456,128 @@
             document.getElementById('step-' + currentStep).classList.remove('active-step');
             document.getElementById('step-' + step).classList.add('active-step');
             currentStep = step;
+        }
+
+        // function to validate proucto availability
+        function validateProductAvailability() {
+            const almaceneId = document.getElementById('almacene').value;
+            const almaceneName = document.getElementById('almacene').selectedOptions[0]
+                .text; // Get the selected almacen name
+            const rows = document.querySelectorAll('#detalle-table tbody tr');
+
+            let isValid = true;
+            let unavailableProducts = []; // Store unavailable products data
+            rows.forEach(row => {
+                const productName = row.querySelector('select[name="productos[]"]').selectedOptions[0].text;
+                const cantidad = parseInt(row.querySelector('input[name="cantidad[]"]').value) || 0;
+                console.log(productName);
+                if (productName && cantidad > 0) {
+                    // Perform the AJAX request to validate product availability
+                    $.ajax({
+                        url: '/movimientos/check-product-availability', // Define your endpoint here
+                        method: 'POST',
+                        data: {
+                            almacene: almaceneId,
+                            producto: productName,
+                            cantidad: cantidad,
+                            _token: '{{ csrf_token() }}' // Include CSRF token for security
+                        },
+                        success: function(response) {
+                            if (!response.available) {
+                                isValid = false;
+                                unavailableProducts.push({
+                                    productName: response.productName,
+                                    cantidadSolicitada: cantidad,
+                                    cantidadDisponible: response
+                                        .cantidadDisponible // Ensure this is returned from the server
+                                });
+                            }
+                        },
+                        async: false // Make this synchronous for validation to wait
+                    });
+                }
+            });
+
+            if (!isValid) {
+                // Update modal body
+                document.getElementById('unavailableProductsModalBody').innerHTML =
+                    `No hay suficiente cantidad de los siguientes productos en almacén: ${almaceneName}`;
+
+                // Populate the table with unavailable products
+                const tableBody = document.getElementById('unavailableProductsTableBody');
+                tableBody.innerHTML = ''; // Clear existing rows
+                unavailableProducts.forEach(product => {
+                    const row = `<tr>
+                <td style="width: 40%">${product.productName}</td>
+                <td>${product.cantidadSolicitada}</td>
+                <td>${product.cantidadDisponible}</td>
+            </tr>`;
+                    tableBody.innerHTML += row; // Append new row
+                });
+
+                const modal = new bootstrap.Modal(document.getElementById('unavailableProductsModal'));
+                modal.show();
+            }
+
+            return isValid;
+        }
+
+        // Función para  verificar que el proveedor está asignado a la empresa del producto agregado.addEventListener 
+        function validateProveedorEmpresaRelation() {
+
+            const proveedor = document.getElementById('proveedor').value;
+            const rows = document.querySelectorAll('#detalle-table tbody tr');
+            const proveedorName = document.getElementById('proveedor').selectedOptions[0].text;
+            console.log(proveedorName);
+            let isValid = true;
+            let unavailableProducts = [];
+            rows.forEach(row => {
+                const productName = row.querySelector('select[name="productos[]"]').selectedOptions[0].text;
+
+                if (productName) {
+                    // Perform the AJAX request to validate product availability
+                    $.ajax({
+                        url: '/movimientos/check-contacto-relationship', // Define your endpoint here
+                        method: 'POST',
+                        data: {
+                            proveedor: proveedor,
+                            producto: productName,
+                            _token: '{{ csrf_token() }}' // Include CSRF token for security
+                        },
+                        success: function(response) {
+                            if (!response.available) {
+                                isValid = false;
+                                unavailableProducts.push({
+                                    productName: response.productName,
+                                    empresaName: response.empresaName,
+                                })
+                            }
+                        },
+                        async: false // Make this synchronous for validation to wait
+                    });
+                }
+            });
+
+            if (!isValid) {
+                // Update modal body
+                document.getElementById('unexistentContactRelationModalBody').innerHTML =
+                    `El proveedor ${proveedorName} no tiene asignado un contacto con la empresa de los siguientes productos: `;
+
+                // Populate the table with unavailable products
+                const tableBody = document.getElementById('unexistentContactRelationTableBody');
+                tableBody.innerHTML = ''; // Clear existing rows
+                unavailableProducts.forEach(product => {
+                    const row = `<tr>
+                <td style="width: 40%">${product.productName}</td>
+                <td>${product.empresaName}</td>
+                </tr>`;
+                    tableBody.innerHTML += row; // Append new row
+                });
+
+                const modal = new bootstrap.Modal(document.getElementById('unexistentContactRelationModal'));
+                modal.show();
+            }
+            return isValid;
         }
 
         function previousStep(step) {
@@ -375,22 +595,69 @@
         function addDetalleRow() {
             const tbody = document.querySelector('#detalle-table tbody');
             const row = document.createElement('tr');
+
             row.innerHTML = `
-                <td>
-                    <select class="form-control" name="productos[]" onchange="updatePrecio(this)">
-                        <option value="">Seleccione un producto</option>
-                        @foreach ($productos as $producto)
-                            <option value="{{ $producto->id }}" data-precio="{{ $producto->precio }}">{{ $producto->nombre }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td><input type="number" class="form-control" name="cantidad[]" onchange="calculateSubtotal(this)" min="0" value="0" /></td>
-                <td class="precio">0</td>
-                <td class="subtotal">0</td>
-                <td><button class="btn btn-danger" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button></td>
-            `;
+        <td>
+            <select class="form-control select-producto" name="productos[]" onchange="updatePrecio(this)">
+                <option value="">Seleccione un producto</option>
+                @foreach ($productos as $producto)
+                    <option value="{{ $producto->id_producto }}" data-precio="{{ $producto->precio }}" data-codigo="{{ $producto->codigo }}">{{ $producto->nombre }}</option>
+                @endforeach
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control" name="cantidad[]" onchange="calculateSubtotal(this)" min="0" value="0" />
+        </td>
+        <td class="precio">0</td>
+        <td class="subtotal">0</td>
+        <td>
+            <button class="btn btn-danger" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
+        </td>
+    `;
+
             tbody.appendChild(row);
+
+            // Initialize Select2 for the newly added select element
+            const selectElement = $(row).find('.select-producto');
+            selectElement.select2({
+                placeholder: "Seleccione un producto [código] ó [nombre]",
+                allowClear: false,
+                matcher: function(params, data) {
+                    // If there are no search terms, return all results
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+
+                    // Convert search term to lower case
+                    const term = params.term.toLowerCase();
+                    const nombre = data.text.toLowerCase();
+                    const codigo = data.element ? $(data.element).data('codigo') :
+                        ""; // Check if data.element is defined
+
+                    // Ensure codigo is a string before calling toString
+                    const codigoStr = codigo ? codigo.toString().toLowerCase() : "";
+
+                    // Check if the term matches either the nombre or the codigo
+                    if (nombre.indexOf(term) > -1 || codigoStr.indexOf(term) > -1) {
+                        return data; // Return data if it matches
+                    }
+
+                    return null; // Return null if it doesn't match
+                },
+                templateResult: function(data) {
+                    return data.text; // Show 'nombre' in the dropdown
+                }
+            });
+
+            // Apply the CSS for wider dropdown
+            selectElement.on("select2:open", function() {
+                $(".select2-dropdown").css({
+                    width: "60vw", // Make dropdown full viewport width
+                    minWidth: "60vw" // Ensure it doesn't shrink
+                });
+            });
         }
+
 
         function updatePrecio(select) {
             const row = select.closest('tr');
@@ -504,13 +771,13 @@
                         </thead>
                         <tbody>
                             ${detalles.map(det => `
-                                                                                <tr>
-                                                                                    <td>${det.producto}</td>
-                                                                                    <td>${det.cantidad}</td>
-                                                                                    <td>${det.precio}</td>
-                                                                                    <td>${det.subtotal}</td>
-                                                                                </tr>
-                                                                            `).join('')}
+                                                                                                                                            <tr>
+                                                                                                                                                <td>${det.producto}</td>
+                                                                                                                                                <td>${det.cantidad}</td>
+                                                                                                                                                <td>${det.precio}</td>
+                                                                                                                                                <td>${det.subtotal}</td>
+                                                                                                                                            </tr>
+                                                                                                                                        `).join('')}
                         </tbody>
                     </table>
                 </div>
