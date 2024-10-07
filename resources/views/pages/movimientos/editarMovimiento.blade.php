@@ -31,7 +31,10 @@
             </div>
         </div>
     </div>
-    <div class="content content-boxed">
+    <button type="button" class="btn btn-sm btn-alt-primary" id="generatePdfButton">
+        <i class="fa fa-file-pdf me-1"></i> Generar PDF
+    </button>
+    <div id="content-to-pdf" class="content content-boxed">
         <!-- Product Edit -->
         <div class="block block-rounded">
             <div class="block-header block-header-default">
@@ -672,6 +675,9 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script></script>
     <script>
         $(document).ready(function() {
             // Apply Select2 to the ID Empresa field
@@ -682,6 +688,33 @@
 
             $('.select-optionals').select2({
                 placeholder: 'No asignado...',
+            });
+            document.getElementById('generatePdfButton').addEventListener('click', function() {
+                // Ocultar elementos que no quieres en el PDF
+                document.querySelectorAll('.hide-on-pdf').forEach(el => el.style.display = 'none');
+
+                const element = document.getElementById('content-to-pdf');
+                const opt = {
+                    margin: [5, 5],
+                    filename: 'recibo-movimiento-{{ $movimiento->codigo }}.pdf',
+                    image: {
+                        type: 'jpeg',
+                        quality: 0.98
+                    },
+                    html2canvas: {
+                        scale: 1
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'landscape'
+                    }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    // Mostrar nuevamente los elementos ocultos
+                    document.querySelectorAll('.hide-on-pdf').forEach(el => el.style.display = '');
+                });
             });
         });
     </script>
