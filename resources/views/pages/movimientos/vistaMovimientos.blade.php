@@ -66,7 +66,7 @@
         </div>
         <div class="block-content block-content-full">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons fs-sm">
+                <table class="table table-bordered table-striped table-vcenter js-dataTable-responsive fs-sm">
                     <thead>
                         <tr>
                             <th class="text-center hide-on-small" style="width: 5%;">#</th>
@@ -88,14 +88,13 @@
                                 <td class="text-muted">{{ $movimiento->usuario->persona->papellido }} -
                                     [{{ $movimiento->usuario->persona->carnet }}]</td>
                                 <td class="text-muted">{{ $movimiento->almacene->nombre }}</td>
-                                <td>testeo</td>
-                                {{-- <td class="text-center">
-                                        <a href="{{ route('contactos.edit', $firstContacto->persona) }}"
-                                            class="btn btn-sm btn-primary">
-                                            <i class="fa fa-edit"></i>
-                                            <span class="hide-on-small">Editar</span>
-                                        </a>
-                                </td> --}}
+                                <td class="text-center">
+                                    <a href="{{ route('movimientos.edit', $movimiento->id_movimiento) }}"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fa fa-edit"></i>
+                                        <span class="hide-on-small">Editar</span>
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

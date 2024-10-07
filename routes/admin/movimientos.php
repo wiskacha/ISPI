@@ -38,6 +38,18 @@ Route::prefix('movimientos')->group(function () {
     Route::post('/cuotas/store', [MovimientoController::class, 'storeCuotas'])
         ->name('movimientos.storeCuotas');
 
+    // Eliminar las Cuotas relacionadas con el movimiento
+    Route::delete('/{movimiento}/cuotas', [MovimientoController::class, 'cuotasDestroy'])
+        ->name('movimientos.cuotasDestroy');
+
+    // Pagar una cuota
+    Route::get('/{cuota}/pagar', [MovimientoController::class, 'payCuota'])
+        ->name('movimientos.payCuota');
+
+    // Resetear una cuota
+    Route::get('/{cuota}/resetear', [MovimientoController::class, 'resetCuota'])
+        ->name('movimientos.resetCuota');
+
     // Route for checking product availability
     Route::post('/check-product-availability', [MovimientoController::class, 'verificarStock'])
         ->name('movimientos.checkAvailability');
@@ -45,4 +57,18 @@ Route::prefix('movimientos')->group(function () {
     // Route for checking contacto relationship between producto and proveedor
     Route::post('/check-contacto-relationship', [MovimientoController::class, 'verificarContacto'])
         ->name('movimientos.checkContacto');
+
+    // Route for checking cuotas existence with the movimiento
+    Route::get('/{id}/check-cuotas', [MovimientoController::class, 'checkCuotas'])
+        ->name('movimientos.checkCuotas');
+
+    // Route for editPage of the Detalles of the Movimiento
+    Route::get('/{movimiento}/editDetalles', [MovimientoController::class, 'editDetalles'])->name('movimientos.editDetalles');
+
+    // Route for updating the Detalles of the Movimient
+    Route::post('/{id_movimiento}/guardarDetalles', [MovimientoController::class, 'guardarDetalles'])->name('movimientos.guardarDetalles');
+
+    // Route for deleting a Detalle of the Movimiento
+    Route::post('/{id_movimiento}/eliminarDetalle/{id_detalle}', [MovimientoController::class, 'eliminarDetalle'])
+        ->name('movimientos.eliminarDetalle');
 });

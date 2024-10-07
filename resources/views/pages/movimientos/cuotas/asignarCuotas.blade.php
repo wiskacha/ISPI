@@ -209,7 +209,7 @@
             <h3 class="block-title">Asignación de Cuotas</h3>
         </div>
         <div class="container">
-            <form action="{{ route('movimientos.storeCuotas') }}" method="POST">
+            <form id="cuotas-form" action="{{ route('movimientos.storeCuotas') }}" method="POST">
                 @csrf
                 <input type="hidden" name="id_movimiento" value="{{ $movimiento->id_movimiento }}">
 
@@ -257,15 +257,16 @@
                 </div>
 
                 <div id="creditoFields" class="mb-3" style="display: none;">
-                    <label for="aditivo" class="form-label">Aditivo:</label>
-                    <input type="number" name="aditivo" class="form-control" step="0.01" min="0"
-                        value="{{ old('aditivo') }}">
                     <label for="cantidad_cuotas" class="form-label">Cantidad de Cuotas:</label>
                     <input type="number" name="cantidad_cuotas" id="cantidad_cuotas" class="form-control" min="1"
                         required>
                     <label for="primer_pago" class="form-label">Primer Pago:</label>
                     <input type="number" name="primer_pago" class="form-control" step="0.01" min="0"
                         value="{{ old('primer_pago') }}">
+                    <label for="aditivo" class="form-label">Aditivo:</label>
+                    <input type="number" name="aditivo" class="form-control" step="0.01" min="0"
+                        value="{{ old('aditivo') }}">
+
                     <h3 class="mt-3">Detalles de Cuotas</h3>
                     <div class="table-responsive">
                         <table id="cuotasTable" class="table table-bordered">
@@ -289,9 +290,127 @@
                 </div>
 
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmModal"
+                        disabled id="triggerModal">
+                        Guardar Cambios
+                    </button>
                 </div>
             </form>
+
+            <!-- Modal de confirmación -->
+            <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmModalLabel">Confirmar Guardar Cambios</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ¿Estás seguro de que deseas guardar los cambios?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primary" id="confirmSubmit">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const form = document.getElementById('cuotas-form');
+                    const submitButton = document.getElementById('triggerModal');
+                    const tipoPagoSelect = document.getElementById('tipo_pago');
+                    const clienteSelect = document.getElementById('cliente_select');
+                    const contadoFields = document.getElementById('contadoFields');
+                    const creditoFields = document.getElementById('creditoFields');
+
+                    function checkRequiredFields() {
+                        const tipoPago = tipoPagoSelect.value;
+                        let allFilled = true;
+
+                        // Verificar campo de tipo de pago
+                        if (!tipoPago) {
+                            allFilled = false;
+                        }
+
+                        if (tipoPago === 'CONTADO') {
+                            // Verificar campos de CONTADO
+                            const descuentoField = document.querySelector('input[name="descuento"]');
+                            if (!descuentoField.value) {
+                                allFilled = false;
+                            }
+                        } else if (tipoPago === 'CRÉDITO') {
+                            // Verificar campos de CRÉDITO
+                            const creditoRequiredFields = creditoFields.querySelectorAll('input[required]');
+                            creditoRequiredFields.forEach(field => {
+                                if (!field.value) {
+                                    allFilled = false;
+                                }
+                            });
+
+                            // Verificar campo de cliente para CRÉDITO
+                            if (!clienteSelect.value) {
+                                allFilled = false;
+                            }
+                        }
+
+                        submitButton.disabled = !allFilled;
+                    }
+
+                    // Evento para tipo de pago
+                    tipoPagoSelect.addEventListener('change', function() {
+                        const tipo = this.value;
+                        contadoFields.style.display = tipo === 'CONTADO' ? 'block' : 'none';
+                        creditoFields.style.display = tipo === 'CRÉDITO' ? 'block' : 'none';
+                        clienteSelect.style.display = tipo === 'CRÉDITO' ? 'block' : 'none';
+                        clienteSelect.required = tipo === 'CRÉDITO';
+                        checkRequiredFields();
+                    });
+
+                    // Eventos para campos de CONTADO
+                    contadoFields.querySelectorAll('input').forEach(field => {
+                        field.addEventListener('input', checkRequiredFields);
+                    });
+
+                    // Eventos para campos de CRÉDITO
+                    creditoFields.querySelectorAll('input').forEach(field => {
+                        field.addEventListener('input', checkRequiredFields);
+                    });
+
+                    // Evento para selección de cliente
+                    clienteSelect.addEventListener('change', checkRequiredFields);
+
+                    // Verificar campos al cargar la página
+                    checkRequiredFields();
+
+                    // Enviar el formulario al confirmar en el modal
+                    document.getElementById('confirmSubmit').addEventListener('click', function() {
+                        form.submit();
+                    });
+                });
+            </script>
+
         </div>
     </div>
+
+    @if ($errors->any())
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+            <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-danger text-white">
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection

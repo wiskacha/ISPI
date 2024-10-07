@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Detalle extends Model
 {
-	use SoftDeletes;
 	protected $table = 'detalles';
 	protected $primaryKey = 'id_detalle';
 

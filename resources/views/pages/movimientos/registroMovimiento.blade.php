@@ -31,7 +31,6 @@
                 /* Allow the dropdown to expand wider */
             }
         }
-        }
     </style>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endsection
@@ -341,7 +340,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
-                    <a href="{{ route('contactos.create.existingContacto') }}" target="_blank" class="btn btn-primary">Página
+                    <a href="{{ route('contactos.create.existingContacto') }}" target="_blank"
+                        class="btn btn-primary">Página
                         de asignación</a>
                 </div>
 
@@ -771,13 +771,13 @@
                         </thead>
                         <tbody>
                             ${detalles.map(det => `
-                                                                                                                                            <tr>
-                                                                                                                                                <td>${det.producto}</td>
-                                                                                                                                                <td>${det.cantidad}</td>
-                                                                                                                                                <td>${det.precio}</td>
-                                                                                                                                                <td>${det.subtotal}</td>
-                                                                                                                                            </tr>
-                                                                                                                                        `).join('')}
+                                                                                                                                                <tr>
+                                                                                                                                                    <td>${det.producto}</td>
+                                                                                                                                                    <td>${det.cantidad}</td>
+                                                                                                                                                    <td>${det.precio}</td>
+                                                                                                                                                    <td>${det.subtotal}</td>
+                                                                                                                                                </tr>
+                                                                                                                                            `).join('')}
                         </tbody>
                     </table>
                 </div>

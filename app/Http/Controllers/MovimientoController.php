@@ -13,11 +13,12 @@ use App\Models\Producto;
 use App\Models\Detalle;
 use App\Models\Cuota;
 use App\Models\Contacto;
+use App\Models\Empresa;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Http\Requests\RegisterCuotasRequest;
-
+use Exception;
 
 class MovimientoController extends Controller
 {
@@ -52,6 +53,7 @@ class MovimientoController extends Controller
 
         // Find the product ID by name
         $producto = Producto::where('nombre', $productoNombre)->first();
+        Log::info($request);
 
         if (!$producto) {
             return response()->json(['available' => false, 'productName' => $productoNombre, 'message' => 'Producto no encontrado.']);
@@ -96,7 +98,6 @@ class MovimientoController extends Controller
 
         // Find the product by its name
         $producto = Producto::where('nombre', $productoNombre)->first();
-
         // If product is not found, return a response indicating failure
         if (!$producto) {
             return response()->json(['contacto' => false, 'productName' => $productoNombre, 'message' => 'Producto no encontrado.']);
@@ -136,6 +137,17 @@ class MovimientoController extends Controller
         }
     }
 
+    public function checkCuotas($id)
+    {
+        // Verifica si existen cuotas relacionadas con el movimiento
+        $cuotas = Cuota::where('id_movimiento', $id)->exists();
+
+        if ($cuotas) {
+            return response()->json(['exists' => true, 'message' => 'Este movimiento tiene cuotas asociadas. Sólo se pueden efectuar cambios en los detalles si no se tienen cuotas.'], 200);
+        } else {
+            return response()->json(['exists' => false], 200);
+        }
+    }
 
     public function store(Request $request)
     {
@@ -257,7 +269,8 @@ class MovimientoController extends Controller
 
         // Check if there are existing cuotas for this movimiento
         if ($movimiento->cuotas()->exists()) {
-            return redirect()->route('movimientos.vista')->withErrors(['error' => 'Ya existen cuotas asignadas para este movimiento.']);
+            return redirect()->route('movimientos.edit', $movimiento->id_movimiento)
+                ->withErrors(['error' => 'Ya existen cuotas asignadas para este movimiento.']);
         }
 
         // Retrieve detalles related to the movimiento
@@ -291,6 +304,8 @@ class MovimientoController extends Controller
             $primerPago = $request->primer_pago;
             $totalConAditivo = $total + $aditivo;
             $montoPagar = ceil($totalConAditivo / $cantidadCuotas); // Calculate amount per cuota
+            $nuevoCliente = $request->id_cliente;
+            Movimiento::where('id_movimiento', $request->id_movimiento)->update(['id_cliente' => $nuevoCliente]);
 
             // Initialize remaining payment
             $montoPagado = $primerPago;
@@ -332,6 +347,234 @@ class MovimientoController extends Controller
             }
         }
 
-        return redirect()->route('movimientos.vista')->with('success', 'Cuotas asignadas exitosamente.');
+        return redirect()->route('movimientos.edit', $movimiento->id_movimiento)
+            ->with('success', 'Cuotas asignadas exitosamente en el movimiento: ' . $movimiento->codigo);
+    }
+
+
+    //Mostrar formulario para editar Movimiento
+    public function edit($id_movimiento)
+    {
+        $movimiento = Movimiento::findOrFail($id_movimiento);
+        $clientes = Persona::all();
+        $proveedores = Persona::has('contactos')->get();
+        $recintos = Recinto::all();
+        $detalles = Detalle::where('id_movimiento', $id_movimiento)->get();
+        $cuotas = Cuota::where('id_movimiento', $id_movimiento)->get();
+
+        return view('pages.movimientos.editarMovimiento', compact('movimiento', 'clientes', 'proveedores', 'recintos', 'detalles', 'cuotas'));
+    }
+
+    public function editDetalles($id_movimiento)
+    {
+        // Fetch the Movimiento by ID
+        $movimiento = Movimiento::find($id_movimiento);
+        // Check if the movimiento exists
+        if (!$movimiento) {
+            return redirect()->back()->with('error', 'Movimiento no encontrado.');
+        }
+
+        // Fetch the detalles based on the movimiento
+        $detalles = Detalle::where('id_movimiento', $id_movimiento)->get();
+        $almacen = $movimiento->id_almacen;
+        $proveedor = $movimiento->id_proveedor;
+        $productos = Producto::all();
+        // Check if the type is ENTRADA or SALIDA and redirect accordingly
+        return view('pages.movimientos.editarDetallesMovimiento', compact('movimiento', 'proveedor', 'detalles', 'almacen', 'productos'));
+    }
+
+    public function guardarDetalles(Request $request, $id_movimiento)
+    {
+        // Fetch the movimiento by ID
+        $movimiento = Movimiento::findOrFail($id_movimiento);
+        if (empty($request->productos)) {
+            return redirect()->route('movimientos.edit', $id_movimiento)
+                ->with('success', 'Detalles vacío');
+        }
+        // Validate request data
+        $request->validate([
+            'productos.*.id_producto' => 'required|exists:productos,id_producto',
+            'productos.*.cantidad' => 'required|integer|min:1',
+        ]);
+
+        // Handle Entrada type
+        if ($movimiento->tipo === 'ENTRADA') {
+            foreach ($request->productos as $producto) {
+                $id_producto = $producto['id_producto'];
+                $proveedor_id = $movimiento->id_proveedor; // Assuming you have the supplier ID in movimiento
+                $productoInstance = Producto::find($id_producto);
+                $empresaInstance = Empresa::find($productoInstance->id_empresa);
+                $proveedorInstance = Persona::find($proveedor_id);
+                // Check if there's a contact relation with the supplier
+                $hasContacto = Contacto::where('id_empresa', $empresaInstance->id_empresa)
+                    ->where('id_persona', $proveedorInstance->id_persona)
+                    ->exists();
+                if (!$hasContacto) {
+                    return redirect()->back()->withErrors(['error' => "No hay relación de contacto entre la empresa: {$empresaInstance->nombre} con el proveedor: [{$proveedorInstance->carnet}] {$proveedorInstance->papellido} para el producto: {$productoInstance->nombre}."])->withInput();
+                }
+            }
+        }
+
+        // Handle Salida type
+        if ($movimiento->tipo === 'SALIDA') {
+            foreach ($request->productos as $producto) {
+                $id_producto = $producto['id_producto'];
+                $cantidad_salida = $producto['cantidad'];
+                $id_almacen = $movimiento->id_almacen; // Assuming you have the warehouse ID in movimiento
+                $productoInstance = Producto::find($id_producto);
+                $almaceneInstance = Almacene::find($id_almacen);
+                // Calculate current stock
+                $total_entradas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
+                    ->where('movimientos.id_almacen', $id_almacen)
+                    ->where('detalles.id_producto', $id_producto)
+                    ->where('movimientos.tipo', 'ENTRADA')
+                    ->sum('detalles.cantidad');
+
+                $total_salidas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
+                    ->where('movimientos.id_almacen', $id_almacen)
+                    ->where('detalles.id_producto', $id_producto)
+                    ->where('movimientos.tipo', 'SALIDA')
+                    ->sum('detalles.cantidad');
+
+                $existencias_actuales = $total_entradas - $total_salidas;
+
+                if ($existencias_actuales < $cantidad_salida) {
+                    return redirect()->back()->withErrors(['error' => "No hay suficiente stock del producto {$productoInstance->nombre}, en el almacen: {$almaceneInstance->nombre}. Solo hay {$existencias_actuales} disponibles."])->withInput();
+                }
+            }
+        }
+
+        // If validations pass, save details
+        foreach ($request->productos as $producto) {
+            $productoInstance = Producto::find($id_producto);
+            // Verifica si 'id_detalle' existe
+            if (isset($producto['id_detalle'])) {
+                // Si 'id_detalle' existe, actualiza el detalle existente
+                Detalle::updateOrCreate(
+                    ['id_detalle' => $producto['id_detalle']],
+                    [
+                        'id_producto' => $producto['id_producto'],
+                        'cantidad' => $producto['cantidad'],
+                        'precio' => $productoInstance->precio,
+                        'total' => $producto['cantidad'] * $productoInstance->precio,
+                        'id_movimiento' => $id_movimiento,
+                    ]
+                );
+            } else {
+                // Si no existe 'id_detalle', crea un nuevo detalle
+                Detalle::create([
+                    'id_producto' => $producto['id_producto'],
+                    'cantidad' => $producto['cantidad'],
+                    'precio' => $productoInstance->precio,
+                    'total' => $producto['cantidad'] * $productoInstance->precio,
+                    'id_movimiento' => $id_movimiento,
+                ]);
+            }
+        }
+
+        return redirect()->route('movimientos.edit', $id_movimiento)
+            ->with('success', 'Detalles guardados correctamente.');
+    }
+
+
+
+
+
+
+    public function eliminarDetalle($id_movimiento, $id_detalle)
+    {
+        $detalle = Detalle::findOrFail($id_detalle);
+        $detalle->delete();
+
+        return response()->json(['success' => 'Detalle eliminado correctamente']);
+    }
+
+
+    // Función para actualizar un Movimiento
+    public function update(Request $request, $id_movimiento)
+    {
+        // Validación de los datos del formulario
+        $request->validate([
+            'glose' => 'nullable|string|max:255',
+            'cliente' => 'nullable|exists:personas,id_persona', // Para SALIDA
+            'recinto' => 'nullable|exists:recintos,id_recinto', // Para SALIDA
+            'proveedor' => 'nullable|exists:personas,id_persona', // Para ENTRADA
+        ]);
+
+        // Buscar el movimiento a actualizar
+        $movimiento = Movimiento::findOrFail($id_movimiento);
+
+        // Actualizar los campos comunes (Glose)
+        $movimiento->glose = $request->input('glose');
+
+        // Actualización condicional según el tipo de movimiento
+        if ($movimiento->tipo == 'SALIDA') {
+            // Para los movimientos de tipo 'SALIDA'
+            $movimiento->id_cliente = $request->input('cliente'); // Cliente opcional
+            $movimiento->id_recinto = $request->input('recinto'); // Recinto opcional
+        } elseif ($movimiento->tipo == 'ENTRADA') {
+            // Para los movimientos de tipo 'ENTRADA'
+            $movimiento->id_proveedor = $request->input('proveedor'); // Proveedor es requerido
+        }
+
+        // Guardar los cambios
+        $movimiento->save();
+
+        // Redirigir con un mensaje de éxito
+        return redirect()->route('movimientos.edit', $movimiento->id_movimiento)
+            ->with('success', 'Se actualizaron los campos del movimiento: ' . $movimiento->codigo);
+    }
+
+
+    // Función para eliminar un Movimiento
+    public function destroy($id_movimiento)
+    {
+        $movimiento = Movimiento::findOrFail($id_movimiento);
+        $movimiento->delete();
+
+        return redirect()->route('movimientos.vista')->with('success', 'Movimiento eliminado exitosamente.');
+    }
+
+    // Función para eliminar las Cuotas pertenecientes a un movimiento
+    public function cuotasDestroy($id_movimiento)
+    {
+        $movimiento = Movimiento::findOrFail($id_movimiento);
+
+        try {
+            Cuota::where('id_movimiento', $id_movimiento)->delete();
+
+            return redirect()->route('movimientos.edit', $movimiento->id_movimiento)
+                ->with('success', 'Cuotas eliminadas exitosamente en el movimiento: ' . $movimiento->codigo);
+        } catch (Exception $e) {
+            return redirect()->route('movimientos.edit', $movimiento->id_movimiento)
+                ->with('error', 'No se pudieron eliminar las cuotas del movimiento: ' . $movimiento->codigo);
+        }
+    }
+
+    //Función para pagar una cuota
+    public function payCuota(Request $request, $id_cuota)
+    {
+        $cuota = Cuota::findOrFail($id_cuota);
+        $cuota->condicion = 'PAGADA';
+        $cuota->monto_pagado = $cuota->monto_pagar;
+        $cuota->monto_adeudado = 0;
+        $cuota->save();
+        $movimiento = Movimiento::findOrFail($cuota->id_movimiento);
+
+        return redirect()->route('movimientos.edit', $cuota->id_movimiento)
+            ->with('success', 'Cuota ' . $cuota->numero . ' pagada exitosamente en el movimiento: ' . $movimiento->codigo);
+    }
+
+    //Función para resetear una cuota
+    public function resetCuota(Request $request, $id_cuota)
+    {
+        $cuota = Cuota::findOrFail($id_cuota);
+        $cuota->condicion = 'PENDIENTE';
+        $cuota->monto_pagado = 0;
+        $cuota->monto_adeudado =  $cuota->monto_pagar;
+        $cuota->save();
+        $movimiento = Movimiento::findOrFail($cuota->id_movimiento);
+        return redirect()->route('movimientos.edit', $cuota->id_movimiento)
+            ->with('success', 'Cuota ' . $cuota->numero . ' reseteada exitosamente en el movimiento: ' . $movimiento->codigo);
     }
 }
