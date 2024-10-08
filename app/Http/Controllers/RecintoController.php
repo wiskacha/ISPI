@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Recinto;
+use App\Models\Movimiento;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\UpdateRequestRecinto;
 
@@ -33,8 +34,14 @@ class RecintoController extends Controller
     public function destroy($id_recinto)
     {
         $recinto = Recinto::find($id_recinto);
+        //Comprobar relacion con tabla Movimientos
+        $hasMovimientos = Movimiento::where('id_recinto', $id_recinto)->exists();
+        //En caso de te nerla prevenir el delete
+        if ($hasMovimientos) {
+            return redirect()->route('recintos.vista')->with('error', 'No se puede eliminar el recinto porque tiene movimientos asociados.');
+        }
         $recinto->delete();
-        return redirect()->route('recintos.vista');
+        return redirect()->route('recintos.vista')->with('success', 'Recinto: '. $recinto->nombre .' eliminado exitosamente.');
     }
 
     // Registrar un nuevo recinto

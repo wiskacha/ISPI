@@ -44,81 +44,120 @@
         </div>
         <div class="block-content block-content-full">
             <div class="table-responsive">
-                <form id="detallesForm" method="POST"
-                    action="{{ route('movimientos.guardarDetalles', $movimiento->id_movimiento) }}">
-                    @csrf
-                    <table class="table table-bordered table-striped table-vcenter js-dataTable-responsive fs-sm">
-                        <thead>
+                <table class="table table-bordered table-striped table-vcenter js-dataTable-responsive fs-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-center hide-on-small" style="width: 5%;">#</th>
+                            <th>Producto</th>
+                            <th>Código</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $totalPr = 0; @endphp <!-- Initialize the total -->
+                        @foreach ($detalles as $index => $detalle)
                             <tr>
-                                <th class="text-center hide-on-small" style="width: 5%;">#</th>
-                                <th style="width: 30%;">Producto</th>
-                                <th>Código</th>
-                                <th>Cantidad</th>
-                                <th>Precio</th>
-                                <th>Subtotal</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detallesBody">
-                            @php
-                                $totalPr = 0;
-                            @endphp
-                            @foreach ($detalles as $index => $detalle)
-                                <tr data-index="{{ $index }}">
-                                    <input type="hidden" class="sexo" name="productos[{{ $index }}][id_detalle]"
-                                        value="{{ $detalle->id_detalle }}">
-                                    <td class="text-center hide-on-small">{{ $loop->index + 1 }}</td>
-                                    <td>
-                                        <select name="productos[{{ $index }}][id_producto]"
-                                            class="form-control select-producto" required>
-                                            <option value="">Seleccione un producto</option>
-                                            @foreach ($productos as $producto)
-                                                <option value="{{ $producto->id_producto }}"
-                                                    data-precio="{{ $producto->precio }}"
-                                                    data-codigo="{{ $producto->codigo }}"
-                                                    {{ $detalle->id_producto == $producto->id_producto ? 'selected' : '' }}>
-                                                    [{{ $producto->codigo }}] {{ $producto->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td class="codigo-producto text-muted">{{ $detalle->producto->codigo }}</td>
-                                    <td>
-                                        <input type="number" name="productos[{{ $index }}][cantidad]"
-                                            class="form-control cantidad" value="{{ $detalle->cantidad }}" min="1"
-                                            required>
-                                    </td>
-                                    <td class="precio-producto text-muted">
-                                        <input type="hidden" name="productos[{{ $index }}][precio]"
-                                            value="{{ $detalle->precio }}">
-                                        {{ number_format($detalle->precio, 2) }}
-                                    </td>
-                                    <td class="subtotal text-muted">{{ number_format($detalle->total, 2) }}</td>
+                                <td class="text-center hide-on-small">{{ $loop->index + 1 }}</td>
+                                <td class="text-muted">{{ $detalle->producto->nombre }}</td>
+                                <td class="text-muted">{{ $detalle->producto->codigo }}</td>
+                                <td class="text-muted">{{ $detalle->cantidad }}</td>
+                                <td class="text-muted">{{ $detalle->precio }}</td>
+                                <td class="text-muted">
+                                    {{ $detalle->total }}
                                     @php
                                         $totalPr += $detalle->total;
-                                    @endphp
-                                    <td>
-                                        <button class="delete-row btn btn-danger"
-                                            data-id-movimiento="{{ $movimiento->id_movimiento }}"
-                                            data-id-detalle="{{ $detalle->id_detalle }}">
-                                            Delete
+                                    @endphp <!-- Add the subtotal to the running total -->
+                                </td>
+                                <td class="text-muted">
+                                    <!-- Add an edit button here -->
+                                    <button type="button" class="btn btn-sm btn-alt-secondary" data-bs-toggle="modal"
+                                        data-bs-target="#editModal{{ $detalle->id_detalle }}" title="Editar Detalle">
+                                        <i class="fa fa-fw fa-pencil-alt"></i>
+                                        <!-- Edit button -->
+                                    </button>
+                                    <!-- Edit Modal -->
+                                    <div class="modal fade" id="editModal{{ $detalle->id_detalle }}" tabindex="-1"
+                                        role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="modal-block-vcenter">Registro de Cliente
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="updateDet-form"
+                                                        action="{{ route('movimientos.guardarDetalles', $detalle->id_detalle) }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <div class="table-responsive">
+                                                            <table id="detalle-table" class="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Producto</th>
+                                                                        <th>Cantidad</th>
+                                                                        <th>Precio</th>
+                                                                        <th>Subtotal</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <td>
+                                                                        <select class="js-example-basic-single form-control form-control-lg" id="producto"
+                                                                        name="producto" required>
+                                                                        <option value="">Seleccione un Producto</option>
+                                                                        @foreach ($productos as $producto)
+                                                                            <option class="col-12" value="{{ $producto->id_producto }}"
+                                                                                {{ $detalle->producto->id_producto == $producto->id_producto ? 'selected' : '' }}>
+                                                                                [{{ $producto->codigo }}]{{ $producto->nombre }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="number" class="form-control"
+                                                                            name="cantidad" min="0" value="0" />
+                                                                    </td>
+                                                                    <td class="precio" value="">0</td>
+                                                                    <td class="subtotal">0</td>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-success">Registrar</button>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Cerrar</button>
+                                                </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add a delete button here -->
+                                    <form method="POST"
+                                        action="{{ route('movimientos.eliminarDetalle', ['id_movimiento' => $movimiento->id_movimiento, 'id_detalle' => $detalle->id_detalle]) }}"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('¿Está seguro que desea eliminar el producto {{ $producto->nombre }}?');">
+                                            <i class="fa fa-trash"></i><small class="hide-on-small"> Eliminar</small>
                                         </button>
-                                    </td>
-
-                                </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td style="text-align: right" colspan="5"><strong>TOTAL</strong></td>
-                                <td colspan="2" id="total">{{ number_format($totalPr, 2) }}</td>
+                                    </form>
+                                </td>
                             </tr>
-                        </tfoot>
-                    </table>
-
-                    <button type="button" id="addRow" class="btn btn-success">Agregar Detalle</button>
-                    <button type="submit" class="btn btn-primary">Guardar Detalles</button>
-                </form>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td style="text-align: right" colspan="5"><strong>TOTAL</strong></td>
+                            <td colspan="1">{{ number_format($totalPr, 2) }}</td>
+                            <!-- Display the total -->
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
     </div>
@@ -148,110 +187,6 @@
         $(document).ready(function() {
             // Initialize Select2 for product selection
             $('.select-producto').select2();
-
-            // Update subtotal and total when product or quantity changes
-            function updateSubtotal(row) {
-                const cantidad = parseFloat(row.find('.cantidad').val()) || 0;
-                const precio = parseFloat(row.find('.select-producto option:selected').data('precio')) || 0;
-                const subtotal = cantidad * precio;
-
-                row.find('.precio-producto').text(precio.toFixed(2));
-                row.find('.subtotal').text(subtotal.toFixed(2));
-
-                updateTotal();
-            }
-
-            function updateTotal() {
-                let total = 0;
-                $('#detallesBody .subtotal').each(function() {
-                    total += parseFloat($(this).text()) || 0;
-                });
-                $('#total').text(total.toFixed(2));
-            }
-
-            // Attach event listeners to existing rows
-            $('#detallesBody').on('change', '.select-producto', function() {
-                const row = $(this).closest('tr');
-                row.find('.codigo-producto').text($(this).find('option:selected').data('codigo'));
-                updateSubtotal(row);
-            });
-
-            $('#detallesBody').on('input', '.cantidad', function() {
-                const row = $(this).closest('tr');
-                updateSubtotal(row);
-            });
-
-            // Add new row
-            $('#addRow').on('click', function() {
-                const index = $('#detallesBody tr').length; // New row index based on existing rows
-                const newRow = `
-                    <tr data-index="${index}">
-                        <td>${index + 1}</td>
-                        <td>
-                            <select name="productos[${index}][id_producto]" class="form-control select-producto" required>
-                                <option value="">Seleccione un producto</option>
-                                @foreach ($productos as $producto)
-                                    <option value="{{ $producto->id_producto }}" data-precio="{{ $producto->precio }}" data-codigo="{{ $producto->codigo }}">
-                                        [{{ $producto->codigo }}] {{ $producto->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </td>
-                        <td class="codigo-producto"></td>
-                        <td>
-                            <input type="number" name="productos[${index}][cantidad]" class="form-control cantidad" value="1" min="1" required>
-                        </td>
-                        <td class="precio-producto">0.00</td>
-                        <td class="subtotal">0.00</td>
-                        <td>
-                            <button type="button" class="delete-new-row btn btn-danger">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                $('#detallesBody').append(newRow);
-                $('.select-producto').select2(); // Reinitialize Select2 for new row
-                updateSubtotal($('#detallesBody tr:last')); // Update subtotal for the new row
-            });
-
-            // Remove row
-            $(document).on('click', '.delete-row', function(e) {
-                e.preventDefault(); // Prevent the default form submission
-
-                var idMovimiento = $(this).data('id-movimiento');
-                var idDetalle = $(this).data('id-detalle');
-                var $row = $(this).closest('tr');
-
-                if (confirm('Are you sure you want to delete this detail?')) {
-                    $.ajax({
-                        url: `/movimientos/${idMovimiento}/eliminarDetalle/${idDetalle}`,
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}' // Include CSRF token
-                        },
-                        success: function(response) {
-                            alert(response.success); // Optionally show success message
-                            $row.remove(); // Remove the row from the table
-                            updateTotal(); // Recalculate the total after deletion
-                        },
-                        error: function(xhr) {
-                            alert('An error occurred while deleting the detail.');
-                        }
-                    });
-                }
-            });
-
-            // Handle delete for newly added rows
-            $('#detallesBody').on('click', '.delete-new-row', function(e) {
-                e.preventDefault();
-                var $row = $(this).closest('tr');
-
-                if (confirm('Are you sure you want to delete this newly added detail?')) {
-                    $row.remove(); // Remove the row from the table
-                    updateTotal(); // Recalculate the total after deletion
-                }
-            });
         });
     </script>
 @endsection

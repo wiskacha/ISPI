@@ -33,6 +33,9 @@ Route::middleware('role:admin')->group(function () {
 
     //Incluir las rutas de movimientos
     require_once base_path('routes/admin/movimientos.php');
+
+    //Incluir las rutas de generación de recibos
+    require_once base_path('routes/admin/pdf.php');
 });
 
 // Rutas de Usuario Autenticado

@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
     <style>
-        @media (max-width: 900px) {
+        @media (max-width: 1400px) {
             .hide-on-small {
                 display: none;
             }
@@ -83,8 +83,29 @@
             </div>
         </div>
     </div>
-    <div class="block block-rounded" style="margin-top: 1rem; margin-left: 1rem; margin-right: 1rem;">
+    @if ($errors->any() || session('error'))
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+            <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-danger text-white">
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    @if ($errors->any())
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        {{ session('error') }}
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 
+    <div class="block block-rounded" style="margin-top: 1rem; margin-left: 1rem; margin-right: 1rem;">
         <div class="block-header block-header-default">
             <h3 class="block-title">
                 Lista de PRODUCTOS <small>Exportable</small>
@@ -104,70 +125,68 @@
                             <th style="width: 10%;">Precio</th>
                             <th style="width: 10%;">Presentación</th>
                             <th style="width: 20%;">Empresa</th> <!-- New column -->
-                            <th class="text-center" style="width: auto">Acciones</th>
+                            <th class="text-center" style="width: auto;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($productos as $index => $producto)
-                            <td class="text-center fs-sm" style="display: none">{{ $index + 1 }}</td>
-                            <td>
-                                @if ($producto->image_base64)
-                                    <img src="data:image/jpeg;base64,{{ $producto->image_base64 }}"
-                                        alt="{{ $producto->nombre }}" style="max-width: 100px; max-height: 100px;">
-                                @else
-                                    <img src="https://via.placeholder.com/100" alt="No Image"
-                                        style="max-height: 100%; max-width: 100%; height: auto;">
-                                @endif
-                            </td>
-                            <td class="fw-semibold fs-sm">{{ $producto->nombre }}</td>
-                            <td class="fs-sm">
-                                @php
-                                    $tags = json_decode($producto->tags, true);
-                                    echo is_array($tags)
-                                        ? implode('<br>', array_map(fn($tag) => "$tag", $tags))
-                                        : 'N/A';
-                                @endphp
-                            </td>
-                            <td class="fs-sm">{{ $producto->codigo }}</td>
-                            <td class="fs-sm">${{ number_format($producto->precio, 2) }}</td>
-                            <td class="fs-sm">{{ 'U:' . $producto->unidad . ' / ' . $producto->presentacion }}</td>
-                            <td class="fs-sm">{{ $producto->empresa ? $producto->empresa->nombre : 'N/A' }}</td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group" aria-label="Horizontal Info">
-                                    <!-- Botón Editar (Left) -->
-                                    <a href="{{ route('productos.edit', $producto->id_producto) }}"
-                                        class="btn btn-primary">
-                                        <i class="fa fa-edit"></i> Editar
-                                    </a>
+                            <tr>
+                                <td class="text-center fs-sm" style="display: none">{{ $index + 1 }}</td>
+                                <td>
+                                    @if ($producto->image_base64)
+                                        <img src="data:image/jpeg;base64,{{ $producto->image_base64 }}"
+                                            alt="{{ $producto->nombre }}" style="max-width: 100px; max-height: 100px;">
+                                    @else
+                                        <img src="https://via.placeholder.com/100" alt="No Image"
+                                            style="max-height: 100%; max-width: 100%; height: auto;">
+                                    @endif
+                                </td>
+                                <td class="fw-semibold fs-sm">{{ $producto->nombre }}</td>
+                                <td class="fs-sm">
+                                    @php
+                                        $tags = json_decode($producto->tags, true);
+                                        echo is_array($tags)
+                                            ? implode('<br>', array_map(fn($tag) => "$tag", $tags))
+                                            : 'N/A';
+                                    @endphp
+                                </td>
+                                <td class="fs-sm">{{ $producto->codigo }}</td>
+                                <td class="fs-sm">${{ number_format($producto->precio, 2) }}</td>
+                                <td class="fs-sm">{{ 'U:' . $producto->unidad . ' / ' . $producto->presentacion }}</td>
+                                <td class="fs-sm">{{ $producto->empresa ? $producto->empresa->nombre : 'N/A' }}</td>
+                                <td class="text-center">
+                                    <div class="row" style="margin: auto;">
+                                        <div class="col-md-6">
+                                            <!-- Botón Editar (Left) -->
+                                            <a href="{{ route('productos.edit', $producto->id_producto) }}"
+                                                class="btn btn-primary btn-sm">
+                                                <i class="fa fa-edit"></i><small class="hide-on-small">Editar</small>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <!-- Botón Eliminar (Middle) -->
+                                            <form method="POST"
+                                                action="{{ route('productos.destroy', $producto->id_producto) }}"
+                                                style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('¿Está seguro que desea eliminar el producto {{ $producto->nombre }}?');">
+                                                    <i class="fa fa-trash"></i><small class="hide-on-small">Eliminar</small>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
 
-                                    <!-- Botón Eliminar (Middle) -->
-                                    <form method="POST" action="{{ route('productos.destroy', $producto->id_producto) }}"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger"
-                                            onclick="return confirm('¿Está seguro que desea eliminar el producto {{ $producto->nombre }}?');">
-                                            <i class="fa fa-trash"></i> Eliminar
-                                        </button>
-                                    </form>
-
-                                    <!-- Botón Ver (Right) -->
-                                    <a href="#" class="btn btn-info">
-                                        <i class="fa fa-eye"></i> Ver
-                                    </a>
-                                </div>
-                            </td>
+                                </td>
                             </tr>
                         @endforeach
-
                     </tbody>
                 </table>
-
             </div>
-
+            <button id="customPrintButton">IMPRIMIR Products</button>
         </div>
     </div>
-    <button id="customPrintButton">IMPRIMIR Products</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
@@ -275,8 +294,6 @@
                     newTable.remove();
                 });
             }
-
-
         });
     </script>
 @endsection

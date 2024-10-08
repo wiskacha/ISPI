@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Persona;
 use App\Models\User;
+use App\Models\Movimiento;
+use App\Models\Contacto;
 use App\Http\Requests\RegisterRequestCliente;
 use App\Http\Requests\UpdateRequestCliente;
 
@@ -94,7 +96,36 @@ class PersonaController extends Controller
         $persona = Persona::find($id);
 
         if ($persona) {
-            $persona->delete(); // Soft delete
+            // Check if the persona has a related user, movimiento or contacto record
+            $hasUser = User::where('id', $id)->exists(); // Check if the persona has a related user record
+            $hasMovimiento = Movimiento::where(function ($query) use ($id) {
+                $query->where('id_cliente', $id)
+                    ->orWhere('id_proveedor', $id)
+                    ->orWhere('id_operador', $id);
+            })->exists();
+            $hasContacto = Contacto::where('id_persona', $id)->exists(); // Check if the persona has a related contacto record
+
+            //If any of the conditions above are true prevent the deletion of the record
+            $errorMessages = [];
+
+            if ($hasUser) {
+                $errorMessages[] = 'tiene un usuario asociado';
+            }
+
+            if ($hasMovimiento) {
+                $errorMessages[] = 'tiene movimientos asociados';
+            }
+
+            if ($hasContacto) {
+                $errorMessages[] = 'tiene empresas asociadas';
+            }
+
+            if (!empty($errorMessages)) {
+                $errorMessage = 'No se puede eliminar la persona porque ' . implode(', ', $errorMessages) . '.';
+                return redirect()->route('personas.clientes.vistaClientes')->with('error', $errorMessage);
+            } else {
+                $persona->delete(); // Soft delete
+            }
             return redirect()->route('personas.clientes.vistaClientes')->with('success', 'Persona eliminada correctamente.');
         } else {
             return redirect()->route('personas.clientes.vistaClientes')->with('error', 'Persona no encontrada.');

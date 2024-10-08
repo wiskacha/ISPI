@@ -31,14 +31,19 @@
             </div>
         </div>
     </div>
-    <button type="button" class="btn btn-sm btn-alt-primary" id="generatePdfButton">
-        <i class="fa fa-file-pdf me-1"></i> Generar PDF
-    </button>
     <div id="content-to-pdf" class="content content-boxed">
         <!-- Product Edit -->
         <div class="block block-rounded">
             <div class="block-header block-header-default">
                 <h3 class="block-title">Editar Movimiento</h3>
+                <div class="ms-3">
+                    <a href="{{ route('movimientos.previewRecibo', $movimiento->id_movimiento) }}" target="_blank">
+                        <button id="generarReciboBtn" type="button" class="btn btn-sm btn-alt-success">
+                            <i class="fa fa-file-pdf"></i>
+                            <span class="d-none d-sm-inline">Generar Recibo</span>
+                        </button>
+                    </a>
+                </div>
             </div>
             <div class="block-content">
                 <form id="movimiento-edit" action="{{ route('movimientos.update', $movimiento->id_movimiento) }}"
@@ -96,7 +101,6 @@
                             <!-- Add a divider for the next fields -->
                             <hr>
                             <div class="row">
-
                                 @if ($movimiento->tipo == 'SALIDA')
                                     <div class="col-md-6">
                                         <!-- Cliente -->
@@ -160,6 +164,21 @@
                                         </div>
                                     </div>
                                 @endif
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="almacene">Almacen</label>
+                                    <select class="js-example-basic-single form-control form-control-lg" id="almacene"
+                                        name="almacene" required>
+                                        <option value="">Seleccione un Almacen</option>
+                                        @foreach ($almacenes as $almacene)
+                                            <option class="col-12" value="{{ $almacene->id_almacen }}"
+                                                {{ $movimiento->id_almacen == $almacene->id_almacen ? 'selected' : '' }}>
+                                                {{ $almacene->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <hr>
                             </div>
                             <!-- Update Button -->
                             <div class="col-12 col-lg-3 ms-auto text-lg-end">
@@ -688,33 +707,6 @@
 
             $('.select-optionals').select2({
                 placeholder: 'No asignado...',
-            });
-            document.getElementById('generatePdfButton').addEventListener('click', function() {
-                // Ocultar elementos que no quieres en el PDF
-                document.querySelectorAll('.hide-on-pdf').forEach(el => el.style.display = 'none');
-
-                const element = document.getElementById('content-to-pdf');
-                const opt = {
-                    margin: [5, 5],
-                    filename: 'recibo-movimiento-{{ $movimiento->codigo }}.pdf',
-                    image: {
-                        type: 'jpeg',
-                        quality: 0.98
-                    },
-                    html2canvas: {
-                        scale: 1
-                    },
-                    jsPDF: {
-                        unit: 'mm',
-                        format: 'a4',
-                        orientation: 'landscape'
-                    }
-                };
-
-                html2pdf().set(opt).from(element).save().then(() => {
-                    // Mostrar nuevamente los elementos ocultos
-                    document.querySelectorAll('.hide-on-pdf').forEach(el => el.style.display = '');
-                });
             });
         });
     </script>

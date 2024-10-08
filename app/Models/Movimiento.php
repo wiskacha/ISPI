@@ -74,6 +74,11 @@ class Movimiento extends Model
 		return $this->belongsTo(Persona::class, 'id_proveedor');
 	}
 
+	public function cliente()
+	{
+		return $this->belongsTo(Persona::class, 'id_cliente');
+	}
+
 	public function usuario()
 	{
 		return $this->belongsTo(User::class, 'id_operador');

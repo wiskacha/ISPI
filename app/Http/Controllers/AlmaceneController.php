@@ -82,8 +82,14 @@ class AlmaceneController extends Controller
     public function destroy($id)
     {
         $almacene = Almacene::findOrFail($id); // Use findOrFail to fetch the almacen by id
-        $almacene->delete(); // Delete the almacen
 
-        return redirect()->route('almacenes.vista')->with('success', 'Almacen eliminado exitosamente.');
+        //Comprobar relaciones con Movimientos
+        $hasMovimientos = $almacene->movimientos()->exists();
+        if ($hasMovimientos) {
+            return redirect()->route('almacenes.vista')->with('error', 'No se puede eliminar el almacen porque tiene movimientos asociados.');
+        } else {
+            $almacene->delete(); // Delete the almacen
+            return redirect()->route('almacenes.vista')->with('success', 'Almacen eliminado exitosamente.');
+        }
     }
 }

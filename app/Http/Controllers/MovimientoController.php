@@ -350,8 +350,6 @@ class MovimientoController extends Controller
         return redirect()->route('movimientos.edit', $movimiento->id_movimiento)
             ->with('success', 'Cuotas asignadas exitosamente en el movimiento: ' . $movimiento->codigo);
     }
-
-
     //Mostrar formulario para editar Movimiento
     public function edit($id_movimiento)
     {
@@ -361,8 +359,9 @@ class MovimientoController extends Controller
         $recintos = Recinto::all();
         $detalles = Detalle::where('id_movimiento', $id_movimiento)->get();
         $cuotas = Cuota::where('id_movimiento', $id_movimiento)->get();
+        $almacenes = Almacene::all(); // Fetch all almacenes
 
-        return view('pages.movimientos.editarMovimiento', compact('movimiento', 'clientes', 'proveedores', 'recintos', 'detalles', 'cuotas'));
+        return view('pages.movimientos.editarMovimiento', compact('movimiento', 'clientes', 'proveedores', 'recintos', 'detalles', 'cuotas', 'almacenes'));
     }
 
     public function editDetalles($id_movimiento)
@@ -446,6 +445,7 @@ class MovimientoController extends Controller
 
         // If validations pass, save details
         foreach ($request->productos as $producto) {
+            Log::info($request->productos);
             $productoInstance = Producto::find($id_producto);
             // Verifica si 'id_detalle' existe
             if (isset($producto['id_detalle'])) {
@@ -476,11 +476,6 @@ class MovimientoController extends Controller
             ->with('success', 'Detalles guardados correctamente.');
     }
 
-
-
-
-
-
     public function eliminarDetalle($id_movimiento, $id_detalle)
     {
         $detalle = Detalle::findOrFail($id_detalle);
@@ -488,7 +483,6 @@ class MovimientoController extends Controller
 
         return response()->json(['success' => 'Detalle eliminado correctamente']);
     }
-
 
     // Función para actualizar un Movimiento
     public function update(Request $request, $id_movimiento)
@@ -499,6 +493,7 @@ class MovimientoController extends Controller
             'cliente' => 'nullable|exists:personas,id_persona', // Para SALIDA
             'recinto' => 'nullable|exists:recintos,id_recinto', // Para SALIDA
             'proveedor' => 'nullable|exists:personas,id_persona', // Para ENTRADA
+            'almacene' => 'required|exists:almacenes,id_almacen', // Para ambos tipos
         ]);
 
         // Buscar el movimiento a actualizar
@@ -506,7 +501,7 @@ class MovimientoController extends Controller
 
         // Actualizar los campos comunes (Glose)
         $movimiento->glose = $request->input('glose');
-
+        $movimiento->id_almacen = $request->input('almacene');
         // Actualización condicional según el tipo de movimiento
         if ($movimiento->tipo == 'SALIDA') {
             // Para los movimientos de tipo 'SALIDA'
@@ -525,7 +520,6 @@ class MovimientoController extends Controller
             ->with('success', 'Se actualizaron los campos del movimiento: ' . $movimiento->codigo);
     }
 
-
     // Función para eliminar un Movimiento
     public function destroy($id_movimiento)
     {
@@ -534,7 +528,6 @@ class MovimientoController extends Controller
 
         return redirect()->route('movimientos.vista')->with('success', 'Movimiento eliminado exitosamente.');
     }
-
     // Función para eliminar las Cuotas pertenecientes a un movimiento
     public function cuotasDestroy($id_movimiento)
     {
@@ -550,7 +543,6 @@ class MovimientoController extends Controller
                 ->with('error', 'No se pudieron eliminar las cuotas del movimiento: ' . $movimiento->codigo);
         }
     }
-
     //Función para pagar una cuota
     public function payCuota(Request $request, $id_cuota)
     {
@@ -576,5 +568,35 @@ class MovimientoController extends Controller
         $movimiento = Movimiento::findOrFail($cuota->id_movimiento);
         return redirect()->route('movimientos.edit', $cuota->id_movimiento)
             ->with('success', 'Cuota ' . $cuota->numero . ' reseteada exitosamente en el movimiento: ' . $movimiento->codigo);
+    }
+
+    public function previewRecibo($id_movimiento)
+    {
+        Log::info(request()->all()); // Agrega esta línea para registrar los datos de la solicitud en los logs
+        // Obtener los datos del movimiento y sus detalles para generar el recibo
+        $movimiento = Movimiento::with('detalles.producto')->findOrFail($id_movimiento);
+        // Obtener el total de la suma de los totales de los detalles del movimiento
+        $totalDet = $movimiento->detalles->sum('total');
+        // Obtener la fecha actual para mostrar en el recibo
+        $fechaActual = now()->format('d/m/Y H:i:s');
+        // Obtener el nombre del usuario que genera el recibo buscando con el ID del usuario autenticado en la tabla Persona
+        $instanciaUsuario = Auth::user()->persona;
+        // Obtener el tipo de Movimiento (SALIDA o ENTRADA) para mostrar en el recibo
+        $tipoMovimiento = $movimiento->tipo; // 'SALIDA' o 'ENTRADA'
+        //Obtener el operador original del movimienot
+        $instanciaOperador = $movimiento->usuario->persona;
+        // En caso de que el movimiento sea de tipo 'ENTRADA'
+        if ($tipoMovimiento === 'ENTRADA') {
+            $instanciaProveedor = $movimiento->persona ?: 'Sin Proveedor Asignado';
+            $instanciaAlmacen = $movimiento->almacene ?: 'Sin Almacén Asignado';
+
+            return view('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaProveedor', 'instanciaAlmacen', 'tipoMovimiento', 'instanciaUsuario'));
+
+        } else { // 'SALIDA'
+            $instanciaCliente = $movimiento->cliente ?: 'Sin Cliente Asignado';
+            $instanciaRecinto = $movimiento->recinto ?: 'Sin Recinto Asignado';
+
+            return view('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaCliente', 'instanciaRecinto', 'tipoMovimiento', 'instanciaUsuario'));
+        }
     }
 }

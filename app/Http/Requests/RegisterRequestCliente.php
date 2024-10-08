@@ -35,7 +35,6 @@ class RegisterRequestCliente extends FormRequest
                 'unique:personas,carnet',
                 'regex:/^\d{4,11}$/'
             ],
-
             // Optional Fields
             'sapellido' => [
                 'nullable',

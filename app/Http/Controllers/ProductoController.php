@@ -21,9 +21,18 @@ class ProductoController extends Controller
     public function destroy($id)
     {
         $producto = Producto::find($id);
-
         if ($producto) {
-            $producto->delete(); // Soft delete
+            // Check if the producto has a related detalles record
+            $hasDetalles = $producto->detalles()->exists();
+            // if it does prevent deletion and return an error message
+            if ($hasDetalles) {
+                Log::info('Attempted to delete producto with id: ' . $id . ' but it has related detalles records.');
+                return redirect()->route('productos.vista')->with('error', 'No se puede eliminar el producto porque tiene detalles asociados.');
+                // If it doesn't, proceed with the deletion
+            } else {
+
+                $producto->delete(); // Soft delete
+            }
             return redirect()->route('productos.vista')->with('success', 'Producto eliminado correctamente.');
         } else {
             return redirect()->route('productos.vista')->with('error', 'Producto no encontrado.');

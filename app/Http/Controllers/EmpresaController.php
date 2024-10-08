@@ -84,8 +84,25 @@ class EmpresaController extends Controller
     public function destroy($id)
     {
         $empresa = Empresa::findOrFail($id); // Buscar la empresa por ID
-        $empresa->delete(); // Eliminar empresa
 
-        return redirect()->route('empresas.vista')->with('success', 'Empresa eliminada exitosamente.'); // Redirigir con mensaje de éxito
+        // Verificar si la empresa tiene registros asociados en productos o contactos
+        $hasProductos = $empresa->productos()->exists();
+        $hasContactos = $empresa->contactos()->exists();
+        $errorMessages = [];
+        if ($hasProductos) {
+            $errorMessages[] = 'tiene productos asociados';
+        }
+        if ($hasContactos) {
+            $errorMessages[] = 'tiene contactos asociados';
+        }
+
+        if (!empty($errorMessages)) {
+            $errorMessage = 'No se puede eliminar la empresa porque ' . implode(', ', $errorMessages) . '.';
+            return redirect()->route('empresas.vista')->withErrors($errorMessage); // Redirigir con mensajes de error
+        } else {
+
+            $empresa->delete(); // Eliminar empresa
+            return redirect()->route('empresas.vista')->with('success', 'Empresa eliminada exitosamente.'); // Redirigir con mensaje de éxito
+        }
     }
 }

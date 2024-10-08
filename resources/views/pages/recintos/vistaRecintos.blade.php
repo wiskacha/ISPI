@@ -79,38 +79,59 @@
                     </thead>
                     <tbody>
                         @foreach ($recintos as $index => $recinto)
-                        <tr>
-                            <td class="text-center hide-on-small">{{ $index + 1 }}</td>
-                            <td class="fw-semibold">
-                                {{ $recinto->nombre }}
-                            </td>
-                            <td class="text-muted">{{ $recinto->direccion }}</td>
-                            <td class="text-muted">{{ $recinto->tipo }}</td>
-                            <td class="text-muted">{{ $recinto->telefono }}</td>
-                            <td class="text-center">
-                                <!-- Form to handle the delete action -->
-                                <form method="POST" action="{{ route('recintos.destroy', $recinto->id_recinto) }}"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('¿Está seguro que desea eliminar el recinto {{ $recinto->nombre }}?');">
-                                        <i class="fa fa-trash"></i>
-                                        <span class="hide-on-small">Eliminar</span>
-                                    </button>
-                                </form>
+                            <tr>
+                                <td class="text-center hide-on-small">{{ $index + 1 }}</td>
+                                <td class="fw-semibold">
+                                    {{ $recinto->nombre }}
+                                </td>
+                                <td class="text-muted">{{ $recinto->direccion }}</td>
+                                <td class="text-muted">{{ $recinto->tipo }}</td>
+                                <td class="text-muted">{{ $recinto->telefono }}</td>
+                                <td class="text-center">
+                                    <!-- Form to handle the delete action -->
+                                    <form method="POST" action="{{ route('recintos.destroy', $recinto->id_recinto) }}"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('¿Está seguro que desea eliminar el recinto {{ $recinto->nombre }}?');">
+                                            <i class="fa fa-trash"></i>
+                                            <span class="hide-on-small">Eliminar</span>
+                                        </button>
+                                    </form>
 
-                                <!-- Button to handle the edit action -->
-                                <a href="{{ route('recintos.edit', $recinto) }}" class="btn btn-sm btn-primary">
-                                    <i class="fa fa-edit"></i>
-                                    <span class="hide-on-small">Editar</span>
-                                </a>
-                            </td>
-                        </tr>
+                                    <!-- Button to handle the edit action -->
+                                    <a href="{{ route('recintos.edit', $recinto) }}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-edit"></i>
+                                        <span class="hide-on-small">Editar</span>
+                                    </a>
+                                </td>
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    @if ($errors->any() || session('error'))
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+            <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-danger text-white">
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    @if ($errors->any())
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        {{ session('error') }}
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
