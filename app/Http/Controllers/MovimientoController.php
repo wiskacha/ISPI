@@ -662,8 +662,18 @@ class MovimientoController extends Controller
             // Return the generated PDF as a download with a dynamic name
             return $pdf->stream($pdfFileName, array("Attachment" => false));
         } else { // 'SALIDA'
-            $instanciaCliente = $movimiento->cliente ?: 'Sin Cliente Asignado';
-            $instanciaRecinto = $movimiento->recinto ?: 'Sin Recinto Asignado';
+
+            if ($movimiento->cliente) {
+                $instanciaCliente = '[' . $movimiento->cliente->carnet . '] ' . $movimiento->cliente->papellido;
+            } else {
+                $instanciaCliente = 'Sin Cliente Asignado';
+            }
+
+            if ($movimiento->recinto) {
+                $instanciaRecinto = '[' . $movimiento->recinto->nombre . '] ';
+            } else {
+                $instanciaRecinto = 'Sin Recinto Asignado';
+            }
 
             // Format the current timestamp
             $currentTimestamp = \Carbon\Carbon::now()->format('dMy'); // e.g., 09Oct2024
@@ -710,8 +720,7 @@ class MovimientoController extends Controller
             $pdf = PDF::loadView('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaProveedor', 'instanciaAlmacen', 'tipoMovimiento', 'instanciaUsuario'));
 
             // Return the generated PDF as a download with a dynamic name
-            return $pdf->download($pdfFileName);            
-
+            return $pdf->download($pdfFileName);
         } else { // 'SALIDA'
             $instanciaCliente = $movimiento->cliente ?: 'Sin Cliente Asignado';
             $instanciaRecinto = $movimiento->recinto ?: 'Sin Recinto Asignado';
@@ -726,7 +735,7 @@ class MovimientoController extends Controller
             $pdf = PDF::loadView('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaCliente', 'instanciaRecinto', 'tipoMovimiento', 'instanciaUsuario'));
 
             // Return the generated PDF as a download with a dynamic name
-            return $pdf->download($pdfFileName);            
+            return $pdf->download($pdfFileName);
         }
     }
 }
