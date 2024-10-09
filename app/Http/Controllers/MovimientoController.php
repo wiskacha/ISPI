@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Http\Requests\RegisterCuotasRequest;
 use Exception;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class MovimientoController extends Controller
 {
@@ -508,7 +510,8 @@ class MovimientoController extends Controller
 
     //Función para actualizar el detalle de un movimiento existente
 
-    public function actualizarDetalle(Request $request, $id_detalle){
+    public function actualizarDetalle(Request $request, $id_detalle)
+    {
         // Encontrar el detalle existente por su ID
         $detalle = Detalle::findOrFail($id_detalle);
 
@@ -518,17 +521,17 @@ class MovimientoController extends Controller
             'precio' => 'required|numeric',
             // Asegúrate de que 'total' se calcula correctamente en el cliente antes de enviarlo al servidor
             'total' => 'required|numeric',
-            ]);
-            
-            // Actualizar los campos del detalle con los datos validados
-            $detalle->cantidad = $validated['cantidad'];
-            $detalle->precio = $validated['precio'];
-            $detalle->total = $validated['total'];
-            // Guardar los cambios en la base de datos
-            $detalle->save();
+        ]);
 
-            // Redirigir de vuelta a la página de edición de detalles del movimiento con un mensaje de éxito
-            return redirect()->route('movimientos.editDetalles', $detalle->id_movimiento)->with('success', 'Detalle actualizado con éxito.');
+        // Actualizar los campos del detalle con los datos validados
+        $detalle->cantidad = $validated['cantidad'];
+        $detalle->precio = $validated['precio'];
+        $detalle->total = $validated['total'];
+        // Guardar los cambios en la base de datos
+        $detalle->save();
+
+        // Redirigir de vuelta a la página de edición de detalles del movimiento con un mensaje de éxito
+        return redirect()->route('movimientos.editDetalles', $detalle->id_movimiento)->with('success', 'Detalle actualizado con éxito.');
     }
 
 
@@ -641,17 +644,89 @@ class MovimientoController extends Controller
         $tipoMovimiento = $movimiento->tipo; // 'SALIDA' o 'ENTRADA'
         //Obtener el operador original del movimienot
         $instanciaOperador = $movimiento->usuario->persona;
-        // En caso de que el movimiento sea de tipo 'ENTRADA'
+        // En caso de que el movimiento sea de tipo 'ENTRADA
+
         if ($tipoMovimiento === 'ENTRADA') {
             $instanciaProveedor = $movimiento->persona ?: 'Sin Proveedor Asignado';
             $instanciaAlmacen = $movimiento->almacene ?: 'Sin Almacén Asignado';
 
-            return view('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaProveedor', 'instanciaAlmacen', 'tipoMovimiento', 'instanciaUsuario'));
+            // Format the current timestamp
+            $currentTimestamp = \Carbon\Carbon::now()->format('dMy'); // e.g., 09Oct2024
+
+            // Generate the dynamic PDF name
+            $pdfFileName = "{$currentTimestamp}_ENT_{$instanciaUsuario->carnet}.pdf";
+
+            // Load the view and pass data to it
+            $pdf = PDF::loadView('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaProveedor', 'instanciaAlmacen', 'tipoMovimiento', 'instanciaUsuario'));
+
+            // Return the generated PDF as a download with a dynamic name
+            return $pdf->stream($pdfFileName, array("Attachment" => false));
         } else { // 'SALIDA'
             $instanciaCliente = $movimiento->cliente ?: 'Sin Cliente Asignado';
             $instanciaRecinto = $movimiento->recinto ?: 'Sin Recinto Asignado';
 
-            return view('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaCliente', 'instanciaRecinto', 'tipoMovimiento', 'instanciaUsuario'));
+            // Format the current timestamp
+            $currentTimestamp = \Carbon\Carbon::now()->format('dMy'); // e.g., 09Oct2024
+
+            // Generate the dynamic PDF name
+            $pdfFileName = "{$currentTimestamp}_SAL_{$instanciaUsuario->carnet}.pdf";
+
+            // Load the view and pass data to it
+            $pdf = PDF::loadView('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaCliente', 'instanciaRecinto', 'tipoMovimiento', 'instanciaUsuario'));
+
+            // Return the generated PDF as a download with a dynamic name
+            return $pdf->stream($pdfFileName, array("Attachment" => false));
+        }
+    }
+
+    public function downloadRecibo($id_movimiento)
+    {
+        Log::info(request()->all()); // Agrega esta línea para registrar los datos de la solicitud en los logs
+        // Obtener los datos del movimiento y sus detalles para generar el recibo
+        $movimiento = Movimiento::with('detalles.producto')->findOrFail($id_movimiento);
+        // Obtener el total de la suma de los totales de los detalles del movimiento
+        $totalDet = $movimiento->detalles->sum('total');
+        // Obtener la fecha actual para mostrar en el recibo
+        $fechaActual = now()->format('d/m/Y H:i:s');
+        // Obtener el nombre del usuario que genera el recibo buscando con el ID del usuario autenticado en la tabla Persona
+        $instanciaUsuario = Auth::user()->persona;
+        // Obtener el tipo de Movimiento (SALIDA o ENTRADA) para mostrar en el recibo
+        $tipoMovimiento = $movimiento->tipo; // 'SALIDA' o 'ENTRADA'
+        //Obtener el operador original del movimienot
+        $instanciaOperador = $movimiento->usuario->persona;
+        // En caso de que el movimiento sea de tipo 'ENTRADA
+
+        if ($tipoMovimiento === 'ENTRADA') {
+            $instanciaProveedor = $movimiento->persona ?: 'Sin Proveedor Asignado';
+            $instanciaAlmacen = $movimiento->almacene ?: 'Sin Almacén Asignado';
+
+            // Format the current timestamp
+            $currentTimestamp = \Carbon\Carbon::now()->format('dMy'); // e.g., 09Oct2024
+
+            // Generate the dynamic PDF name
+            $pdfFileName = "{$currentTimestamp}_ENT_{$instanciaUsuario->carnet}.pdf";
+
+            // Load the view and pass data to it
+            $pdf = PDF::loadView('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaProveedor', 'instanciaAlmacen', 'tipoMovimiento', 'instanciaUsuario'));
+
+            // Return the generated PDF as a download with a dynamic name
+            return $pdf->download($pdfFileName);            
+
+        } else { // 'SALIDA'
+            $instanciaCliente = $movimiento->cliente ?: 'Sin Cliente Asignado';
+            $instanciaRecinto = $movimiento->recinto ?: 'Sin Recinto Asignado';
+
+            // Format the current timestamp
+            $currentTimestamp = \Carbon\Carbon::now()->format('dMy'); // e.g., 09Oct2024
+
+            // Generate the dynamic PDF name
+            $pdfFileName = "{$currentTimestamp}_SAL_{$instanciaUsuario->carnet}.pdf";
+
+            // Load the view and pass data to it
+            $pdf = PDF::loadView('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaCliente', 'instanciaRecinto', 'tipoMovimiento', 'instanciaUsuario'));
+
+            // Return the generated PDF as a download with a dynamic name
+            return $pdf->download($pdfFileName);            
         }
     }
 }

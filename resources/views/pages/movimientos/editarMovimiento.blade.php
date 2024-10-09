@@ -38,9 +38,19 @@
                 <h3 class="block-title">Editar Movimiento</h3>
                 <div class="ms-3">
                     <a href="{{ route('movimientos.previewRecibo', $movimiento->id_movimiento) }}" target="_blank">
-                        <button id="generarReciboBtn" type="button" class="btn btn-sm btn-alt-success">
+                        <button id="generarReciboBtn" type="button" class="btn btn-sm btn-alt-info">
                             <i class="fa fa-file-pdf"></i>
-                            <span class="d-none d-sm-inline">Generar Recibo</span>
+                            <i class="fa fa-eye"></i>
+                            <span class="d-none d-sm-inline">Previsualizar Recibo</span>
+                        </button>
+                    </a>
+                </div>
+                <div class="ms-3">
+                    <a href="{{ route('movimientos.downloadRecibo', $movimiento->id_movimiento) }}" target="_blank">
+                        <button id="descargarReciboBtn" type="button" class="btn btn-sm btn-alt-success">
+                            <i class="fa fa-file-pdf"></i>
+                            <i class="fa fa-download"></i>
+                            <span class="d-none d-sm-inline">Descargar Recibo</span>
                         </button>
                     </a>
                 </div>
