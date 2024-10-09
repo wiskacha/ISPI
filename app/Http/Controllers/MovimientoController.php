@@ -50,11 +50,9 @@ class MovimientoController extends Controller
         $id_almacen = $request->almacene;
         $productoNombre = $request->producto; // Get the product name
         $cantidad_solicitada = $request->cantidad; // Get the requested quantity
-
+        $nombreAlmacen = Almacene::find($id_almacen)->nombre;
         // Find the product ID by name
         $producto = Producto::where('nombre', $productoNombre)->first();
-        Log::info($request);
-
         if (!$producto) {
             return response()->json(['available' => false, 'productName' => $productoNombre, 'message' => 'Producto no encontrado.']);
         }
@@ -82,12 +80,17 @@ class MovimientoController extends Controller
         if ($cantidad_solicitada > $existencias_actuales) {
             return response()->json([
                 'available' => false,
+                'almacenName' => $nombreAlmacen,
                 'productName' => $productoNombre,
-                'cantidadDisponible' => $existencias_actuales // Include available quantity in the response
+                'cantidadDisponible' => $existencias_actuales, // Include available quantity in the response
+                'message' => 'No existen suficientes unidades.'
+
             ]);
         }
-
-        return response()->json(['available' => true]); // Stock sufficient
+        return response()->json([
+            'available' => true,
+            'message' => 'Existen suficientes unidades.'
+        ]); // Stock sufficient
     }
 
     // Verificar relación entre que la empresa del producto tiene una relación de contacto con el proveedor
@@ -151,8 +154,6 @@ class MovimientoController extends Controller
 
     public function store(Request $request)
     {
-        Log::info(request()->all());
-
         // Validate the request
         $request->validate([
             'almacene' => 'required|exists:almacenes,id_almacen',
@@ -382,106 +383,161 @@ class MovimientoController extends Controller
         return view('pages.movimientos.editarDetallesMovimiento', compact('movimiento', 'proveedor', 'detalles', 'almacen', 'productos'));
     }
 
-    public function guardarDetalles(Request $request, $id_movimiento)
+    // public function guardarDetalles(Request $request, $id_movimiento)
+    // {
+    //     // Fetch the movimiento by ID
+    //     $movimiento = Movimiento::findOrFail($id_movimiento);
+    //     if (empty($request->productos)) {
+    //         return redirect()->route('movimientos.edit', $id_movimiento)
+    //             ->with('success', 'Detalles vacío');
+    //     }
+    //     // Validate request data
+    //     $request->validate([
+    //         'productos.*.id_producto' => 'required|exists:productos,id_producto',
+    //         'productos.*.cantidad' => 'required|integer|min:1',
+    //     ]);
+
+    //     // Handle Entrada type
+    //     if ($movimiento->tipo === 'ENTRADA') {
+    //         foreach ($request->productos as $producto) {
+    //             $id_producto = $producto['id_producto'];
+    //             $proveedor_id = $movimiento->id_proveedor; // Assuming you have the supplier ID in movimiento
+    //             $productoInstance = Producto::find($id_producto);
+    //             $empresaInstance = Empresa::find($productoInstance->id_empresa);
+    //             $proveedorInstance = Persona::find($proveedor_id);
+    //             // Check if there's a contact relation with the supplier
+    //             $hasContacto = Contacto::where('id_empresa', $empresaInstance->id_empresa)
+    //                 ->where('id_persona', $proveedorInstance->id_persona)
+    //                 ->exists();
+    //             if (!$hasContacto) {
+    //                 return redirect()->back()->withErrors(['error' => "No hay relación de contacto entre la empresa: {$empresaInstance->nombre} con el proveedor: [{$proveedorInstance->carnet}] {$proveedorInstance->papellido} para el producto: {$productoInstance->nombre}."])->withInput();
+    //             }
+    //         }
+    //     }
+
+    //     // Handle Salida type
+    //     if ($movimiento->tipo === 'SALIDA') {
+    //         foreach ($request->productos as $producto) {
+    //             $id_producto = $producto['id_producto'];
+    //             $cantidad_salida = $producto['cantidad'];
+    //             $id_almacen = $movimiento->id_almacen; // Assuming you have the warehouse ID in movimiento
+    //             $productoInstance = Producto::find($id_producto);
+    //             $almaceneInstance = Almacene::find($id_almacen);
+    //             // Calculate current stock
+    //             $total_entradas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
+    //                 ->where('movimientos.id_almacen', $id_almacen)
+    //                 ->where('detalles.id_producto', $id_producto)
+    //                 ->where('movimientos.tipo', 'ENTRADA')
+    //                 ->sum('detalles.cantidad');
+
+    //             $total_salidas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
+    //                 ->where('movimientos.id_almacen', $id_almacen)
+    //                 ->where('detalles.id_producto', $id_producto)
+    //                 ->where('movimientos.tipo', 'SALIDA')
+    //                 ->sum('detalles.cantidad');
+
+    //             $existencias_actuales = $total_entradas - $total_salidas;
+
+    //             if ($existencias_actuales < $cantidad_salida) {
+    //                 return redirect()->back()->withErrors(['error' => "No hay suficiente stock del producto {$productoInstance->nombre}, en el almacen: {$almaceneInstance->nombre}. Solo hay {$existencias_actuales} disponibles."])->withInput();
+    //             }
+    //         }
+    //     }
+
+    //     // If validations pass, save details
+    //     foreach ($request->productos as $producto) {
+    //         Log::info($request->productos);
+    //         $productoInstance = Producto::find($id_producto);
+    //         // Verifica si 'id_detalle' existe
+    //         if (isset($producto['id_detalle'])) {
+    //             // Si 'id_detalle' existe, actualiza el detalle existente
+    //             Detalle::updateOrCreate(
+    //                 ['id_detalle' => $producto['id_detalle']],
+    //                 [
+    //                     'id_producto' => $producto['id_producto'],
+    //                     'cantidad' => $producto['cantidad'],
+    //                     'precio' => $productoInstance->precio,
+    //                     'total' => $producto['cantidad'] * $productoInstance->precio,
+    //                     'id_movimiento' => $id_movimiento,
+    //                 ]
+    //             );
+    //         } else {
+    //             // Si no existe 'id_detalle', crea un nuevo detalle
+    //             Detalle::create([
+    //                 'id_producto' => $producto['id_producto'],
+    //                 'cantidad' => $producto['cantidad'],
+    //                 'precio' => $productoInstance->precio,
+    //                 'total' => $producto['cantidad'] * $productoInstance->precio,
+    //                 'id_movimiento' => $id_movimiento,
+    //             ]);
+    //         }
+    //     }
+
+    //     return redirect()->route('movimientos.edit', $id_movimiento)
+    //         ->with('success', 'Detalles guardados correctamente.');
+    // }
+
+    public function guardarDetalle(Request $request, $id_movimiento)
     {
-        // Fetch the movimiento by ID
-        $movimiento = Movimiento::findOrFail($id_movimiento);
-        if (empty($request->productos)) {
-            return redirect()->route('movimientos.edit', $id_movimiento)
-                ->with('success', 'Detalles vacío');
-        }
-        // Validate request data
-        $request->validate([
-            'productos.*.id_producto' => 'required|exists:productos,id_producto',
-            'productos.*.cantidad' => 'required|integer|min:1',
+        $validated = $request->validate([
+            'producto' => 'required|exists:productos,id_producto',
+            'cantidad' => 'required|integer|min:1',
+            'precio' => 'required|numeric',
+            'total' => 'required|numeric',
         ]);
 
-        // Handle Entrada type
-        if ($movimiento->tipo === 'ENTRADA') {
-            foreach ($request->productos as $producto) {
-                $id_producto = $producto['id_producto'];
-                $proveedor_id = $movimiento->id_proveedor; // Assuming you have the supplier ID in movimiento
-                $productoInstance = Producto::find($id_producto);
-                $empresaInstance = Empresa::find($productoInstance->id_empresa);
-                $proveedorInstance = Persona::find($proveedor_id);
-                // Check if there's a contact relation with the supplier
-                $hasContacto = Contacto::where('id_empresa', $empresaInstance->id_empresa)
-                    ->where('id_persona', $proveedorInstance->id_persona)
-                    ->exists();
-                if (!$hasContacto) {
-                    return redirect()->back()->withErrors(['error' => "No hay relación de contacto entre la empresa: {$empresaInstance->nombre} con el proveedor: [{$proveedorInstance->carnet}] {$proveedorInstance->papellido} para el producto: {$productoInstance->nombre}."])->withInput();
-                }
-            }
+        $hasProducto = Detalle::where('id_producto', $request->producto)->where('id_movimiento', $id_movimiento)->exists();
+        if ($hasProducto) {
+            $detalle = Detalle::where('id_producto', $request->producto)->where('id_movimiento', $id_movimiento)->first();
+            $detalle->cantidad += $request->cantidad;
+            $detalle->total += $request->total; // Ajusta según tus necesidades
+            $detalle->save();
+            return redirect()->route('movimientos.editDetalles', $id_movimiento)->with('success', 'Se actualizó un detalle existente con el producto: ' . $detalle->producto->nombre . ' cantidad actualizada: ' . $detalle->cantidad);
+        } else {
+            // Create new Detalle
+            Detalle::create([
+                'id_movimiento' => $id_movimiento,
+                'id_producto' => $validated['producto'],
+                'cantidad' => $validated['cantidad'],
+                'precio' => $validated['precio'],
+                'total' => $validated['total'],
+            ]);
+            return redirect()->route('movimientos.editDetalles', $id_movimiento)->with('success', 'Producto añadido con éxito');
         }
-
-        // Handle Salida type
-        if ($movimiento->tipo === 'SALIDA') {
-            foreach ($request->productos as $producto) {
-                $id_producto = $producto['id_producto'];
-                $cantidad_salida = $producto['cantidad'];
-                $id_almacen = $movimiento->id_almacen; // Assuming you have the warehouse ID in movimiento
-                $productoInstance = Producto::find($id_producto);
-                $almaceneInstance = Almacene::find($id_almacen);
-                // Calculate current stock
-                $total_entradas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
-                    ->where('movimientos.id_almacen', $id_almacen)
-                    ->where('detalles.id_producto', $id_producto)
-                    ->where('movimientos.tipo', 'ENTRADA')
-                    ->sum('detalles.cantidad');
-
-                $total_salidas = Detalle::join('movimientos', 'movimientos.id_movimiento', '=', 'detalles.id_movimiento')
-                    ->where('movimientos.id_almacen', $id_almacen)
-                    ->where('detalles.id_producto', $id_producto)
-                    ->where('movimientos.tipo', 'SALIDA')
-                    ->sum('detalles.cantidad');
-
-                $existencias_actuales = $total_entradas - $total_salidas;
-
-                if ($existencias_actuales < $cantidad_salida) {
-                    return redirect()->back()->withErrors(['error' => "No hay suficiente stock del producto {$productoInstance->nombre}, en el almacen: {$almaceneInstance->nombre}. Solo hay {$existencias_actuales} disponibles."])->withInput();
-                }
-            }
-        }
-
-        // If validations pass, save details
-        foreach ($request->productos as $producto) {
-            Log::info($request->productos);
-            $productoInstance = Producto::find($id_producto);
-            // Verifica si 'id_detalle' existe
-            if (isset($producto['id_detalle'])) {
-                // Si 'id_detalle' existe, actualiza el detalle existente
-                Detalle::updateOrCreate(
-                    ['id_detalle' => $producto['id_detalle']],
-                    [
-                        'id_producto' => $producto['id_producto'],
-                        'cantidad' => $producto['cantidad'],
-                        'precio' => $productoInstance->precio,
-                        'total' => $producto['cantidad'] * $productoInstance->precio,
-                        'id_movimiento' => $id_movimiento,
-                    ]
-                );
-            } else {
-                // Si no existe 'id_detalle', crea un nuevo detalle
-                Detalle::create([
-                    'id_producto' => $producto['id_producto'],
-                    'cantidad' => $producto['cantidad'],
-                    'precio' => $productoInstance->precio,
-                    'total' => $producto['cantidad'] * $productoInstance->precio,
-                    'id_movimiento' => $id_movimiento,
-                ]);
-            }
-        }
-
-        return redirect()->route('movimientos.edit', $id_movimiento)
-            ->with('success', 'Detalles guardados correctamente.');
     }
+
+    //Función para actualizar el detalle de un movimiento existente
+
+    public function actualizarDetalle(Request $request, $id_detalle){
+        // Encontrar el detalle existente por su ID
+        $detalle = Detalle::findOrFail($id_detalle);
+
+        // Validar los datos del formulario
+        $validated = $request->validate([
+            'cantidad' => 'required|integer|min:1',
+            'precio' => 'required|numeric',
+            // Asegúrate de que 'total' se calcula correctamente en el cliente antes de enviarlo al servidor
+            'total' => 'required|numeric',
+            ]);
+            
+            // Actualizar los campos del detalle con los datos validados
+            $detalle->cantidad = $validated['cantidad'];
+            $detalle->precio = $validated['precio'];
+            $detalle->total = $validated['total'];
+            // Guardar los cambios en la base de datos
+            $detalle->save();
+
+            // Redirigir de vuelta a la página de edición de detalles del movimiento con un mensaje de éxito
+            return redirect()->route('movimientos.editDetalles', $detalle->id_movimiento)->with('success', 'Detalle actualizado con éxito.');
+    }
+
 
     public function eliminarDetalle($id_movimiento, $id_detalle)
     {
         $detalle = Detalle::findOrFail($id_detalle);
         $detalle->delete();
 
-        return response()->json(['success' => 'Detalle eliminado correctamente']);
+        return redirect()->route('movimientos.editDetalles', $detalle->id_movimiento)->with('success', 'Detalle eliminado con éxito.');
     }
 
     // Función para actualizar un Movimiento
@@ -591,7 +647,6 @@ class MovimientoController extends Controller
             $instanciaAlmacen = $movimiento->almacene ?: 'Sin Almacén Asignado';
 
             return view('pages.movimientos.pdf.ispinvo', compact('movimiento', 'totalDet', 'fechaActual', 'instanciaOperador', 'instanciaProveedor', 'instanciaAlmacen', 'tipoMovimiento', 'instanciaUsuario'));
-
         } else { // 'SALIDA'
             $instanciaCliente = $movimiento->cliente ?: 'Sin Cliente Asignado';
             $instanciaRecinto = $movimiento->recinto ?: 'Sin Recinto Asignado';

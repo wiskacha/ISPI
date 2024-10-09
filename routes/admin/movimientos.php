@@ -71,4 +71,10 @@ Route::prefix('movimientos')->group(function () {
     // Route for deleting a Detalle of the Movimiento
     Route::post('/{id_movimiento}/eliminarDetalle/{id_detalle}', [MovimientoController::class, 'eliminarDetalle'])
         ->name('movimientos.eliminarDetalle');
+
+    //NUEVA RUTA PRA GUARDAR DETALLE DE FORMA INDIVIDUAL
+    Route::post('/{id_movimiento}/guardarDetalle', [MovimientoController::class, 'guardarDetalle'])->name('movimientos.guardarDetalle');
+
+    //NUEVA RUTA PARA ACUTALIZAR EL VALOR DE UN DETALLE DE FORMA INDIVIDUAL
+    Route::post('/{id_movimiento}/actualizarDetalle', [MovimientoController::class, 'actualizarDetalle'])->name('movimientos.actualizarDetalle');
 });

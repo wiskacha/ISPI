@@ -105,7 +105,7 @@
                                     <div class="col-md-6">
                                         <!-- Cliente -->
                                         <div class="mb-4">
-                                            <label class="form-label" for="cliente">Cliente</label>
+                                            <label class="form-label" for="cliente">Cliente</label></br>
                                             <select
                                                 class="select-optionals js-example-basic-single form-control form-control-lg"
                                                 id="cliente" name="cliente">
@@ -126,7 +126,7 @@
                                     <div class="col-md-6">
                                         <!-- Recinto -->
                                         <div class="mb-4">
-                                            <label class="form-label" for="recinto">Recinto</label>
+                                            <label class="form-label" for="recinto">Recinto</label></br>
                                             <select
                                                 class="select-optionals js-example-basic-single form-control form-control-lg"
                                                 id="recinto" name="recinto">
@@ -148,7 +148,7 @@
                                     <div class="col-md-6">
                                         <!-- Proveedor -->
                                         <div class="mb-4">
-                                            <label class="form-label" for="proveedor">Proveedor</label>
+                                            <label class="form-label" for="proveedor">Proveedor</label></br>
                                             <select class="js-example-basic-single form-control form-control-lg"
                                                 id="proveedor" name="proveedor" required>
                                                 @foreach ($proveedores as $proveedor)
@@ -167,7 +167,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label" for="almacene">Almacen</label>
+                                    <label class="form-label" for="almacene">Almacen</label></br>
                                     <select class="js-example-basic-single form-control form-control-lg" id="almacene"
                                         name="almacene" required>
                                         <option value="">Seleccione un Almacen</option>
@@ -178,8 +178,9 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <hr>
+                                
                             </div>
+                            <hr>
                             <!-- Update Button -->
                             <div class="col-12 col-lg-3 ms-auto text-lg-end">
                                 <button type="button" class="btn btn-alt-primary w-100 w-lg-auto"
