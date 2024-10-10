@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('role:admin')->group(function () {
     // Incluir las rutas de clientes
     require_once base_path('routes/admin/clientes.php');
-    
+
     // Incluir las rutas de usuarios
     require_once base_path('routes/admin/usuarios.php');
-    
+
     // Incluir las rutas de productos
     require_once base_path('routes/admin/productos.php');
 
@@ -27,7 +27,7 @@ Route::middleware('role:admin')->group(function () {
 
     //Incluir las rutas de almacenes
     require_once base_path('routes/admin/almacenes.php');
-    
+
     //Incluir las rutas de recintos
     require_once base_path('routes/admin/recintos.php');
 
@@ -36,6 +36,9 @@ Route::middleware('role:admin')->group(function () {
 
     //Incluir las rutas de generación de recibos
     require_once base_path('routes/admin/pdf.php');
+
+    //Incluir las rutas de generación de reportes
+    require_once base_path('routes/admin/reportes.php');
 });
 
 // Rutas de Usuario Autenticado

@@ -184,7 +184,9 @@
 
             <!-- Cuotas si existen -->
             @if ($movimiento->cuotas->isNotEmpty())
-                <h4>Cuotas en el anverso de esta hoja</h4>
+                <td colspan="2">
+                    <small>Existen cuotas en la continuación de este documento</small>
+                </td>
                 <tr>
                     <td colspan="2">
                         <table>
@@ -231,7 +233,7 @@
                                     <td>{{ number_format($total_mAde, 2) }}</td>
                                     <td>
                                         @if ($estado)
-                                            <span style="color: chartreuse"><strong>COMPLETO</strong></span>
+                                            <span style="color: limegreen"><strong>COMPLETO</strong></span>
                                         @else
                                             <span style="color: crimson"><strong>PENDIENTE</strong></span>
                                         @endif
