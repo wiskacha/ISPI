@@ -556,7 +556,7 @@
                                             <div class="form-check">
                                                 <!-- Second radio option for enabling the select input -->
                                                 <input class="form-check-input" type="radio" id="criterioSelectP"
-                                                    name="criterioOption" value="specific">
+                                                    name="criterioOption" value="specificP">
                                                 <label class="form-check-label" for="criterioSelectP">Selec.
                                                     Producto</label>
                                             </div>
@@ -572,7 +572,7 @@
 
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="criterioSelectE"
-                                                    name="criterioOption" value="specific">
+                                                    name="criterioOption" value="specificE">
                                                 <label class="form-check-label" for="criterioSelectE">Selec.
                                                     Empresa<span class="badge rounded-pill text-bg-danger">beta!</span>
                                                 </label>
