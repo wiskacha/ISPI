@@ -41,6 +41,16 @@
             </h3>
         </div>
         <div class="block-content block-content-full">
+            <p>Almacén: {{ $criteriosB->almacen ?? 'N/A' }}</p>
+            <p>Operador: {{ $criteriosB->operador ?? 'N/A' }}</p>
+            <p>Producto: {{ $criteriosB->producto ?? 'N/A' }}</p>
+            <p>Empresa: {{ $criteriosB->empresa ?? 'N/A' }}</p>
+            <p>Desde: {{ $criteriosB->desde ?? 'N/A' }}</p>
+            <p>Hasta: {{ $criteriosB->hasta ?? 'N/A' }}</p>
+            <p>Tipo: {{ $criteriosB->tipo ?? 'N/A' }}</p>
+            <p>Recinto: {{ $criteriosB->recinto ?? 'N/A' }}</p>
+            <p>Proveedor: {{ $criteriosB->proveedor ?? 'N/A' }}</p>
+
 
             <div class="block block-rounded" style="margin-top: 1rem; margin-left: 1rem; margin-right: 1rem;">
                 <div class="block-header block-header-default clickable-row" data-target="#contenido-tabla"
@@ -51,11 +61,12 @@
                 </div>
                 <div id="contenido-tabla" class="block-content block-content-full collapse">
                     <div class="ms-3">
-
                         <form action="{{ route('reportes.imprimirDesglose') }}" method="POST" target="_blank">
                             @csrf
                             <input type="hidden" name="movimiento_ids"
                                 value="{{ json_encode($movimientos->pluck('id_movimiento')) }}">
+                            <input type="hidden" name="criteriosB" value="{{ json_encode($criteriosB) }}">
+
                             <!-- Pass only the IDs of movimientos -->
                             <button type="submit" class="btn btn-primary">Generar PDF</button>
                         </form>

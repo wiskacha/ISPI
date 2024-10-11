@@ -34,106 +34,127 @@ class ReporteController extends Controller
 
     public function generarReporte(Request $request)
     {
-        // Initialize the query for Movimiento
+        // Inicializamos el query para Movimiento
         $movimientosQuery = Movimiento::query();
 
-        // Get the 'tipo' from the request
+        // Inicializamos la variable para almacenar los criterios de búsqueda
+        $criteriosB = [];
+
+        // Obtener el 'tipo' del request
         $tipo = $request->input('tipo');
+        $criteriosB['tipo'] = $tipo;
 
-        // Apply filters common to all report types (almacen, operador, criterio, date range, etc.)
-        $this->applyCommonFilters($request, $movimientosQuery);
+        // Aplicar filtros comunes a todos los tipos de reportes
+        $this->applyCommonFilters($request, $movimientosQuery, $criteriosB);
 
-        // Apply 'tipo'-specific logic
+        // Aplicar lógica específica del 'tipo'
         switch ($tipo) {
             case 'Existencias':
-                // For Existencias, ignore the 'tipo' column (both ENTRADA and SALIDA)
+                $criteriosB['filtro_tipo'] = 'Ignorado (Existencias)';
                 break;
 
             case 'Ventas':
-                // For Ventas, only select 'SALIDA'
                 $movimientosQuery->where('tipo', 'SALIDA');
+                $criteriosB['filtro_tipo'] = 'SALIDA';
 
-                // Apply specific filters for Ventas (cliente, recinto, etc.)
+                // Filtros específicos para Ventas
                 if ($request->clienteOption === 'specific' && $request->filled('cliente')) {
+                    $cliente = Persona::find($request->cliente);
                     $movimientosQuery->where('id_cliente', $request->cliente);
+                    $criteriosB['cliente'] = $cliente ? $cliente->carnet : null;
                 }
                 if ($request->recintoOption === 'specific' && $request->filled('recinto')) {
+                    $recinto = Recinto::find($request->recinto);
                     $movimientosQuery->where('id_recinto', $request->recinto);
+                    $criteriosB['recinto'] = $recinto ? $recinto->nombre : null;
                 }
                 break;
 
             case 'Adquisiciones':
-                // For Adquisiciones, only select 'ENTRADA'
                 $movimientosQuery->where('tipo', 'ENTRADA');
+                $criteriosB['filtro_tipo'] = 'ENTRADA';
 
-                // Apply specific filters for Adquisiciones (proveedor)
                 if ($request->proveedorOption === 'specific' && $request->filled('proveedor')) {
+                    $proveedor = Persona::find($request->proveedor);
                     $movimientosQuery->where('id_proveedor', $request->proveedor);
+                    $criteriosB['proveedor'] = $proveedor ? $proveedor->nombre : null;
                 }
                 break;
 
             default:
-                // Handle invalid 'tipo' input (optional)
                 return redirect()->back()->withErrors(['tipo' => 'Tipo de reporte no válido']);
         }
 
-        // Execute the query
+        // Convertir $criteriosB a un objeto de tipo stdClass
+        $criteriosB = (object) $criteriosB;
+
+        // Ejecutar el query
         $movimientos = $movimientosQuery->get();
 
-        // Return the correct view based on 'tipo'
+        // Retornar la vista correcta basada en el 'tipo'
         if ($tipo === 'Existencias') {
-            return view('pages.reportes.existencias', compact('movimientos'));
+            return view('pages.reportes.existencias', compact('movimientos', 'criteriosB'));
         } elseif ($tipo === 'Ventas') {
-            return view('pages.reportes.ventas', compact('movimientos'));
+            return view('pages.reportes.ventas', compact('movimientos', 'criteriosB'));
         } elseif ($tipo === 'Adquisiciones') {
-            return view('pages.reportes.adquisiciones', compact('movimientos'));
+            return view('pages.reportes.adquisiciones', compact('movimientos', 'criteriosB'));
         }
     }
 
-    protected function applyCommonFilters(Request $request, &$movimientosQuery)
+    protected function applyCommonFilters(Request $request, &$movimientosQuery, &$criteriosB)
     {
-        // Filter by almacen
+        // Filtro por almacen
         if ($request->almacenOption === 'specific' && $request->filled('almacen')) {
+            $almacen = Almacene::find($request->almacen);
             $movimientosQuery->where('id_almacen', $request->almacen);
+            $criteriosB['almacen'] = $almacen ? $almacen->nombre : null;
         }
 
-        // Filter by operador
+        // Filtro por operador
         if ($request->operadorOption === 'specific' && $request->filled('operador')) {
+            $operador = Persona::find($request->operador);
             $movimientosQuery->where('id_operador', $request->operador);
+            $criteriosB['operador'] = $operador ? $operador->carnet : null;
         }
 
-        // Filter by criterio: producto or empresa
+        // Filtro por criterio: producto o empresa
         if ($request->criterioOption === 'specificP' && $request->filled('producto')) {
+            $producto = Producto::find($request->producto);
             $movimientosQuery->whereHas('detalles', function ($query) use ($request) {
                 $query->where('id_producto', $request->producto);
             });
+            $criteriosB['producto'] = $producto ? $producto->codigo : null;
         } elseif ($request->criterioOption === 'specificE' && $request->filled('empresa')) {
+            $empresa = Empresa::find($request->empresa);
             $movimientosQuery->whereHas('detalles.producto', function ($query) use ($request) {
                 $query->where('id_empresa', $request->empresa);
             });
+            $criteriosB['empresa'] = $empresa ? $empresa->nombre : null;
         }
 
-        // Filter by date range
+        // Filtro por rango de fechas
         if ($request->filled('desde')) {
             $movimientosQuery->where('fecha', '>=', $request->desde);
+            $criteriosB['desde'] = $request->desde;
         }
         if ($request->filled('hasta')) {
             $movimientosQuery->where('fecha', '<=', $request->hasta);
+            $criteriosB['hasta'] = $request->hasta;
         }
     }
 
     public function imprimirDesglose(Request $request)
     {
-        // Decode the JSON-encoded movimiento IDs
+        // Decodificar los IDs de los movimientos
         $movimientoIds = json_decode($request->input('movimiento_ids'), true);
 
-        // Fetch the movimientos based on the IDs
+        // Decodificar los criterios de búsqueda
+        $criteriosB = json_decode($request->input('criteriosB'), true);
+        // Fetch los movimientos basados en los IDs
         $movimientos = Movimiento::whereIn('id_movimiento', $movimientoIds)->get();
-
-
-        // Generate the PDF using the fetched movimientos
-        $pdf = PDF::loadView('pages.reportes.pdf.desglose', compact('movimientos'))
-            ->setPaper('a4', 'landscape'); // Set paper size and orientation
+        // Generar el PDF utilizando los movimientos y los criterios de búsqueda
+        $pdf = PDF::loadView('pages.reportes.pdf.desglose', compact('movimientos', 'criteriosB'))
+            ->setPaper('a4', 'landscape'); // Setear tamaño y orientación del papel
 
         return $pdf->stream('reporte_movimientos.pdf');
     }
