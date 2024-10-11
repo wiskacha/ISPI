@@ -7,7 +7,9 @@ Route::prefix('reportes')->group(function () {
 
     Route::get('/vista-generar', [ReporteController::class, 'index'])->name('recintos.vista');
 
+    Route::post('/reporte-generado', [ReporteController::class, 'generarReporte'])->name('reportes.reportegenerado');
 
+    Route::post('/reporte-generado/imprimir-desglose',[ReporteController::class, 'imprimirDesglose'])->name('reportes.imprimirDesglose');
     // Route::get('/create', function () {
     //     return view('reportes.create');
     // });

@@ -4,6 +4,8 @@
     <!-- Page JS Plugins CSS -->
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('js/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}">
     <style>
         @media (max-width: 1328px) {
             .hide-on-small {
@@ -28,6 +30,8 @@
     <script src="{{ asset('js/plugins/datatables-buttons/buttons.print.min.js') }}"></script>
     <script src="{{ asset('js/plugins/datatables-buttons/buttons.html5.min.js') }}"></script>
 
+    <script src="{{ asset('js/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ asset('js/plugins/bootstrap-datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
     <!-- Page JS Code -->
     @vite(['resources/js/pages/datatables.js'])
 
@@ -54,47 +58,56 @@
 
             const CliinputsInBlock = clienteNavItem.querySelectorAll('input, select, textarea, button');
             const RecinputsInBlock = recintoNavItem.querySelectorAll('input, select, textarea, button');
-
             const ProvinputsInBlock = proveedorNavItem.querySelectorAll('input, select, textarea, button');
 
+            // Función para habilitar/deshabilitar inputs y gestionar el atributo required
+            function toggleInputs(inputs, enable) {
+                inputs.forEach(input => {
+                    input.disabled = !enable; // Deshabilita o habilita el campo
+                    if (enable) {
+                        input.setAttribute('required', 'required'); // Añade required si está habilitado
+                    } else {
+                        input.removeAttribute('required'); // Quita required si está deshabilitado
+                    }
+                });
+            }
+
+            // Listener para tipoOP1 (oculta los elementos)
             tipoOP1.addEventListener('change', function() {
                 if (tipoOP1.checked) {
-                    // Mostrar el elemento cuando el radio está seleccionado
                     clienteNavItem.style.display = 'none';
                     recintoNavItem.style.display = 'none';
                     proveedorNavItem.style.display = 'none';
 
-                    CliinputsInBlock.forEach(input => input.disabled = true);
-                    RecinputsInBlock.forEach(input => input.disabled = true);
-
-                    ProvinputsInBlock.forEach(input => input.disabled = true);
-
+                    toggleInputs(CliinputsInBlock, false); // Deshabilitar y quitar required
+                    toggleInputs(RecinputsInBlock, false);
+                    toggleInputs(ProvinputsInBlock, false);
                 }
             });
+
+            // Listener para tipoOP2 (muestra cliente y recinto, oculta proveedor)
             tipoOP2.addEventListener('change', function() {
                 if (tipoOP2.checked) {
-                    // Mostrar el elemento cuando el radio está seleccionado
-                    clienteNavItem.style.display = 'block'; // O 'flex', depende del diseño
+                    clienteNavItem.style.display = 'block'; // Mostrar
                     recintoNavItem.style.display = 'block';
-                    proveedorNavItem.style.display = 'none';
+                    proveedorNavItem.style.display = 'none'; // Ocultar
 
-                    CliinputsInBlock.forEach(input => input.disabled = false);
-                    RecinputsInBlock.forEach(input => input.disabled = false);
-
-                    ProvinputsInBlock.forEach(input => input.disabled = true);
+                    toggleInputs(CliinputsInBlock, true); // Habilitar y añadir required
+                    toggleInputs(RecinputsInBlock, true);
+                    toggleInputs(ProvinputsInBlock, false); // Deshabilitar proveedor
                 }
             });
+
+            // Listener para tipoOP3 (muestra proveedor, oculta cliente y recinto)
             tipoOP3.addEventListener('change', function() {
                 if (tipoOP3.checked) {
-                    // Mostrar el elemento cuando el radio está seleccionado
                     clienteNavItem.style.display = 'none';
                     recintoNavItem.style.display = 'none';
-                    proveedorNavItem.style.display = 'block';
+                    proveedorNavItem.style.display = 'block'; // Mostrar
 
-                    CliinputsInBlock.forEach(input => input.disabled = true);
-                    RecinputsInBlock.forEach(input => input.disabled = true);
-
-                    ProvinputsInBlock.forEach(input => input.disabled = false);
+                    toggleInputs(CliinputsInBlock, false); // Deshabilitar cliente
+                    toggleInputs(RecinputsInBlock, false); // Deshabilitar recinto
+                    toggleInputs(ProvinputsInBlock, true); // Habilitar proveedor
                 }
             });
             // <!--- Fin de Cambio de titulo item-main-menu -->:
@@ -329,40 +342,91 @@
 
 
             // ENVIO DE FORMULARIO
-            const form = document.getElementById('reportForm');
+            // const form = document.getElementById('reportForm');
 
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
+            // form.addEventListener('submit', function(event) {
+            //     event.preventDefault();
 
-                // Collect form data
-                const formData = new FormData(form);
-                formData.forEach((value, key) => {
-                    console.log(key + ': ' + value);
-                });
-                // Send AJAX request
-                fetch('/generate-report', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                .getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Handle success (e.g., show a success message, download the report)
-                            console.log('Report generated successfully:', data.message);
-                        } else {
-                            // Handle errors
-                            console.error('Error generating report:', data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
+            //     // Collect form data
+            //     const formData = new FormData(form);
+            //     formData.forEach((value, key) => {
+            //         console.log(key + ': ' + value);
+            //     });
+            //     // Send AJAX request
+            //     fetch('/generate-report', {
+            //             method: 'POST',
+            //             body: formData,
+            //             headers: {
+            //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+            //                     .getAttribute('content')
+            //             }
+            //         })
+            //         .then(response => response.json())
+            //         .then(data => {
+            //             if (data.success) {
+            //                 // Handle success (e.g., show a success message, download the report)
+            //                 console.log('Report generated successfully:', data.message);
+            //             } else {
+            //                 // Handle errors
+            //                 console.error('Error generating report:', data.message);
+            //             }
+            //         })
+            //         .catch(error => {
+            //             console.error('Error:', error);
+            //         });
+            // });
+
+            //FECHAS!!!!
+            // Function to convert date from dd/mm/yyyy to yyyy-mm-dd
+            function convertToMySQLDate(dateStr) {
+                var parts = dateStr.split("/");
+                return parts[2] + "-" + parts[1] + "-" + parts[0];
+            }
+
+            // Function to convert date from yyyy-mm-dd to dd/mm/yyyy
+            function convertToDisplayDate(dateStr) {
+                var parts = dateStr.split("-");
+                return parts[2] + "/" + parts[1] + "/" + parts[0];
+            }
+
+            // Initialize datepickers
+            var $desdeDate = jQuery('#example-daterange1');
+            var $hastaDate = jQuery('#example-daterange2');
+            var $desdeMysql = jQuery('#desde_mysql');
+            var $hastaMysql = jQuery('#hasta_mysql');
+
+            $desdeDate.datepicker({
+                weekStart: 1,
+                autoclose: true,
+                todayHighlight: true,
+                language: 'es',
+                format: 'dd/mm/yyyy'
+            }).on('changeDate', function(selected) {
+                var startDate = new Date(selected.date.valueOf());
+                $hastaDate.datepicker('setStartDate', startDate);
+                $desdeMysql.val(convertToMySQLDate($desdeDate.val()));
             });
 
+            $hastaDate.datepicker({
+                weekStart: 1,
+                autoclose: true,
+                todayHighlight: true,
+                language: 'es',
+                format: 'dd/mm/yyyy'
+            }).on('changeDate', function(selected) {
+                var endDate = new Date(selected.date.valueOf());
+                $desdeDate.datepicker('setEndDate', endDate);
+                $hastaMysql.val(convertToMySQLDate($hastaDate.val()));
+            });
+
+            // Handle manual input
+            $desdeDate.on('change', function() {
+                $desdeMysql.val(convertToMySQLDate($desdeDate.val()));
+            });
+
+            $hastaDate.on('change', function() {
+                $hastaMysql.val(convertToMySQLDate($hastaDate.val()));
+            });
         });
     </script>
 @endsection
@@ -399,9 +463,9 @@
                 Generación de Reporte
             </h3>
         </div>
-        <div class="block-content block-content-full">
-            <form id="reportForm" action="/generate-report" method="POST">
-                @csrf
+        <form id="reportForm" action="{{ route('reportes.reportegenerado') }}" target="_blank" method="POST">
+            @csrf
+            <div class="block-content block-content-full">
                 <div id="horizontal-navigation-click-normal-dark" class="d-lg-block mt-2">
                     <ul class="nav-main nav-main-horizontal nav-main">
 
@@ -419,7 +483,7 @@
                                         <div class="space-y-2">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="tipoOP1" name="tipo"
-                                                    value="Existencias">
+                                                    value="Existencias" required>
                                                 <label class="form-check-label" for="tipoOP1">Existencias
                                                     <br>
                                                     <small>(entrada y salidas)</small>
@@ -427,7 +491,7 @@
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="tipoOP2" name="tipo"
-                                                    value="Ventas">
+                                                    value="Ventas" required>
                                                 <label class="form-check-label" for="tipoOP2">Ventas
                                                     <br>
                                                     <small>(salidas)</small>
@@ -435,7 +499,7 @@
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="tipoOP3" name="tipo"
-                                                    value="Adquisiciones">
+                                                    value="Adquisiciones" required>
                                                 <label class="form-check-label" for="tipoOP3">Adquisiciones
                                                     <br>
                                                     <small>(entradas)</small>
@@ -464,20 +528,21 @@
                                             <div class="form-check">
                                                 <!-- First radio option for 'TODOS' -->
                                                 <input class="form-check-input" type="radio" id="almacenTodos"
-                                                    name="almacenOption" value="todos">
+                                                    name="almacenOption" value="todos" required>
                                                 <label class="form-check-label" for="almacenTodos">TODOS</label>
                                             </div>
 
                                             <div class="form-check">
                                                 <!-- Second radio option for enabling the select input -->
                                                 <input class="form-check-input" type="radio" id="almacenSelect"
-                                                    name="almacenOption" value="specific">
+                                                    name="almacenOption" value="specific" required>
                                                 <label class="form-check-label" for="almacenSelect">Seleccionar
                                                     Almacén</label>
                                             </div>
 
                                             <!-- The select input should be disabled by default -->
-                                            <select class="form-select" id="almacenDropdown" disabled>
+                                            <select class="form-select" name="almacen" id="almacenDropdown" required
+                                                disabled>
                                                 @foreach ($almacenes as $almacene)
                                                     <option value="{{ $almacene->id_almacen }}">
                                                         {{ $almacene->nombre }}
@@ -506,20 +571,21 @@
                                             <div class="form-check">
                                                 <!-- First radio option for 'TODOS' -->
                                                 <input class="form-check-input" type="radio" id="operadorTodos"
-                                                    name="operadorOption" value="todos">
+                                                    name="operadorOption" value="todos" required>
                                                 <label class="form-check-label" for="operadorTodos">TODOS</label>
                                             </div>
 
                                             <div class="form-check">
                                                 <!-- Second radio option for enabling the select input -->
                                                 <input class="form-check-input" type="radio" id="operadorSelect"
-                                                    name="operadorOption" value="specific">
+                                                    name="operadorOption" value="specific" required>
                                                 <label class="form-check-label" for="operadorSelect">Seleccionar
                                                     Operador</label>
                                             </div>
 
                                             <!-- The select input should be disabled by default -->
-                                            <select class="form-select" id="operadorDropdown" disabled>
+                                            <select class="form-select" id="operadorDropdown" name="operador" required
+                                                disabled>
                                                 @foreach ($operadores as $operador)
                                                     <option value="{{ $operador->id_persona }}">
                                                         [{{ $operador->carnet }}] {{ $operador->papellido }}
@@ -548,7 +614,7 @@
                                             <div class="form-check">
                                                 <!-- First radio option for 'TODOS' -->
                                                 <input class="form-check-input" type="radio" id="criterioTodos"
-                                                    name="criterioOption" value="todos p.">
+                                                    name="criterioOption" value="todos p." required>
                                                 <label class="form-check-label" for="criterioTodos">Todos los
                                                     Productos</label>
                                             </div>
@@ -556,13 +622,14 @@
                                             <div class="form-check">
                                                 <!-- Second radio option for enabling the select input -->
                                                 <input class="form-check-input" type="radio" id="criterioSelectP"
-                                                    name="criterioOption" value="specificP">
+                                                    name="criterioOption" value="specificP" required>
                                                 <label class="form-check-label" for="criterioSelectP">Selec.
                                                     Producto</label>
                                             </div>
 
                                             <!-- The select input should be disabled by default -->
-                                            <select class="form-select" id="productoDropdown" disabled>
+                                            <select class="form-select" id="productoDropdown" name="producto" required
+                                                disabled>
                                                 @foreach ($productos as $producto)
                                                     <option value="{{ $producto->id_producto }}">
                                                         [{{ $producto->codigo }}] {{ $producto->nombre }}
@@ -572,12 +639,13 @@
 
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="criterioSelectE"
-                                                    name="criterioOption" value="specificE">
+                                                    name="criterioOption" value="specificE" required>
                                                 <label class="form-check-label" for="criterioSelectE">Selec.
                                                     Empresa<span class="badge rounded-pill text-bg-danger">beta!</span>
                                                 </label>
                                             </div>
-                                            <select class="form-select" id="empresaDropdown" disabled>
+                                            <select class="form-select" id="empresaDropdown" name="empresa" required
+                                                disabled>
                                                 @foreach ($empresas as $empresa)
                                                     <option value="{{ $empresa->id_empresa }}">
                                                         {{ $empresa->nombre }}
@@ -620,7 +688,7 @@
                                             </div>
 
                                             <!-- The select input should be disabled by default -->
-                                            <select class="form-select" id="clienteDropdown" disabled>
+                                            <select class="form-select" id="clienteDropdown" name="cliente" disabled>
                                                 @foreach ($clientes as $cliente)
                                                     <option value="{{ $cliente->id_persona }}">
                                                         [{{ $cliente->carnet }}] {{ $cliente->papellido }}
@@ -663,7 +731,7 @@
                                             </div>
 
                                             <!-- The select input should be disabled by default -->
-                                            <select class="form-select" id="recintoDropdown" disabled>
+                                            <select class="form-select" id="recintoDropdown" name="recinto" disabled>
                                                 @foreach ($recintos as $recinto)
                                                     <option value="{{ $recinto->id_recinto }}">
                                                         {{ $recinto->nombre }}
@@ -706,7 +774,7 @@
                                             </div>
 
                                             <!-- The select input should be disabled by default -->
-                                            <select class="form-select" id="proveedorDropdown" disabled>
+                                            <select class="form-select" id="proveedorDropdown" name="proveedor" disabled>
                                                 @foreach ($proveedores as $proveedor)
                                                     <option value="{{ $proveedor->id_persona }}">
                                                         [{{ $proveedor->carnet }}] {{ $proveedor->papellido }}
@@ -719,15 +787,46 @@
                                 </div>
                             </ul>
                         </li>
-                        <button id="generarReciboBtn" type="submit" class="btn btn-lg btn-alt-info">
-                            <i class="fa fa-file-pdf"></i>
-                            <span class="d-none d-sm-inline">Generar Informe</span>
-                        </button>
                     </ul>
                 </div>
-            </form>
-        </div>
+                <br />
+                <div class="row">
+                    <!-- Fechas-->
+
+                    <div class="block col-12 col-md-6 col-lg-5">
+                        <div class="block-content">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="example-daterange1" style="margin-top: 1rem;">Desde</label>
+                                        <input type="text" class="js-datepicker form-control" id="example-daterange1"
+                                            placeholder="dd/mm/yyyy" required>
+                                        <input type="hidden" name="desde" id="desde_mysql" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="example-daterange2" style="margin-top: 1rem;">Hasta</label>
+                                        <input type="text" class="js-datepicker form-control" id="example-daterange2"
+                                            placeholder="dd/mm/yyyy" required>
+                                        <input type="hidden" name="hasta" id="hasta_mysql" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ms-auto d-flex justify-content-end">
+                        <button id="generarReciboBtn" type="submit"
+                            class="col-12 col-md-6 col-lg-4 col-xl-2 btn btn-lg btn-alt-info">
+                            <i class="fa fa-file-pdf"></i>
+                            <span class="d-sm-inline">Generar Informe</span>
+                        </button>
+                    </div>
+                </div>
+        </form>
     </div>
+
+
     @if ($errors->any() || session('error'))
         <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
             <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
