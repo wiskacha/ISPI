@@ -73,7 +73,7 @@
                                     <div class="mb-4">
                                         <label class="col-8 form-label" for="empresa">Empresa</label>
                                         <select class="col-12 col-md-12 js-example-basic-single form-control-lg"
-                                            id="empresa" name="id_empresa">
+                                            id="id_empresa" name="id_empresa">
                                             @foreach ($empresas as $empresa)
                                                 <option class="col-12" value="{{ $empresa->id_empresa }}"
                                                     {{ $producto->id_empresa == $empresa->id_empresa ? 'selected' : '' }}>

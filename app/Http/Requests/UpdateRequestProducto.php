@@ -30,6 +30,7 @@ class UpdateRequestProducto extends FormRequest
             'precio' => 'required|numeric',
             'unidad' => 'required|string|max:255',
             'presentacion' => 'required|string|max:255',
+            'id_empresa' =>'required|exists:empresas,id_empresa',
             'tags' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',

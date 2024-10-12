@@ -184,7 +184,6 @@ class ProductoController extends Controller
         try {
 
             $validatedData = $request->validated();
-
             // Handle tags conversion to JSON
             if (isset($validatedData['tags'])) {
                 $validatedData['tags'] = json_encode(array_map('trim', explode(',', $validatedData['tags'])));
