@@ -404,7 +404,7 @@
                                     `No existen suficientes unidades de ${response.productName}, en el almacen: ${response.almacenName}. Cantidad disponible: ${response.cantidadDisponible}`;
                             } else if (tipoMovimiento === 'ENTRADA') {
                                 errorMessage =
-                                    `El proveedor del movimiento actual, no tiene relación de contacto con la empresa ${response.empresaName} a la que pertenece el producto: ${response.productName}`;
+                                    `El proveedor del movimiento actual: [${response.proveedorName}], no tiene relación de contacto con la empresa ${response.empresaName} a la que pertenece el producto: ${response.productName}`;
                             } else {
                                 errorMessage = response.message;
                             }
@@ -530,7 +530,7 @@
                                     `No existen suficientes unidades de ${response.productName}, en el almacen: ${response.almacenName}. Cantidad disponible: ${response.cantidadDisponible}`;
                             } else if (tipoMovimiento === 'ENTRADA') {
                                 errorMessage =
-                                    `El proveedor del movimiento actual no tiene relación de contacto con la empresa ${response.empresaName} a la que pertenece el producto: ${response.productName}`;
+                                    `El proveedor del movimiento actual: [${response.proveedorName}], no tiene relación de contacto con la empresa ${response.empresaName} a la que pertenece el producto: ${response.productName}`;
                             } else {
                                 errorMessage = response.message;
                             }

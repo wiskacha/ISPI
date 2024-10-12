@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id_movimiento
  * @property string $codigo
  * @property Carbon $fecha
+ * @property Carbon $fecha_f
  * @property string|null $glose
  * @property string $tipo
  * @property int|null $id_cliente
@@ -45,6 +46,7 @@ class Movimiento extends Model
 
 	protected $casts = [
 		'fecha' => 'datetime',
+		'fecha_f' => 'datetime',
 		'id_cliente' => 'int',
 		'id_recinto' => 'int',
 		'id_proveedor' => 'int',
@@ -55,6 +57,7 @@ class Movimiento extends Model
 	protected $fillable = [
 		'codigo',
 		'fecha',
+		'fecha_f',
 		'glose',
 		'tipo',
 		'id_cliente',

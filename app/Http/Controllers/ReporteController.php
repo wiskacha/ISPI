@@ -132,14 +132,25 @@ class ReporteController extends Controller
             $criteriosB['empresa'] = $empresa ? $empresa->nombre : null;
         }
 
-        // Filtro por rango de fechas
-        if ($request->filled('desde')) {
-            $movimientosQuery->where('fecha', '>=', $request->desde);
-            $criteriosB['desde'] = $request->desde;
-        }
-        if ($request->filled('hasta')) {
-            $movimientosQuery->where('fecha', '<=', $request->hasta);
-            $criteriosB['hasta'] = $request->hasta;
+        if ($request->fechaOption === 'create') {
+            // Filtro por rango de fechas
+            if ($request->filled('desde')) {
+                $movimientosQuery->where('fecha', '>=', $request->desde);
+                $criteriosB['desde'] = $request->desde;
+            }
+            if ($request->filled('hasta')) {
+                $movimientosQuery->where('fecha', '<=', $request->hasta);
+                $criteriosB['hasta'] = $request->hasta;
+            }
+        } elseif ($request->fechaOption === 'final') {
+            if ($request->filled('desde')) {
+                $movimientosQuery->where('fecha_f', '>=', $request->desde);
+                $criteriosB['desde'] = $request->desde;
+            }
+            if ($request->filled('hasta')) {
+                $movimientosQuery->where('fecha_f', '<=', $request->hasta);
+                $criteriosB['hasta'] = $request->hasta;
+            }
         }
     }
 

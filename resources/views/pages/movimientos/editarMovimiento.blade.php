@@ -76,9 +76,15 @@
 
                                 <div class="col-md-6">
                                     <!-- Fecha -->
-                                    <div class="mb-4">
-                                        <label class="form-label" for="fecha">Fecha de Operación: </label>
-                                        <h2>{{ $movimiento->fecha }}</h2>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="fecha">Fecha de Operación: </label>
+                                            <h2>{{ $movimiento->fecha }}</h2>
+                                        </div>
+                                        <div class='col-md-6'>
+                                            <label for="form-label" for="fecha_f">Fecha de Finalización: </label>
+                                            <h2>{{ $movimiento->fecha_f ?? 'Pendiente' }}</h2>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -188,7 +194,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                
+
                             </div>
                             <hr>
                             <!-- Update Button -->
@@ -601,7 +607,7 @@
                         <div class="form-check mt-3">
                             <input class="form-check-input" type="checkbox" id="confirmarEliminacionCCheckbox" required>
                             <label class="form-check-label" for="confirmarEliminacionCCheckbox">
-                                Confirmo que deseo eliminar este movimiento.
+                                Confirmo que deseo eliminar las cuotas de este movimiento.
                             </label>
                             <small>Esta acción es irreversible</small>
                         </div>
@@ -609,7 +615,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <!-- El botón de eliminar se enviará solo si la checkbox está marcada -->
-                        <button type="submit" class="btn btn-danger">Eliminar Movimiento</button>
+                        <button type="submit" class="btn btn-danger">Eliminar Cuotas</button>
                     </div>
 
                 </form>

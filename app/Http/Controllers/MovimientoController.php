@@ -123,11 +123,13 @@ class MovimientoController extends Controller
         $existe_relacion = Contacto::where('id_persona', $id_proveedor)
             ->where('id_empresa', $id_empresa)
             ->exists();
+        $proveedorName = Persona::find($id_proveedor)->carnet; // Get the name of the Proveedor (Persona) based on the ID
 
         // Return a JSON response based on whether the Contacto relation exists
         if ($existe_relacion) {
             return response()->json([
                 'available' => true,
+                'proveedorName' => $proveedorName,
                 'productName' => $productoNombre,
                 'empresaName' => $empresa->nombre,
                 'message' => 'Relación de contacto encontrada.'
@@ -135,6 +137,7 @@ class MovimientoController extends Controller
         } else {
             return response()->json([
                 'available' => false,
+                'proveedorName' => $proveedorName,
                 'productName' => $productoNombre,
                 'empresaName' => $empresa->nombre,
                 'message' => 'No existe relación de contacto.'
@@ -234,6 +237,9 @@ class MovimientoController extends Controller
             // Redirect based on the tipo of the movimiento
             if ($movimiento->tipo === 'SALIDA') {
                 return $this->asignarCuotas($movimiento->id_movimiento);
+            } else {
+                $movimiento->fecha_f = now();
+                $movimiento->save();
             }
 
             // If tipo is not SALIDA, redirect to the normal view
@@ -300,6 +306,8 @@ class MovimientoController extends Controller
                 'condicion' => 'PAGADA',
                 'id_movimiento' => $movimiento->id_movimiento,
             ]);
+            $movimiento->fecha_f = now();
+            $movimiento->save();
         } elseif ($request->tipo_pago === 'CRÉDITO') {
             // Handle CRÉDITO payment type
             $aditivo = $request->aditivo ?? 0;
@@ -310,6 +318,8 @@ class MovimientoController extends Controller
             $nuevoCliente = $request->id_cliente;
             Movimiento::where('id_movimiento', $request->id_movimiento)->update(['id_cliente' => $nuevoCliente]);
 
+            $movimiento->fecha_f = null;
+            $movimiento->save();
             // Initialize remaining payment
             $montoPagado = $primerPago;
 
@@ -375,7 +385,6 @@ class MovimientoController extends Controller
         if (!$movimiento) {
             return redirect()->back()->with('error', 'Movimiento no encontrado.');
         }
-
         // Fetch the detalles based on the movimiento
         $detalles = Detalle::where('id_movimiento', $id_movimiento)->get();
         $almacen = $movimiento->id_almacen;
@@ -487,6 +496,16 @@ class MovimientoController extends Controller
             'precio' => 'required|numeric',
             'total' => 'required|numeric',
         ]);
+        $movimiento = Movimiento::findOrFail($id_movimiento);
+        
+        if($movimiento->tipo == 'ENTRADA'){
+            $movimiento->fecha_f = now();
+            $movimiento->save();
+        }
+        else{
+            $movimiento->fecha_f = null;
+            $movimiento->save();
+        }
 
         $hasProducto = Detalle::where('id_producto', $request->producto)->where('id_movimiento', $id_movimiento)->exists();
         if ($hasProducto) {
@@ -494,6 +513,7 @@ class MovimientoController extends Controller
             $detalle->cantidad += $request->cantidad;
             $detalle->total += $request->total; // Ajusta según tus necesidades
             $detalle->save();
+
             return redirect()->route('movimientos.editDetalles', $id_movimiento)->with('success', 'Se actualizó un detalle existente con el producto: ' . $detalle->producto->nombre . ' cantidad actualizada: ' . $detalle->cantidad);
         } else {
             // Create new Detalle
@@ -522,7 +542,14 @@ class MovimientoController extends Controller
             // Asegúrate de que 'total' se calcula correctamente en el cliente antes de enviarlo al servidor
             'total' => 'required|numeric',
         ]);
-
+        $movimiento = Movimiento::find($detalle->id_movimiento);
+        if ($movimiento->tipo == 'SALIDA') {
+            $movimiento->fecha_f = null;
+            $movimiento->save();
+        } else {
+            $movimiento->fecha_f = now();
+            $movimiento->save();
+        }
         // Actualizar los campos del detalle con los datos validados
         $detalle->cantidad = $validated['cantidad'];
         $detalle->precio = $validated['precio'];
@@ -539,7 +566,16 @@ class MovimientoController extends Controller
     {
         $detalle = Detalle::findOrFail($id_detalle);
         $detalle->delete();
-
+        $movimiento = Movimiento::find($id_movimiento);
+        if ($movimiento->tipo == 'SALIDA') {
+            $movimiento->fecha_f = null;
+            $movimiento->save();
+        }
+        else
+        {
+            $movimiento->fecha_f = now();
+            $movimiento->save();
+        }
         return redirect()->route('movimientos.editDetalles', $detalle->id_movimiento)->with('success', 'Detalle eliminado con éxito.');
     }
 
@@ -594,7 +630,9 @@ class MovimientoController extends Controller
 
         try {
             Cuota::where('id_movimiento', $id_movimiento)->delete();
-
+            $movimiento = Movimiento::find($id_movimiento);
+            $movimiento->fecha_f = null;
+            $movimiento->save();
             return redirect()->route('movimientos.edit', $movimiento->id_movimiento)
                 ->with('success', 'Cuotas eliminadas exitosamente en el movimiento: ' . $movimiento->codigo);
         } catch (Exception $e) {
@@ -611,6 +649,11 @@ class MovimientoController extends Controller
         $cuota->monto_adeudado = 0;
         $cuota->save();
         $movimiento = Movimiento::findOrFail($cuota->id_movimiento);
+        // Verificar si todas las cuotas están pagadas y actualizar el estado del movimiento si es necesario
+        if ($movimiento->cuotas->where('condicion', 'PENDIENTE')->count() == 0) {
+            $movimiento->fecha_f = now();
+            $movimiento->save();
+        }
 
         return redirect()->route('movimientos.edit', $cuota->id_movimiento)
             ->with('success', 'Cuota ' . $cuota->numero . ' pagada exitosamente en el movimiento: ' . $movimiento->codigo);
@@ -625,6 +668,8 @@ class MovimientoController extends Controller
         $cuota->monto_adeudado =  $cuota->monto_pagar;
         $cuota->save();
         $movimiento = Movimiento::findOrFail($cuota->id_movimiento);
+        $movimiento->fecha_f = null;
+        $movimiento->save();
         return redirect()->route('movimientos.edit', $cuota->id_movimiento)
             ->with('success', 'Cuota ' . $cuota->numero . ' reseteada exitosamente en el movimiento: ' . $movimiento->codigo);
     }

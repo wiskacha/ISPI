@@ -338,8 +338,40 @@
                 proveedornavLinkName.innerHTML = 'Proveedor: CI[' + codigoProv +
                     '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
-            // <!---- Fin de Opciones de Cliente -->:
+            // <!---- Fin de Opciones de Prooveedor -->:
 
+
+            // <!---- Opciones de Prooveedor -->
+            // Get references to the relevant DOM elements
+            const FecradioCreac = document.getElementById('fechaCreac');
+            const FecradioFinal = document.getElementById('fechaFinal');
+            const fechaDesde = document.getElementById('example-daterange1');
+            const fechaHasta = document.getElementById('example-daterange2');
+            const fechasnavLinkName = document.getElementById('fechasnavLinkName');
+
+            // Function to update fechasnavLinkName
+            function updateFechasNavLinkName() {
+                let selectedOption = '';
+
+                if (FecradioCreac.checked) {
+                    selectedOption = 'Creación';
+                } else if (FecradioFinal.checked) {
+                    selectedOption = 'Finalización';
+                }
+
+                fechasnavLinkName.innerHTML = 'Fecha ' + selectedOption +
+                    ': desde [' + fechaDesde.value + '] hasta [' + fechaHasta.value + '] ' +
+                    '<i class="fa fa-check-circle text-success" title="Verified User"></i>';
+            }
+
+            // Add event listeners to the radio buttons
+            FecradioCreac.addEventListener('change', updateFechasNavLinkName);
+            FecradioFinal.addEventListener('change', updateFechasNavLinkName);
+
+            // Add event listeners to the date inputs to dynamically update when dates are changed
+            fechaDesde.addEventListener('input', updateFechasNavLinkName);
+            fechaHasta.addEventListener('input', updateFechasNavLinkName);
+            // <!---- Fin de Opciones de Prooveedor -->:
 
             // ENVIO DE FORMULARIO
             // const form = document.getElementById('reportForm');
@@ -405,6 +437,7 @@
                 var startDate = new Date(selected.date.valueOf());
                 $hastaDate.datepicker('setStartDate', startDate);
                 $desdeMysql.val(convertToMySQLDate($desdeDate.val()));
+                updateFechasNavLinkName(); // Update the fechasnavLinkName when date is selected
             });
 
             $hastaDate.datepicker({
@@ -417,15 +450,21 @@
                 var endDate = new Date(selected.date.valueOf());
                 $desdeDate.datepicker('setEndDate', endDate);
                 $hastaMysql.val(convertToMySQLDate($hastaDate.val()));
+                updateFechasNavLinkName(); // Update the fechasnavLinkName when date is selected
+
             });
 
             // Handle manual input
             $desdeDate.on('change', function() {
                 $desdeMysql.val(convertToMySQLDate($desdeDate.val()));
+                updateFechasNavLinkName(); // Update the fechasnavLinkName when date is selected
+
             });
 
             $hastaDate.on('change', function() {
                 $hastaMysql.val(convertToMySQLDate($hastaDate.val()));
+                updateFechasNavLinkName(); // Update the fechasnavLinkName when date is selected
+
             });
         });
     </script>
@@ -787,34 +826,69 @@
                                 </div>
                             </ul>
                         </li>
+
+
+
+
+                        <!-- Fechas NEW -->
+                        <li class="nav-main-item" id="fechas-nav-main-item">
+                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                                aria-expanded="true" href="#">
+                                <i class="nav-main-link-icon si si-calendar"></i>
+                                <span id="fechasnavLinkName" class="nav-main-link-name">Fecha: <small
+                                        class="text-muted">no seleccionada</small></span>
+                            </a>
+                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                                <div class="block" style="width: 100%; height: 100%;">
+                                    <div class="block-content">
+                                        <div class="space-y-2">
+                                            <div class="form-check">
+                                                <!-- First radio option for 'TODOS' -->
+                                                <input class="form-check-input" type="radio" id="fechaCreac"
+                                                    name="fechaOption" value="create" required>
+                                                <label class="form-check-label" for="fechaOption">Creación</label>
+                                            </div>
+
+                                            <div class="form-check">
+                                                <!-- Second radio option for enabling the select input -->
+                                                <input class="form-check-input" type="radio" id="fechaFinal"
+                                                    name="fechaOption" value="final" required>
+                                                <label class="form-check-label" for="fechaOption">Finalización</label>
+                                            </div>
+                                            <!-- The select input should be disabled by default -->
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="example-daterange1"
+                                                            style="margin-top: 1rem;">Desde</label>
+                                                        <input type="text" class="js-datepicker form-control"
+                                                            id="example-daterange1" placeholder="dd/mm/yyyy" required>
+                                                        <input type="hidden" name="desde" id="desde_mysql" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="example-daterange2"
+                                                            style="margin-top: 1rem;">Hasta</label>
+                                                        <input type="text" class="js-datepicker form-control"
+                                                            id="example-daterange2" placeholder="dd/mm/yyyy" required>
+                                                        <input type="hidden" name="hasta" id="hasta_mysql" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <br />
+                                        </div>
+                                    </div>
+                                </div>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
                 <br />
                 <div class="row">
-                    <!-- Fechas-->
-
-                    <div class="block col-12 col-md-6 col-lg-5">
-                        <div class="block-content">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="example-daterange1" style="margin-top: 1rem;">Desde</label>
-                                        <input type="text" class="js-datepicker form-control" id="example-daterange1"
-                                            placeholder="dd/mm/yyyy" required>
-                                        <input type="hidden" name="desde" id="desde_mysql" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="example-daterange2" style="margin-top: 1rem;">Hasta</label>
-                                        <input type="text" class="js-datepicker form-control" id="example-daterange2"
-                                            placeholder="dd/mm/yyyy" required>
-                                        <input type="hidden" name="hasta" id="hasta_mysql" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="ms-auto d-flex justify-content-end">
                         <button id="generarReciboBtn" type="submit"
                             class="col-12 col-md-6 col-lg-4 col-xl-2 btn btn-lg btn-alt-info">
