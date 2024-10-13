@@ -77,7 +77,7 @@ class ReporteController extends Controller
                 if ($request->proveedorOption === 'specific' && $request->filled('proveedor')) {
                     $proveedor = Persona::find($request->proveedor);
                     $movimientosQuery->where('id_proveedor', $request->proveedor);
-                    $criteriosB['proveedor'] = $proveedor ? $proveedor->nombre : null;
+                    $criteriosB['proveedor'] = $proveedor ? $proveedor->carnet : null;
                 }
                 break;
 
@@ -133,6 +133,7 @@ class ReporteController extends Controller
         }
 
         if ($request->fechaOption === 'create') {
+            $criteriosB['criterio_fecha'] = 'Creados entre: ';
             // Filtro por rango de fechas
             if ($request->filled('desde')) {
                 $movimientosQuery->where('fecha', '>=', $request->desde);
@@ -143,6 +144,7 @@ class ReporteController extends Controller
                 $criteriosB['hasta'] = $request->hasta;
             }
         } elseif ($request->fechaOption === 'final') {
+            $criteriosB['criterio_fecha'] = 'Finalizados entre: ';
             if ($request->filled('desde')) {
                 $movimientosQuery->where('fecha_f', '>=', $request->desde);
                 $criteriosB['desde'] = $request->desde;
@@ -163,10 +165,52 @@ class ReporteController extends Controller
         $criteriosB = json_decode($request->input('criteriosB'), true);
         // Fetch los movimientos basados en los IDs
         $movimientos = Movimiento::whereIn('id_movimiento', $movimientoIds)->get();
-        // Generar el PDF utilizando los movimientos y los criterios de búsqueda
-        $pdf = PDF::loadView('pages.reportes.pdf.desglose', compact('movimientos', 'criteriosB'))
-            ->setPaper('a4', 'landscape'); // Setear tamaño y orientación del papel
 
-        return $pdf->stream('reporte_movimientos.pdf');
+        $view = $request->has('cn_cuotas')
+            ? 'pages.reportes.pdf.desglose'
+            : 'pages.reportes.pdf.desgloseSCuotas';
+
+        if ($request->input('action') == 'pdf') {
+            // Generate the PDF and stream it
+            $pdf = PDF::loadView($view, compact('movimientos', 'criteriosB'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->stream('reporte_movimientos.pdf');
+        } elseif ($request->input('action') == 'preview') {
+            // Return the HTML preview
+            return view($view, compact('movimientos', 'criteriosB'));
+        } elseif ($request->input('action') == 'download') {
+            // Generate and download the PDF
+            $pdf = PDF::loadView($view, compact('movimientos', 'criteriosB'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download('reporte_movimientos.pdf');
+        }
+    }
+
+    public function imprimirDesglosePorProducto(Request $request)
+    {
+        // Decodificar los IDs de los movimientos
+        $movimientoIds = json_decode($request->input('movimiento_ids'), true);
+        // Decodificar los criterios de búsqueda
+        $criteriosB = json_decode($request->input('criteriosB'), true);
+        // Fetch los movimientos basados en los IDs
+        $movimientos = Movimiento::whereIn('id_movimiento', $movimientoIds)->get();
+        $view = $request->has('cn_cuotas')
+            ? 'pages.reportes.pdf.desgloseP'
+            : 'pages.reportes.pdf.desgloseP';
+
+        if ($request->input('action') == 'pdf') {
+            // Generate the PDF and stream it
+            $pdf = PDF::loadView($view, compact('movimientos', 'criteriosB'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->stream('reporte_movimientos.pdf');
+        } elseif ($request->input('action') == 'preview') {
+            // Return the HTML preview
+            return view($view, compact('movimientos', 'criteriosB'));
+        } elseif ($request->input('action') == 'download') {
+            // Generate and download the PDF
+            $pdf = PDF::loadView($view, compact('movimientos', 'criteriosB'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download('reporte_movimientos.pdf');
+        }
     }
 }

@@ -10,6 +10,9 @@ Route::prefix('reportes')->group(function () {
     Route::post('/reporte-generado', [ReporteController::class, 'generarReporte'])->name('reportes.reportegenerado');
 
     Route::post('/reporte-generado/imprimir-desglose',[ReporteController::class, 'imprimirDesglose'])->name('reportes.imprimirDesglose');
+
+    Route::post('/reporte-generado/imprimir-desglose-productos',[ReporteController::class, 'imprimirDesglosePorProducto'])->name('reportes.imprimirDesglosePorProducto');
+
     // Route::get('/create', function () {
     //     return view('reportes.create');
     // });

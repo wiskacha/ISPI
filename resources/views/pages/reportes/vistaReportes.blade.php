@@ -4,6 +4,7 @@
     <!-- Page JS Plugins CSS -->
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="{{ asset('js/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}">
     <style>
@@ -17,11 +18,16 @@
 
 @section('js')
     <!-- jQuery (required for DataTables plugin) -->
+    <!-- jQuery (required for DataTables plugin) -->
     <script src="{{ asset('js/lib/jquery.min.js') }}"></script>
 
-    <!-- Page JS Plugins -->
+    <!-- DataTables Core -->
     <script src="{{ asset('js/plugins/datatables/dataTables.min.js') }}"></script>
+
+    <!-- DataTables Bootstrap 5 integration -->
     <script src="{{ asset('js/plugins/datatables-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+
+    <!-- Other DataTables plugins -->
     <script src="{{ asset('js/plugins/datatables-buttons/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset('js/plugins/datatables-buttons-bs5/js/buttons.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('js/plugins/datatables-buttons-jszip/jszip.min.js') }}"></script>
@@ -30,22 +36,29 @@
     <script src="{{ asset('js/plugins/datatables-buttons/buttons.print.min.js') }}"></script>
     <script src="{{ asset('js/plugins/datatables-buttons/buttons.html5.min.js') }}"></script>
 
+    <!-- Other libraries -->
     <script src="{{ asset('js/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
     <script src="{{ asset('js/plugins/bootstrap-datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
-    <!-- Page JS Code -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Your custom scripts -->
     @vite(['resources/js/pages/datatables.js'])
 
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            $('.form-select').select2();
             // <!--- Cambio de titulo item-main-menu -->
             const radioButtons = document.querySelectorAll('input[name="tipo"]');
             const TiponavLinkName = document.getElementById('TiponavLinkName');
 
             radioButtons.forEach(function(radio) {
                 radio.addEventListener('change', function() {
-                    TiponavLinkName.innerHTML = 'Tipo: ' + this.value +
-                        ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
+                    TiponavLinkName.innerHTML = 'Tipo: </br>' + this.value +
+                        '<i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 });
             });
 
@@ -122,7 +135,7 @@
             AlmradioTodos.addEventListener('change', function() {
                 if (AlmradioTodos.checked) {
                     almacenDropdown.disabled = true;
-                    almacennavLinkName.innerHTML = 'Almacen: ' + this.value +
+                    almacennavLinkName.innerHTML = 'Almacen: </br>' + this.value +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -133,7 +146,7 @@
                     almacenDropdown.disabled = false;
                     // Set the almacennavLinkName to the currently selected almacén from the dropdown
                     const selectedAlmacen = almacenDropdown.options[almacenDropdown.selectedIndex].text;
-                    almacennavLinkName.innerHTML = 'Almacen: ' + selectedAlmacen +
+                    almacennavLinkName.innerHTML = 'Almacen: </br>' + selectedAlmacen +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -141,7 +154,7 @@
             // Update almacennavLinkName whenever the user changes the selected option in the dropdown
             almacenDropdown.addEventListener('change', function() {
                 const selectedAlmacen = almacenDropdown.options[almacenDropdown.selectedIndex].text;
-                almacennavLinkName.innerHTML = 'Almacen: ' + selectedAlmacen +
+                almacennavLinkName.innerHTML = 'Almacen: </br>' + selectedAlmacen +
                     ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
             // <!---- Fin de Opciones de almacen -->:
@@ -156,7 +169,7 @@
             OperadioTodos.addEventListener('change', function() {
                 if (OperadioTodos.checked) {
                     operadorDropdown.disabled = true;
-                    operadornavLinkName.innerHTML = 'Operador: ' + this.value +
+                    operadornavLinkName.innerHTML = 'Operador: </br>' + this.value +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -168,7 +181,7 @@
                     const selectedOperador = operadorDropdown.options[operadorDropdown.selectedIndex].text;
                     const codigoOpe = selectedOperador.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
 
-                    operadornavLinkName.innerHTML = 'Operador: CI[' + codigoOpe +
+                    operadornavLinkName.innerHTML = 'Operador: </br>CI[' + codigoOpe +
                         '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -177,7 +190,7 @@
                 const selectedOperador = operadorDropdown.options[operadorDropdown.selectedIndex].text;
                 const codigoOpe = selectedOperador.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
 
-                operadornavLinkName.innerHTML = 'Operador: CI[' + codigoOpe +
+                operadornavLinkName.innerHTML = 'Operador: </br>CI[' + codigoOpe +
                     '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
             // <!---- Fin de Opciones de operador -->:
@@ -197,7 +210,7 @@
                     productoDropdown.disabled = true;
                     empresaDropdown.disabled = true;
 
-                    criterionavLinkName.innerHTML = 'Criterio: ' + this.value +
+                    criterionavLinkName.innerHTML = 'Criterio: </br>' + this.value +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -210,7 +223,7 @@
                     const selectedProducto = productoDropdown.options[productoDropdown.selectedIndex].text;
                     const codigoP = selectedProducto.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
 
-                    criterionavLinkName.innerHTML = 'Criterio: P[' + codigoP +
+                    criterionavLinkName.innerHTML = 'Criterio: </br>P[' + codigoP +
                         '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -219,7 +232,7 @@
                 const selectedProducto = productoDropdown.options[productoDropdown.selectedIndex].text;
                 const codigoP = selectedProducto.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
 
-                criterionavLinkName.innerHTML = 'Criterio: P[' + codigoP +
+                criterionavLinkName.innerHTML = 'Criterio: </br>P[' + codigoP +
                     '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
 
@@ -229,14 +242,14 @@
                     productoDropdown.disabled = true;
                     // Set the almacennavLinkName to the currently selected almacén from the dropdown
                     const selectedEmpresa = empresaDropdown.options[empresaDropdown.selectedIndex].text;
-                    criterionavLinkName.innerHTML = 'Criterio: ' + selectedEmpresa +
-                        ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
+                    criterionavLinkName.innerHTML = 'Criterio: </br>E[' + selectedEmpresa +
+                        '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
 
             empresaDropdown.addEventListener('change', function() {
                 const selectedEmpresa = empresaDropdown.options[empresaDropdown.selectedIndex].text;
-                criterionavLinkName.innerHTML = 'Criterio: E[' + selectedEmpresa +
+                criterionavLinkName.innerHTML = 'Criterio: </br>E[' + selectedEmpresa +
                     '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
             // <!---- Fin de Opciones de Criterio -->:
@@ -250,7 +263,7 @@
             CliradioTodos.addEventListener('change', function() {
                 if (CliradioTodos.checked) {
                     clienteDropdown.disabled = true;
-                    clientenavLinkName.innerHTML = 'Cliente: ' + this.value +
+                    clientenavLinkName.innerHTML = 'Cliente: </br>' + this.value +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -261,7 +274,7 @@
                     const selectedCliente = clienteDropdown.options[clienteDropdown.selectedIndex].text;
                     const codigoCli = selectedCliente.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
 
-                    clientenavLinkName.innerHTML = 'Cliente: CI[' + codigoCli +
+                    clientenavLinkName.innerHTML = 'Cliente: </br>CI[' + codigoCli +
                         '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -269,7 +282,7 @@
             clienteDropdown.addEventListener('change', function() {
                 const selectedCliente = clienteDropdown.options[clienteDropdown.selectedIndex].text;
                 const codigoCli = selectedCliente.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
-                clientenavLinkName.innerHTML = 'Cliente: CI[' + codigoCli +
+                clientenavLinkName.innerHTML = 'Cliente: </br>CI[' + codigoCli +
                     '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
             // <!---- Fin de Opciones de Cliente -->:
@@ -283,7 +296,7 @@
             RecradioTodos.addEventListener('change', function() {
                 if (RecradioTodos.checked) {
                     recintoDropdown.disabled = true;
-                    recintonavLinkName.innerHTML = 'Recinto: ' + this.value +
+                    recintonavLinkName.innerHTML = 'Recinto: </br>' + this.value +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -293,7 +306,7 @@
                     recintoDropdown.disabled = false;
                     const selectedRecinto = recintoDropdown.options[recintoDropdown.selectedIndex].text;
 
-                    recintonavLinkName.innerHTML = 'Recinto: ' + selectedRecinto +
+                    recintonavLinkName.innerHTML = 'Recinto: </br>' + selectedRecinto +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -301,7 +314,7 @@
             recintoDropdown.addEventListener('change', function() {
                 const selectedRecinto = recintoDropdown.options[recintoDropdown.selectedIndex].text;
 
-                recintonavLinkName.innerHTML = 'Recinto: ' + selectedRecinto +
+                recintonavLinkName.innerHTML = 'Recinto: </br>' + selectedRecinto +
                     ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
             // <!---- Fin de Opciones de Recinto -->:
@@ -315,7 +328,7 @@
             ProvradioTodos.addEventListener('change', function() {
                 if (ProvradioTodos.checked) {
                     proveedorDropdown.disabled = true;
-                    proveedornavLinkName.innerHTML = 'Prov: ' + this.value +
+                    proveedornavLinkName.innerHTML = 'Proveedor: </br>' + this.value +
                         ' <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -327,7 +340,7 @@
                         .text;
                     const codigoProv = selectedProveedor.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
 
-                    proveedornavLinkName.innerHTML = 'Proveedor: CI[' + codigoProv +
+                    proveedornavLinkName.innerHTML = 'Proveedor: </br>CI[' + codigoProv +
                         '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
                 }
             });
@@ -335,7 +348,7 @@
             proveedorDropdown.addEventListener('change', function() {
                 const selectedProveedor = proveedorDropdown.options[proveedorDropdown.selectedIndex].text;
                 const codigoProv = selectedProveedor.match(/\[([a-zA-Z0-9]+)\]/)?.[1];
-                proveedornavLinkName.innerHTML = 'Proveedor: CI[' + codigoProv +
+                proveedornavLinkName.innerHTML = 'Proveedor: </br>CI[' + codigoProv +
                     '] <i class="fa fa-check-circle text-success" title="Verified User"></i>';
             });
             // <!---- Fin de Opciones de Prooveedor -->:
@@ -360,7 +373,7 @@
                 }
 
                 fechasnavLinkName.innerHTML = 'Fecha ' + selectedOption +
-                    ': desde [' + fechaDesde.value + '] hasta [' + fechaHasta.value + '] ' +
+                    ':</br>desde [' + fechaDesde.value + '] hasta [' + fechaHasta.value + '] ' +
                     '<i class="fa fa-check-circle text-success" title="Verified User"></i>';
             }
 
@@ -466,6 +479,7 @@
                 updateFechasNavLinkName(); // Update the fechasnavLinkName when date is selected
 
             });
+
         });
     </script>
 @endsection
@@ -505,18 +519,24 @@
         <form id="reportForm" action="{{ route('reportes.reportegenerado') }}" target="_blank" method="POST">
             @csrf
             <div class="block-content block-content-full">
-                <div id="horizontal-navigation-click-normal-dark" class="d-lg-block mt-2">
+
+                <div id="horizontal-navigation-click-normal-dark g-2" class="d-lg-block mt-2">
                     <ul class="nav-main nav-main-horizontal nav-main">
 
                         <!-- Tipo -->
-                        <li class="nav-main-item">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                        <li class="nav-main-item col-12 col-lg-5 col-xl-2">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu" aria-haspopup="true"
                                 aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon fa fa-shuffle"></i>
-                                <span id="TiponavLinkName" class="nav-main-link-name">Tipo: <small class="text-muted">no
-                                        seleccionado</small></span>
+                                <span id="TiponavLinkName" class="nav-main-link-name">
+                                    Tipo:
+                                    <small class="text-muted">
+                                        </br>
+                                        No selecc.
+                                    </small>
+                                </span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -538,7 +558,7 @@
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="tipoOP3" name="tipo"
-                                                    value="Adquisiciones" required>
+                                                    value="Adquisic." required>
                                                 <label class="form-check-label" for="tipoOP3">Adquisiciones
                                                     <br>
                                                     <small>(entradas)</small>
@@ -552,15 +572,18 @@
                         </li>
 
                         <!-- Almacen -->
-                        <li class="nav-main-item" id="almacen-nav-main-item">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                        <li class="nav-main-item col-12  col-lg-5 col-xl-3" id="almacen-nav-main-item">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu" aria-haspopup="true"
                                 aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon fa fa-warehouse"></i>
-                                <span id="almacennavLinkName" class="nav-main-link-name">Almacen: <small
-                                        class="text-muted">no
-                                        seleccionado</small></span>
+                                <span id="almacennavLinkName" class="nav-main-link-name">
+                                    Almacen:
+                                    <small class="text-muted">
+                                        </br>No seleccionado
+                                    </small>
+                                </span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -596,14 +619,14 @@
                         </li>
 
                         <!-- Operador -->
-                        <li class="nav-main-item" id="operador-nav-main-item">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                                aria-expanded="true" href="#">
+                        <li class="nav-main-item col-12  col-lg-5 col-xl-3" id="operador-nav-main-item">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu"
+                                aria-haspopup="true" aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon fa fa-user-tie"></i>
                                 <span id="operadornavLinkName" class="nav-main-link-name">Operador: <small
-                                        class="text-muted">no seleccionado</small></span>
+                                        class="text-muted"></br>No seleccionado</small></span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -639,14 +662,14 @@
                         </li>
 
                         <!-- Criterio -->
-                        <li class="nav-main-item" id="criterio-nav-main-item">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                                aria-expanded="true" href="#">
+                        <li class="nav-main-item col-12  col-lg-5 col-xl-3" id="criterio-nav-main-item">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu"
+                                aria-haspopup="true" aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon si si-target"></i>
                                 <span id="criterionavLinkName" class="nav-main-link-name">Criterio: <small
-                                        class="text-muted">no seleccionado</small></span>
+                                        class="text-muted"></br>No seleccionado</small></span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -699,14 +722,15 @@
                         </li>
 
                         <!-- Cliente -->
-                        <li class="nav-main-item" id="cliente-nav-main-item" style="display: none;">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                                aria-expanded="true" href="#">
+                        <li class="nav-main-item col-12  col-lg-5 col-xl-3" id="cliente-nav-main-item"
+                            style="display: none;">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu"
+                                aria-haspopup="true" aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon fa fa-person"></i>
                                 <span id="clientenavLinkName" class="nav-main-link-name">Cliente: <small
-                                        class="text-muted">no seleccionado</small></span>
+                                        class="text-muted"></br>No seleccionado</small></span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -742,14 +766,15 @@
                         </li>
 
                         <!-- Recinto -->
-                        <li class="nav-main-item" id="recinto-nav-main-item" style="display: none;">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                                aria-expanded="true" href="#">
+                        <li class="nav-main-item col-12  col-lg-5 col-xl-3" id="recinto-nav-main-item"
+                            style="display: none;">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu"
+                                aria-haspopup="true" aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon fa fa-location-dot"></i>
                                 <span id="recintonavLinkName" class="nav-main-link-name">Recinto: <small
-                                        class="text-muted">no seleccionado</small></span>
+                                        class="text-muted"></br>No seleccionado</small></span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -785,14 +810,15 @@
                         </li>
 
                         <!-- Proveedor -->
-                        <li class="nav-main-item" id="proveedor-nav-main-item" style="display: none;">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                                aria-expanded="true" href="#">
+                        <li class="nav-main-item col-12  col-lg-5 col-xl-3" id="proveedor-nav-main-item"
+                            style="display: none;">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu"
+                                aria-haspopup="true" aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon fa fa-cart-shopping"></i>
                                 <span id="proveedornavLinkName" class="nav-main-link-name">Proveedor: <small
-                                        class="text-muted">no seleccionado</small></span>
+                                        class="text-muted"></br>No seleccionado</small></span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -826,19 +852,16 @@
                                 </div>
                             </ul>
                         </li>
-
-
-
-
+                        <br>
                         <!-- Fechas NEW -->
-                        <li class="nav-main-item" id="fechas-nav-main-item">
-                            <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                                aria-expanded="true" href="#">
+                        <li class="nav-main-item col-12 col-sm-12 col-lg-6 col-xl-5" id="fechas-nav-main-item">
+                            <a class="nav-main-link nav-main-link-submenu border" data-toggle="submenu"
+                                aria-haspopup="true" aria-expanded="true" href="#">
                                 <i class="nav-main-link-icon si si-calendar"></i>
                                 <span id="fechasnavLinkName" class="nav-main-link-name">Fecha: <small
-                                        class="text-muted">no seleccionada</small></span>
+                                        class="text-muted"></br>No seleccionada</small></span>
                             </a>
-                            <ul class="nav-main-submenu" style="border-radius: 0px; padding: 0;">
+                            <ul class="nav-main-submenu w-100" style="border-radius: 0px; padding: 0;">
                                 <div class="block" style="width: 100%; height: 100%;">
                                     <div class="block-content">
                                         <div class="space-y-2">
@@ -887,11 +910,11 @@
                         </li>
                     </ul>
                 </div>
-                <br />
+                <hr>
                 <div class="row">
                     <div class="ms-auto d-flex justify-content-end">
                         <button id="generarReciboBtn" type="submit"
-                            class="col-12 col-md-6 col-lg-4 col-xl-2 btn btn-lg btn-alt-info">
+                            class="col-12 col-md-6 col-lg-4 col-xl-3-2 btn btn-lg btn-alt-info">
                             <i class="fa fa-file-pdf"></i>
                             <span class="d-sm-inline">Generar Informe</span>
                         </button>

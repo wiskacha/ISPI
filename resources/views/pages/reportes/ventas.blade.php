@@ -7,6 +7,22 @@
                 display: none;
             }
         }
+
+        @media (max-width: 767.98px) {
+            .fa-2x-md {
+                font-size: 1em;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .fa-2x-md {
+                font-size: 2em;
+            }
+        }
+
+        .fs-7 {
+            font-size: 0.9rem;
+        }
     </style>
 @endsection
 
@@ -33,7 +49,6 @@
 @endsection
 
 @section('content')
-
     <div class="block block-rounded" style="margin-top: 1rem; margin-left: 1rem; margin-right: 1rem;">
         <div class="block-header block-header-default">
             <h3 class="block-title">
@@ -41,15 +56,131 @@
             </h3>
         </div>
         <div class="block-content block-content-full">
-            <p>Almacén: {{ $criteriosB->almacen ?? 'N/A' }}</p>
-            <p>Operador: {{ $criteriosB->operador ?? 'N/A' }}</p>
-            <p>Producto: {{ $criteriosB->producto ?? 'N/A' }}</p>
-            <p>Empresa: {{ $criteriosB->empresa ?? 'N/A' }}</p>
-            <p>Desde: {{ $criteriosB->desde ?? 'N/A' }}</p>
-            <p>Hasta: {{ $criteriosB->hasta ?? 'N/A' }}</p>
-            <p>Tipo: {{ $criteriosB->tipo ?? 'N/A' }}</p>
-            <p>Recinto: {{ $criteriosB->recinto ?? 'N/A' }}</p>
-            <p>Proveedor: {{ $criteriosB->proveedor ?? 'N/A' }}</p>
+            {{-- <div class="criterios-busqueda">
+                <span><strong>Almacén:</strong> {{ $criteriosB->almacen ?? 'No asignado' }}</span>
+                <span><strong>Operador:</strong> {{ $criteriosB->operador ?? 'No asignado' }}</span>
+                <span><strong>Producto:</strong> {{ $criteriosB->producto ?? 'No asignado' }}</span>
+                <span><strong>Empresa:</strong> {{ $criteriosB->empresa ?? 'No asignado' }}</span>
+                <span><strong>Desde:</strong> {{ $criteriosB->desde ?? 'No asignado' }}</span>
+                <span><strong>Hasta:</strong> {{ $criteriosB->hasta ?? 'No asignado' }}</span>
+                <span><strong>Tipo:</strong> {{ $criteriosB->tipo ?? 'No asignado' }}</span>
+                <span><strong>Recinto:</strong> {{ $criteriosB->recinto ?? 'No asignado' }}</span>
+                <span><strong>Proveedor:</strong> {{ $criteriosB->proveedor ?? 'No asignado' }}</span>
+            </div> --}}
+            <div class="flex-grow-1 text-centered">
+                <h1 class="h3 fw-bold mb-1">
+                    Criterios
+                    <small class="fs-base lh-base fw-medium text-muted mb-0">
+                        Estos fueron los criterios utilizados al momento de generar este lobby
+                    </small>
+                </h1>
+            </div>
+            <div class="criterios-busqueda">
+                <div class="row g-2">
+                    <!-- Tipo -->
+                    <div class="col-12 col-sm-8 col-md-3 col-lg-3 col-xl">
+                        <div class="card h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-list-alt fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>
+                                <div class="flex-grow-1 text-end">
+                                    <h6 class="card-title mb-0 fs-7">Tipo</h6>
+                                    <p class="card-text small text-muted mb-0 text-truncate">
+                                        {{ $criteriosB->tipo ?? 'No asignado' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Almacén -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-3 col-xl">
+                        <div class="card h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-warehouse fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>
+                                <div class="flex-grow-1 text-end">
+                                    <h6 class="card-title mb-0 fs-7">Almacén</h6>
+                                    <p class="card-text small text-muted mb-0 text-truncate">
+                                        {{ $criteriosB->almacen ?? 'No asignado' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Operador -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-3 col-xl">
+                        <div class="card h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-user-tie fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>
+                                <div class="flex-grow-1 text-end">
+                                    <h6 class="card-title mb-0 fs-7">Operador</h6>
+                                    <p class="card-text small text-muted mb-0 text-truncate">
+                                        {{ $criteriosB->operador ?? 'No asignado' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Recinto -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-3 col-xl">
+                        <div class="card h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-building fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>
+                                <div class="flex-grow-1 text-end">
+                                    <h6 class="card-title mb-0 fs-7">Recinto</h6>
+                                    <p class="card-text small text-muted mb-0 text-truncate">
+                                        {{ $criteriosB->recinto ?? 'No asignado' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proveedor -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-3 col-xl">
+                        <div class="card h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-parachute-box fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>
+                                <div class="flex-grow-1 text-end">
+                                    <h6 class="card-title mb-0 fs-7">Proveedor</h6>
+                                    <p class="card-text small text-muted mb-0 text-truncate">
+                                        {{ $criteriosB->proveedor ?? 'No asignado' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Producto / Empresa -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 col-xxl-2">
+                        <div class="card h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-box-open fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>
+                                <div class="flex-grow-1 text-end">
+                                    <h6 class="card-title mb-0 fs-7">Criterio</h6>
+                                    <p class="card-text small text-muted mb-0 text-truncate">
+                                        {{ isset($criteriosB->producto) ? $criteriosB->producto : $criteriosB->empresa ?? 'No asignado' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fecha -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 col-xxl-2">
+                        <div class="card h-100">
+                            <div class="card-body d-flex align-items-center">
+                                <i class="fas fa-calendar-day fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>
+                                <div class="flex-grow-1 text-end">
+                                    <h6 class="card-title mb-0 fs-7">{{ $criteriosB->criterio_fecha }}</h6>
+                                    <p class="card-text small text-muted mb-0 text-truncate">
+                                        {{ isset($criteriosB->desde) ? $criteriosB->desde : 'No asignado' }}
+                                        {{ isset($criteriosB->hasta) ? ' - ' . $criteriosB->hasta : '' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
 
 
             <div class="block block-rounded" style="margin-top: 1rem; margin-left: 1rem; margin-right: 1rem;">
@@ -79,202 +210,6 @@
                     </div>
                     <hr />
                     <!-- Check if there are any movimientos to display -->
-                    @if ($movimientos->isEmpty())
-                        <div class="alert alert-info">
-                            No se encontraron movimientos que coincidan con los criterios de búsqueda.
-                        </div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons fs-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Codigo</th>
-                                        <th>Tipo</th>
-                                        <th>Almacén</th>
-                                        <th>Operador</th>
-                                        <th>Cliente</th>
-                                        <th>Recinto</th>
-                                        <th>Proveedor</th>
-                                        <th>Fecha</th>
-                                        <th>Total Productos</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($movimientos as $movimiento)
-                                        <tr>
-                                            <td>{{ $movimiento->codigo }}</td>
-                                            <td>{{ $movimiento->tipo }}</td> <!-- ENTRADA or SALIDA -->
-                                            <td>{{ $movimiento->almacene->nombre ?? 'N/A' }}</td>
-                                            <!-- Assumes 'almacene' relationship exists -->
-                                            <td>{{ $movimiento->usuario->persona->carnet ?? 'N/A' }}</td>
-                                            <!-- Assumes 'operador' relationship exists -->
-                                            <td>{{ $movimiento->cliente->carnet ?? 'N/A' }}</td>
-                                            <!-- Assumes 'cliente' relationship exists for VENTAS -->
-                                            <td>{{ $movimiento->recinto->nombre ?? 'N/A' }}</td>
-                                            <!-- Assumes 'recinto' relationship exists for VENTAS -->
-                                            <td>{{ $movimiento->persona->carnet ?? 'N/A' }}</td>
-                                            <!-- Assumes 'recinto' relationship exists for VENTAS -->
-                                            <td>{{ $movimiento->fecha->format('d/m/Y') }}</td>
-                                            <td>{{ $movimiento->detalles->count() }}</td> <!-- Count of Detalles -->
-                                            @if ($movimiento->tipo == 'ENTRADA')
-                                                <td>{{ number_format($movimiento->detalles->sum('total'), 2) }}</td>
-                                                <td>No Aplica</td>
-                                            @else
-                                                <td>{{ number_format($movimiento->cuotas->sum('monto_pagar'), 2) }}</td>
-                                                @php $cuotasST = ""; @endphp
-                                                @if ($movimiento->cuotas->count() > 0)
-                                                    @php $cuotasST = "COMPLETO"; @endphp
-                                                    @foreach ($movimiento->cuotas as $cuota)
-                                                        @if ($cuota->condicion == 'PENDIENTE')
-                                                            @php $cuotasST="PENDIENTE"; @endphp
-                                                        @endif
-                                                    @endforeach
-                                                    <td>{{ $cuotasST }}</td>
-                                                @else
-                                                    <td>No Asignadas</td>
-                                                @endif
-                                            @endif
-                                            <!-- Sum of Detalle totals -->
-                                        </tr>
-                                        <tr class="clickable-row" data-toggle="collapse"
-                                            data-target="#detalles-{{ $movimiento->id_movimiento }}">
-                                            <td colspan="11">Detalles ↕</td>
-                                        </tr>
-                                        <!-- Expandable row for product details -->
-                                        <tr id="detalles-{{ $movimiento->id_movimiento }}" class="collapse desglose">
-                                            <td colspan="11">
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered">
-                                                        <thead class="thead-light">
-                                                            <tr>
-                                                                <th>Empresa</th>
-                                                                <th>Producto</th>
-                                                                <th>Cantidad</th>
-                                                                <th>Precio Unitario</th>
-                                                                <th>Subtotal</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @php $totalP=0; @endphp
-                                                            @foreach ($movimiento->detalles as $detalle)
-                                                                <tr>
-                                                                    <td>{{ $detalle->producto->empresa->nombre }}</td>
-                                                                    <td>{{ $detalle->producto->nombre }}</td>
-                                                                    <td>{{ $detalle->cantidad }}</td>
-                                                                    <td>{{ number_format($detalle->precio, 2) }}</td>
-                                                                    <td>
-                                                                        {{ number_format($detalle->total, 2) }}
-                                                                        @php $totalP += $detalle->total @endphp
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                        <tfoot>
-                                                            <tr>
-                                                                <td colspan="3"></td>
-                                                                <td>TOTAL: </td>
-                                                                <td>{{ number_format($totalP, 2) }}</td>
-                                                                <!-- Sum of Detalle totals -->
-                                                            </tr>
-
-                                                            @if ($movimiento->cuotas->count() > 0)
-                                                                <tr class="clickable-row" data-toggle="collapse"
-                                                                    data-target="#cuotas-{{ $movimiento->id_movimiento }}">
-                                                                    <td colspan="11">Cuotas ↕</td>
-                                                                </tr>
-                                                                <tr id="cuotas-{{ $movimiento->id_movimiento }}"
-                                                                    class="collapse desglose">
-                                                                    <td colspan="10">
-                                                                        <div class="table-responsive">
-                                                                            <table class="table table-bordered">
-                                                                                <thead class="thead-light">
-                                                                                    <tr>
-                                                                                        <th>Concepto</th>
-                                                                                        <th>Código</th>
-                                                                                        <th>Fecha V.</th>
-                                                                                        <th>M. Pagar</th>
-                                                                                        <th>M. Pagado</th>
-                                                                                        <th>M. Pendiente</th>
-                                                                                        <th>Condición</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    @php
-                                                                                        $total_mPgr = 0;
-                                                                                        $total_mPdo = 0;
-                                                                                        $total_mAde = 0;
-                                                                                        $estado = true;
-                                                                                    @endphp
-                                                                                    @foreach ($movimiento->cuotas as $cuota)
-                                                                                        <tr>
-                                                                                            <td>{{ $cuota->concepto }}</td>
-                                                                                            <td>{{ $cuota->codigo }}</td>
-                                                                                            <td>{{ date('d/M/Y', strtotime($cuota->fecha_venc)) }}
-                                                                                            </td>
-                                                                                            <td>{{ $cuota->monto_pagar }}
-                                                                                            </td>
-                                                                                            <td>{{ $cuota->monto_pagado }}
-                                                                                            </td>
-                                                                                            <td>{{ $cuota->monto_adeudado }}
-                                                                                            </td>
-                                                                                            <td>{{ $cuota->condicion }}
-                                                                                            </td>
-                                                                                            @php
-                                                                                                $total_mPgr +=
-                                                                                                    $cuota->monto_pagar;
-                                                                                                $total_mPdo +=
-                                                                                                    $cuota->monto_pagado;
-                                                                                                $total_mAde +=
-                                                                                                    $cuota->monto_adeudado;
-                                                                                                $estado =
-                                                                                                    $estado &&
-                                                                                                    $cuota->condicion ==
-                                                                                                        'PAGADA';
-                                                                                            @endphp
-                                                                                        </tr>
-                                                                                    @endforeach
-                                                                                </tbody>
-                                                                                <tfoot>
-                                                                                    <tr>
-                                                                                        <td colspan="2"></td>
-                                                                                        <td colspan="0"><strong>T.
-                                                                                                Cuotas:</strong></td>
-                                                                                        <td>{{ number_format($total_mPgr, 2) }}
-                                                                                        </td>
-                                                                                        <td>{{ number_format($total_mPdo, 2) }}
-                                                                                        </td>
-                                                                                        <td>{{ number_format($total_mAde, 2) }}
-                                                                                        </td>
-                                                                                        <td>
-                                                                                            @if ($estado)
-                                                                                                <span
-                                                                                                    style="color: limegreen"><strong>COMPLETO</strong></span>
-                                                                                            @else
-                                                                                                <span
-                                                                                                    style="color: crimson"><strong>PENDIENTE</strong></span>
-                                                                                            @endif
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </tfoot>
-                                                                            </table>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            @endif
-
-                                                        </tfoot>
-                                                    </table>
-                                                </div>
-                                                <hr>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
