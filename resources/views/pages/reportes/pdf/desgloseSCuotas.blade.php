@@ -247,14 +247,14 @@
                     </td>
                     <td>
                         @if (isset($criteriosB['desde']))
-                            {{ $criteriosB['desde'] }}
+                            {{ \Carbon\Carbon::createFromFormat('Y-m-d', $criteriosB['desde'])->format('d/m/Y') }}
                         @else
                             <small>No especificado</small>
                         @endif
                     </td>
                     <td>
                         @if (isset($criteriosB['hasta']))
-                            {{ $criteriosB['hasta'] }}
+                            {{ \Carbon\Carbon::createFromFormat('Y-m-d', $criteriosB['hasta'])->format('d/m/Y') }}
                         @else
                             <small>No especificado</small>
                         @endif
@@ -376,6 +376,24 @@
                             </tfoot>
                         </table>
                 @endforeach
+                <div class="page-break"></div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                Este reporte analizó un total de:
+                                @php $queryCount=0; @endphp
+                                @foreach ($movimientos as $mv)
+                                    @php $queryCount++; @endphp
+                                @endforeach
+                                <strong>
+                                    {{ $queryCount }}
+                                </strong>
+                                movimientos / transacciones.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
         </div>
         @endif
     </div>

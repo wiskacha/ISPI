@@ -247,14 +247,14 @@
                     </td>
                     <td>
                         @if (isset($criteriosB['desde']))
-                            {{ $criteriosB['desde'] }}
+                            {{ \Carbon\Carbon::createFromFormat('Y-m-d', $criteriosB['desde'])->format('d/m/Y') }}
                         @else
                             <small>No especificado</small>
                         @endif
                     </td>
                     <td>
                         @if (isset($criteriosB['hasta']))
-                            {{ $criteriosB['hasta'] }}
+                            {{ \Carbon\Carbon::createFromFormat('Y-m-d', $criteriosB['hasta'])->format('d/m/Y') }}
                         @else
                             <small>No especificado</small>
                         @endif
@@ -268,85 +268,229 @@
         $isFirstPage = true;
     @endphp
     <div style="position: absolute; top: 80px; bottom: 80px; left: 0; right: 0; background-color: rgb(241, 241, 241);">
+
+
         <div id="contenido-tabla" class="block-content block-content-full collapse">
             @if ($movimientos->isEmpty())
                 <div class="alert alert-info">
                     No se encontraron movimientos que coincidan con los criterios de búsqueda.
                 </div>
             @else
-                @php $check = false; @endphp
-                @foreach (collect($movimiento->detalles)->unique('producto.id_producto') as $productoP)
-                    <div class="contenido">
-                        <table class="table table-bordered">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th style="width: 20%;">Empresa</th>
-                                    <th style="width: 30%;">Producto</th>
-                                    <th style="width: 15%;">Cantidad</th>
-                                    <th style="width: 15%;">Precio Unitario</th>
-                                    <th style="width: 15%;">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                    $totalP = 0;
-                                    $cant_filas = 0;
-                                    // Obtener el producto correspondiente
-                                    $producto = $detalles->first()->producto;
-                                    // Sumar las cantidades de los detalles
-                                    $totalCantidad = $detalles->sum('cantidad');
-                                    $subtotal = $totalCantidad * $producto->precio;
-                                @endphp
-                                <tr>
-                                    <td>{{ $productoP->empresa->nombre }}</td>
-                                    <td>{{ $productoP->nombre }}</td>
-
-                                    <p>Cantidad total: {{ $totalCantidad }}</p>
-                                    <td>{{ $productoP->precio }}</td>
-                                    <td>
-                                        {{ $subtotal }}
-                                    </td>
-                                </tr>
-                                @php $cant_filas++; @endphp
-                                @if ($cant_filas == 9 && $check == false)
-                                    <tr>
-                                        <td colspan="3"></td>
-                                        <td colspan="2">Continua en la siguiente hoja!</td>
-                                    </tr>
-                                    <tr class="page-break"></tr>
-                                    <tr>
-                                        <td colspan="6">Continuación de los detalles del movimiento:
-                                            {{ $movimiento->codigo }}</td>
-                                    </tr>
-                                    @php $cant_filas = 0; @endphp
-                                    @php $check = true; @endphp
-                                @elseif ($cant_filas == 12 && $loop->last == true)
-                                    <tr>
-                                        <td colspan="3"></td>
-                                        <td colspan="2">Continua en la siguiente hoja!</td>
-                                    </tr>
-                                    <tr class="page-break"></tr>
-                                    <tr>
-                                        <td colspan="6">Continuación de los detalles del movimiento:
-                                            {{ $movimiento->codigo }}</td>
-                                    </tr>
-                                    @php $check = true; @endphp
+                <div class="contenido">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th style="width: 30%;">Producto</th>
+                                <th style="width: 10%">Precio Act</th>
+                                <th style="width: 10%;">Precio Min</th>
+                                <th style="width: 10%;">Precio Max</th>
+                                <th style="width: 10%;">Precio Avg</th>
+                                @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] === 'Existencias')
+                                    <th style="width: 10%;">Cant. E</th>
+                                    <th style="width: 10%;">Cant. S</th>
+                                    <th style="width: 10%;">Cant. T</th>
+                                    <th style="width: 10%;">SubT. E</th>
+                                    <th style="width: 10%;">SubT. S</th>
+                                    <th style="width: 10%;">SubT. T</th>
+                                @else
+                                    <th style="width: 10%;">Cantidad</th>
+                                    <th style="width: 10%;">Subtotal</th>
                                 @endif
-                @endforeach
-                @php $check = false; @endphp
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3"></td>
-                        <td>TOTAL:</td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-                </table>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                // Collect and group unique products by their empresa
+                                $productosAgrupadosPorEmpresa = $movimientos->flatMap->detalles->groupBy(function (
+                                    $detalle,
+                                ) {
+                                    return $detalle->producto->empresa->nombre ?? 'Sin Empresa';
+                                });
+                                $subtotalGeneral = 0;
+                                $subtotalEGeneral = 0; // Total for SubT. E
+                                $subtotalSGeneral = 0; // Total for SubT. S
+                                $subtotalTGeneral = 0; // Total for SubT. T
+                                $cant_mov = 0;
+                                $contador_rows = 0;
+                                $rows_perpage = 10;
+                            @endphp
 
+                            {{-- Iterate through each empresa and its associated products --}}
+                            @foreach ($productosAgrupadosPorEmpresa as $empresaNombre => $detallesEmpresa)
+                                @if ($contador_rows >= $rows_perpage)
+                                    <tr class="page-break">
+                                        @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] == 'Existencias')
+                                            <td colspan="11"></td>
+                                        @else
+                                            <td colspan="7"></td>
+                                        @endif
+                                    </tr>
+                                    @php $contador_rows = 0; @endphp
+                                @endif
+                                {{-- Empresa Name Row --}}
+                                <tr style="background-color: #f5f5f5;">
+                                    @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] == 'Existencias')
+                                        <td colspan="11"><strong>{{ $empresaNombre }}</strong></td>
+                                    @else
+                                        <td colspan="7"><strong>{{ $empresaNombre }}</strong></td>
+                                    @endif
+                                </tr>
+
+                                @php
+                                    $contador_rows++;
+                                    // Group products by unique id_producto within the empresa
+                                    $productosUnicos = $detallesEmpresa->pluck('producto')->unique('id_producto');
+                                @endphp
+
+                                @foreach ($productosUnicos->sortBy('nombre') as $productoP)
+                                    @php
+                                        // Get all details for the current product within this empresa
+                                        $detallesProducto = $detallesEmpresa->filter(function ($detalle) use (
+                                            $productoP,
+                                        ) {
+                                            return $detalle->producto->id_producto === $productoP->id_producto;
+                                        });
+
+                                        // Initialize quantities and subtotals
+                                        $cantidadE = $detallesProducto
+                                            ->where('movimiento.tipo', 'ENTRADA')
+                                            ->sum('cantidad');
+                                        $cantidadS = $detallesProducto
+                                            ->where('movimiento.tipo', 'SALIDA')
+                                            ->sum('cantidad');
+                                        $subtotalE = $detallesProducto
+                                            ->where('movimiento.tipo', 'ENTRADA')
+                                            ->sum('total');
+                                        $subtotalS = $detallesProducto
+                                            ->where('movimiento.tipo', 'SALIDA')
+                                            ->sum('total');
+
+                                        // Nuevas variables para contar el número de detalles
+                                        $cantidadE = $detallesProducto->where('movimiento.tipo', 'ENTRADA')->count(); // Contar detalles con tipo 'ENTRADA'
+
+                                        $cantidadS = $detallesProducto->where('movimiento.tipo', 'SALIDA')->count(); // Contar detalles con tipo 'SALIDA'
+
+                                        // Calcular la cantidad total (opcional)
+                                        $cant_mov = $cantidadE + $cantidadS; // Total de conteo
+
+                                        // Calculate totals for the existence case
+                                        $cantidadT = $cantidadE - $cantidadS;
+                                        $subtotalT = $subtotalE - $subtotalS;
+                                        $subtotalGeneral += $subtotalT; // Sum the total for the general subtotal
+                                        $subtotalEGeneral += $subtotalE; // Sum for SubT. E
+                                        $subtotalSGeneral += $subtotalS; // Sum for SubT. S
+                                        $subtotalTGeneral += $subtotalT; // Sum for SubT. T
+
+                                    @endphp
+                                    @if ($contador_rows >= $rows_perpage)
+                                        <tr class="page-break">
+                                            @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] == 'Existencias')
+                                                <td colspan="11"></td>
+                                            @else
+                                                <td colspan="7"></td>
+                                            @endif
+                                        </tr>
+                                        @php $contador_rows = 0; @endphp
+                                    @endif
+                                    {{-- Product Row --}}
+                                    <tr>
+                                        <td>
+                                            [{{ $productoP->codigo }}]
+                                            <small>{{ $productoP->nombre }}</small>
+                                        </td>
+                                        <td>{{ $productoP->precio }}</td> {{-- Current product price --}}
+                                        <td>{{ $detallesProducto->min('precio') }}</td> {{-- Minimum price in the details --}}
+                                        <td>{{ $detallesProducto->max('precio') }}</td> {{-- Maximum price in the details --}}
+                                        <td>{{ number_format($detallesProducto->avg('precio'), 2) }}</td>
+
+                                        @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] === 'Existencias')
+                                            <td>{{ $cantidadE }}</td> {{-- Cant. E --}}
+                                            <td>{{ $cantidadS }}</td> {{-- Cant. S --}}
+                                            <td>{{ $cantidadT }}</td> {{-- Cant. T --}}
+                                            <td>{{ $subtotalE }}</td> {{-- SubT. E --}}
+                                            <td>{{ $subtotalS }}</td> {{-- SubT. S --}}
+                                            <td>{{ $subtotalT }}</td> {{-- SubT. T --}}
+                                        @else
+                                            <td>{{ $detallesProducto->sum('cantidad') }}</td> {{-- Quantity --}}
+                                            <td>{{ $detallesProducto->sum('total') }}</td> {{-- Subtotal --}}
+                                        @endif
+                                    </tr>
+                                    @php $contador_rows++; @endphp
+                                @endforeach
+                                @if ($contador_rows >= $rows_perpage)
+                                    <tr class="page-break">
+                                        @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] == 'Existencias')
+                                            <td colspan="11"></td>
+                                        @else
+                                            <td colspan="7"></td>
+                                        @endif
+                                    </tr>
+                                    @php $contador_rows = 0; @endphp
+                                @endif
+                                {{-- Blank Row for separation between empresas --}}
+                                <tr>
+                                    @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] == 'Existencias')
+                                        <td colspan="11">&nbsp;</td>
+                                    @else
+                                        <td colspan="7">&nbsp;</td>
+                                    @endif
+                                </tr>
+                                @php $contador_rows++; @endphp
+                            @endforeach
+                        </tbody>
+
+                        <tfoot>
+                            @if ($contador_rows >= $rows_perpage)
+                                <tr class="page-break">
+                                    <td></td>
+                                </tr>
+                                @php $contador_rows = 0; @endphp
+                            @endif
+                            <tr>
+                                @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] !== 'Existencias')
+                                    <td colspan="5"></td>
+                                @else
+                                    <td colspan="7"></td>
+                                @endif
+                                <td><strong>TOTAL:</strong></td>
+                                @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] === 'Existencias')
+                                    <td>{{ $subtotalEGeneral }}</td> {{-- Total SubT. E --}}
+                                    <td>{{ $subtotalSGeneral }}</td> {{-- Total SubT. S --}}
+                                    <td>{{ $subtotalTGeneral }}</td> {{-- Total SubT. T --}}
+                                @else
+                                    <td colspan="1">{{ abs($subtotalGeneral) }}</td> {{-- Total for Quantity and Subtotal --}}
+                                @endif
+                            </tr>
+                            <tr>
+                                @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] !== 'Existencias')
+                                    <td colspan="7">
+                                    @else
+                                    <td colspan="13">
+                                @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] !== 'Existencias')
+                                    <td colspan="7">
+                                    @else
+                                    <td colspan="13">
+                                @endif
+                                Este reporte analizó un total de:
+                                @php $queryCount=0; @endphp
+                                @foreach ($movimientos as $mv)
+                                    @php $queryCount++; @endphp
+                                @endforeach
+                                <strong>
+                                    {{ $queryCount }}
+                                </strong>
+                                movimientos / transacciones.
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            @endif
         </div>
-        @endif
-    </div>
     </div>
 </body>
 

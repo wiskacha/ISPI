@@ -558,7 +558,7 @@
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="tipoOP3" name="tipo"
-                                                    value="Adquisic." required>
+                                                    value="Adquisiciones" required>
                                                 <label class="form-check-label" for="tipoOP3">Adquisiciones
                                                     <br>
                                                     <small>(entradas)</small>

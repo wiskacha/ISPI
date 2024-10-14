@@ -194,15 +194,14 @@ class ReporteController extends Controller
         $criteriosB = json_decode($request->input('criteriosB'), true);
         // Fetch los movimientos basados en los IDs
         $movimientos = Movimiento::whereIn('id_movimiento', $movimientoIds)->get();
-        $view = $request->has('cn_cuotas')
-            ? 'pages.reportes.pdf.desgloseP'
-            : 'pages.reportes.pdf.desgloseP';
+
+        $view =  'pages.reportes.pdf.desgloseP';
 
         if ($request->input('action') == 'pdf') {
             // Generate the PDF and stream it
             $pdf = PDF::loadView($view, compact('movimientos', 'criteriosB'))
                 ->setPaper('a4', 'landscape');
-            return $pdf->stream('reporte_movimientos.pdf');
+            return $pdf->stream('reporte_movimientos_pd.pdf');
         } elseif ($request->input('action') == 'preview') {
             // Return the HTML preview
             return view($view, compact('movimientos', 'criteriosB'));
@@ -210,7 +209,7 @@ class ReporteController extends Controller
             // Generate and download the PDF
             $pdf = PDF::loadView($view, compact('movimientos', 'criteriosB'))
                 ->setPaper('a4', 'landscape');
-            return $pdf->download('reporte_movimientos.pdf');
+            return $pdf->download('reporte_movimientos_pd.pdf');
         }
     }
 }
