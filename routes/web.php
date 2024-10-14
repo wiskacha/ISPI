@@ -42,7 +42,13 @@ Route::middleware('role:admin')->group(function () {
 });
 
 // Rutas de Usuario Autenticado
-Route::middleware('auth')->group(function () {});
+Route::middleware('auth')->group(function () {
+    require_once base_path('routes/user/uclientes.php');
+
+    require_once base_path('routes/user/umovimientos.php');
+
+    require_once base_path('routes/user/pdf.php');
+});
 
 // Rutas de Páginas Genéricas
 Route::view('/pages/slick', 'pages.slick');

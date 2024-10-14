@@ -249,12 +249,11 @@
                         </tfoot>
                     </table>
                 </div>
-            </div>
-            <div>
                 <div class="alert alert-warning d-flex align-items-center justify-content-between" role="alert">
                     <div class="flex-grow-1 me-3">
                         <p class="mb-0">
-                            ¡Recuerda! En caso de querer corregir los detalles accede a <a class="alert-link" href="{{route('usuario.editMv', $movimiento->id_movimiento)}}">este</a> enlace!
+                            ¡Recuerda! En caso de querer corregir los detalles accede a <a class="alert-link"
+                                href="{{ route('usuario.editMv', $movimiento->id_movimiento) }}">este</a> enlace!
                         </p>
                     </div>
                     <div class="flex-shrink-0">
@@ -262,22 +261,24 @@
                     </div>
                 </div>
             </div>
-            <form id="cuotas-form" action="{{ route('movimientos.storeCuotas') }}" method="POST">
+            <form id="cuotas-form" action="{{ route('usuario.storeCuotas') }}" method="POST">
                 @csrf
                 <input type="hidden" name="id_movimiento" value="{{ $movimiento->id_movimiento }}">
-
                 <!-- Tipo de Pago y Cliente al mismo nivel -->
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="tipo_pago" class="form-label">Tipo de Pago:</label>
+                        <label for="tipo_pago" class="form-label">Tipo de Pago: <br><small class="text-muted">*Un tipo de
+                                pago es obligatorio</small></label>
                         <select name="tipo_pago" id="tipo_pago" class="form-select" required>
-                            <option value="" selected>Seleccionar tipo de pago</option>
+                            <option value="" selected>Seleccionar tipo de pago:</option>
                             <option value="CONTADO">CONTADO</option>
                             <option value="CRÉDITO">CRÉDITO</option>
                         </select>
                     </div>
                     <div class="col-md-6 text-end">
-                        <label for="cliente_select" class="form-label">Seleccionar Cliente:</label>
+                        <label for="cliente_select" class="form-label">Seleccionar Cliente: <br><small
+                                class="text-muted">*Un Cliente es obligatorio en caso de que el tipo de pago sea
+                                CRÉDITO</small></label>
                         <select name="id_cliente" id="cliente_select" class="form-select">
                             <option value="">Seleccione un Cliente</option>
                             @foreach ($clientes as $cliente)
