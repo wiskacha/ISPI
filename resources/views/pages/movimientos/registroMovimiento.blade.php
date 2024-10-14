@@ -437,18 +437,20 @@
             if (step === 5) {
                 // Only validate if tipo is 'SALIDA'
                 const tipo = document.getElementById('tipo').value;
-                if (tipo === 'SALIDA') {
-                    if (!validateProductAvailability()) {
-                        return; // Don't proceed if validation fails
-                    }
-                } else if (tipo === 'ENTRADA') {
-                    if (!validateProveedorEmpresaRelation()) {
-                        return; // Don't proceed if validation fails
-                    }
-                }
+
 
                 if (!validateAndCleanupRows()) {
                     return; // Don't proceed if row validation fails
+                } else {
+                    if (tipo === 'SALIDA') {
+                        if (!validateProductAvailability()) {
+                            return; // Don't proceed if validation fails
+                        }
+                    } else if (tipo === 'ENTRADA') {
+                        if (!validateProveedorEmpresaRelation()) {
+                            return; // Don't proceed if validation fails
+                        }
+                    }
                 }
                 generatePreview(); // Move preview generation here after validation
             }
@@ -462,44 +464,61 @@
         function validateProductAvailability() {
             const almaceneId = document.getElementById('almacene').value;
             const almaceneName = document.getElementById('almacene').selectedOptions[0]
-                .text; // Get the selected almacen name
+            .text; // Get the selected almacen name
             const rows = document.querySelectorAll('#detalle-table tbody tr');
 
             let isValid = true;
             let unavailableProducts = []; // Store unavailable products data
+            let productQuantities = {}; // Store product quantities to aggregate duplicates
+
+            // Aggregate quantities for each product
             rows.forEach(row => {
-                const productName = row.querySelector('select[name="productos[]"]').selectedOptions[0].text;
+                const productId = row.querySelector('select[name="productos[]"]').value;
+                const productName = row.querySelector('select[name="productos[]"]').selectedOptions[0]
+                .text; // Get product name
                 const cantidad = parseInt(row.querySelector('input[name="cantidad[]"]').value) || 0;
-                console.log(productName);
-                if (productName && cantidad > 0) {
-                    // Perform the AJAX request to validate product availability
-                    $.ajax({
-                        url: '/movimientos/check-product-availability', // Define your endpoint here
-                        method: 'POST',
-                        data: {
-                            almacene: almaceneId,
-                            producto: productName,
-                            cantidad: cantidad,
-                            _token: '{{ csrf_token() }}' // Include CSRF token for security
-                        },
-                        success: function(response) {
-                            if (!response.available) {
-                                isValid = false;
-                                unavailableProducts.push({
-                                    productName: response.productName,
-                                    cantidadSolicitada: cantidad,
-                                    cantidadDisponible: response
-                                        .cantidadDisponible // Ensure this is returned from the server
-                                });
-                            }
-                        },
-                        async: false // Make this synchronous for validation to wait
-                    });
+
+                if (productId && cantidad > 0) {
+                    // If the product already exists in the map, add to its quantity
+                    if (productQuantities[productName]) {
+                        productQuantities[productName] += cantidad;
+                    } else {
+                        // Otherwise, set the initial quantity
+                        productQuantities[productName] = cantidad;
+                    }
                 }
             });
 
+            // Perform the AJAX request to validate each product's total availability
+            for (const productName in productQuantities) {
+                const cantidadTotal = productQuantities[productName];
+
+                $.ajax({
+                    url: '/movimientos/check-product-availability', // Define your endpoint here
+                    method: 'POST',
+                    data: {
+                        almacene: almaceneId,
+                        producto: productName, // Send product name as expected by the backend
+                        cantidad: cantidadTotal, // Send the total quantity
+                        _token: '{{ csrf_token() }}' // Include CSRF token for security
+                    },
+                    success: function(response) {
+                        if (!response.available) {
+                            isValid = false;
+                            unavailableProducts.push({
+                                productName: response.productName,
+                                cantidadSolicitada: cantidadTotal,
+                                cantidadDisponible: response.cantidadDisponible ||
+                                    0 // Ensure it's set properly
+                            });
+                        }
+                    },
+                    async: false // Make this synchronous for validation to wait
+                });
+            }
+
             if (!isValid) {
-                // Update modal body
+                // Update modal body with almacene name
                 document.getElementById('unavailableProductsModalBody').innerHTML =
                     `No hay suficiente cantidad de los siguientes productos en almacén: ${almaceneName}`;
 
@@ -515,12 +534,14 @@
                     tableBody.innerHTML += row; // Append new row
                 });
 
+                // Show the error modal
                 const modal = new bootstrap.Modal(document.getElementById('unavailableProductsModal'));
                 modal.show();
             }
 
             return isValid;
         }
+
 
         // Función para  verificar que el proveedor está asignado a la empresa del producto agregado.addEventListener 
         function validateProveedorEmpresaRelation() {
@@ -771,13 +792,13 @@
                         </thead>
                         <tbody>
                             ${detalles.map(det => `
-                                                                                                                                                <tr>
-                                                                                                                                                    <td>${det.producto}</td>
-                                                                                                                                                    <td>${det.cantidad}</td>
-                                                                                                                                                    <td>${det.precio}</td>
-                                                                                                                                                    <td>${det.subtotal}</td>
-                                                                                                                                                </tr>
-                                                                                                                                            `).join('')}
+                                                                                                                                                            <tr>
+                                                                                                                                                                <td>${det.producto}</td>
+                                                                                                                                                                <td>${det.cantidad}</td>
+                                                                                                                                                                <td>${det.precio}</td>
+                                                                                                                                                                <td>${det.subtotal}</td>
+                                                                                                                                                            </tr>
+                                                                                                                                                        `).join('')}
                         </tbody>
                     </table>
                 </div>

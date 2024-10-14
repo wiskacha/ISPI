@@ -72,7 +72,8 @@
                             <th class="text-center hide-on-small" style="width: 5%;">#</th>
                             <th>Tipo</th>
                             <th>Código</th>
-                            <th>Fecha</th>
+                            <th>Fecha Creac.</th>
+                            <th>Fecha Final.</th>
                             <th>Operador</th>
                             <th>Almacen</th>
                             <th class="text-center" style="width: 15%;">Acciones</th>
@@ -85,6 +86,8 @@
                                 <td class="fw-semibold">{{ $movimiento->tipo }}</td>
                                 <td class="text-muted">{{ $movimiento->codigo }}</td>
                                 <td class="text-muted">{{ $movimiento->fecha }}</td>
+                                <td class="text-muted">{{ $movimiento->fecha_f ?? 'N/A' }}</td>
+
                                 <td class="text-muted">{{ $movimiento->usuario->persona->papellido }} -
                                     [{{ $movimiento->usuario->persona->carnet }}]</td>
                                 <td class="text-muted">{{ $movimiento->almacene->nombre }}</td>
