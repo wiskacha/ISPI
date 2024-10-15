@@ -268,6 +268,7 @@ class MovimientoController extends Controller
             'movimiento' => $movimiento,
             'total' => $total,
             'clientes' => $clientes,
+            'detalles' => $detalles,
         ]);
     }
 
