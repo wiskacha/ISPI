@@ -126,16 +126,13 @@
     </style>
 </head>
 @php
-    // Inicializamos el contador de páginas
-    $pageBreakCount = 0;
-
     // Función para contar los saltos de página
     function countPageBreaks($movimientos)
     {
         $count = 0;
-        foreach ($movimientos as $movimiento) {
-            // Contamos el salto de página para cada movimiento (excepto el primero)
-            if ($count > 0) {
+        foreach ($movimientos as $index => $movimiento) {
+            // No contamos el salto de página para el primer movimiento
+            if ($index > 0) {
                 $count++;
             }
 
@@ -155,6 +152,10 @@
                 $count++;
             }
         }
+
+        // Añadimos una página para el resumen final
+        $count++;
+
         return $count;
     }
 
@@ -535,27 +536,27 @@
                             </table>
                         @endif
                 @endforeach
-                <div class="page-break"></div>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                Este reporte analizó un total de:
-                                @php $queryCount=0; @endphp
-                                @foreach ($movimientos as $mv)
-                                    @php $queryCount++; @endphp
-                                @endforeach
-                                <strong>
-                                    {{ $queryCount }}
-                                </strong>
-                                movimientos / transacciones.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
         </div>
         @endif
     </div>
+    <div class="page-break"></div>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    Este reporte analizó un total de:
+                    @php $queryCount=0; @endphp
+                    @foreach ($movimientos as $mv)
+                        @php $queryCount++; @endphp
+                    @endforeach
+                    <strong>
+                        {{ $queryCount }}
+                    </strong>
+                    movimientos / transacciones.
+                </td>
+            </tr>
+        </tbody>
+    </table>
     </div>
 </body>
 
