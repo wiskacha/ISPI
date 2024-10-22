@@ -4,18 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEmpresasTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('empresas', function (Blueprint $table) {
-            $table->increments('id_empresa');
+        Schema::create('recintos', function (Blueprint $table) {
+            $table->increments('id_recinto');
             $table->string('nombre', 100)->unique();
+            $table->string('direccion', 200);
+            $table->string('tipo', 100);
+            $table->integer('telefono');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -23,11 +24,9 @@ class CreateEmpresasTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('empresas');
+        Schema::dropIfExists('recintos');
     }
-}
+};

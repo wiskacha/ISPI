@@ -111,6 +111,7 @@ class UserController extends Controller
             ];
 
             $user = User::create($userData);
+            $user->sendEmailVerificationNotification();
 
             // Commit the transaction
             DB::commit();
@@ -136,6 +137,8 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
             ];
             $user = User::create($userData);
+            $user->sendEmailVerificationNotification();
+
             DB::commit();
             return redirect('/personas/usuarios/vista')->with('success', 'Cuenta creada satisfactoriamente');
         } catch (\Exception $e) {

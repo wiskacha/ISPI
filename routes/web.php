@@ -7,63 +7,48 @@ use App\Http\Controllers\{
 };
 use Illuminate\Support\Facades\Route;
 
+// Visitor Routes (Unauthenticated)
+Route::middleware('guest')->group(function () {
+    Route::view('/landing', 'landing')->name('landing');
+    Route::get('/login', [LoginController::class, 'show'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
 
-// Rutas de Administrador (role: admin)
-Route::middleware('role:admin')->group(function () {
-    // Incluir las rutas de clientes
-    require_once base_path('routes/admin/clientes.php');
-
-    // Incluir las rutas de usuarios
-    require_once base_path('routes/admin/usuarios.php');
-
-    // Incluir las rutas de productos
-    require_once base_path('routes/admin/productos.php');
-
-    //Incluir las rutas de empresas
-    require_once base_path('routes/admin/empresas.php');
-
-    //Incluir las rutas de contactos
-    require_once base_path('routes/admin/contactos.php');
-
-    //Incluir las rutas de almacenes
-    require_once base_path('routes/admin/almacenes.php');
-
-    //Incluir las rutas de recintos
-    require_once base_path('routes/admin/recintos.php');
-
-    //Incluir las rutas de movimientos
-    require_once base_path('routes/admin/movimientos.php');
-
-    //Incluir las rutas de generación de recibos
-    require_once base_path('routes/admin/pdf.php');
-
-    //Incluir las rutas de generación de reportes
-    require_once base_path('routes/admin/reportes.php');
 });
 
-// Rutas de Usuario Autenticado
 Route::middleware('auth')->group(function () {
+
+    require_once base_path('routes/email_verification.php');
+    
+    Route::match(['get', 'post'], '/', [HomeController::class, 'show'])->name('home');
+    Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
+});
+
+// Authenticated User Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [HomeController::class, 'show'])->name('dashboard');
+    // User-specific routes
     require_once base_path('routes/user/uclientes.php');
-
     require_once base_path('routes/user/umovimientos.php');
-
     require_once base_path('routes/user/pdf.php');
 });
 
-// Rutas de Páginas Genéricas
+
+// Admin Routes (role: admin)
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Admin-specific routes
+    require_once base_path('routes/admin/clientes.php');
+    require_once base_path('routes/admin/usuarios.php');
+    require_once base_path('routes/admin/productos.php');
+    require_once base_path('routes/admin/empresas.php');
+    require_once base_path('routes/admin/contactos.php');
+    require_once base_path('routes/admin/almacenes.php');
+    require_once base_path('routes/admin/recintos.php');
+    require_once base_path('routes/admin/movimientos.php');
+    require_once base_path('routes/admin/pdf.php');
+    require_once base_path('routes/admin/reportes.php');
+});
+
+// Generic Pages
 Route::view('/pages/slick', 'pages.slick');
 Route::view('/pages/datatables', 'pages.datatables');
 Route::view('/pages/blank', 'pages.blank');
-
-// Ruta del Dashboard
-Route::match(['get', 'post'], '/dashboard', [HomeController::class, 'show']);
-
-// Rutas de Visitante (Sin autenticación)
-Route::match(['get', 'post'], '/', [HomeController::class, 'show']);
-Route::view('/landing', 'landing');
-Route::view('/login', 'landing');
-Route::get('/logout', [LogoutController::class, 'logout']);
-
-// Rutas de Autenticación
-Route::get('/login', [HomeController::class, 'show'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);

@@ -4,14 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCuotasTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('cuotas', function (Blueprint $table) {
             $table->increments('id_cuota');
@@ -19,25 +17,21 @@ class CreateCuotasTable extends Migration
             $table->string('codigo', 100)->unique('codigo');
             $table->string('concepto', 200);
             $table->date('fecha_venc');
-            $table->decimal('monto_pagar', 10, 2);
-            $table->decimal('monto_pagado', 10, 2);
-            $table->decimal('monto_adeudado', 10, 2);
+            $table->decimal('monto_pagar', 10);
+            $table->decimal('monto_pagado', 10);
+            $table->decimal('monto_adeudado', 10);
             $table->string('condicion', 100);
-            $table->unsignedInteger('id_movimiento');
+            $table->unsignedInteger('id_movimiento')->index('cuotas_ibfk_1');
             $table->timestamps();
             $table->softDeletes();
-            
-            $table->foreign('id_movimiento', 'cuotas_ibfk_1')->references('id_movimiento')->on('movimientos');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('cuotas');
     }
-}
+};

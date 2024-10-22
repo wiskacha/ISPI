@@ -9,10 +9,6 @@ class HomeController extends Controller
 {
     public function show()
     {
-        if (Auth::check()) {
-            return view('dashboard');
-        } else {
-            return view('landing'); 
-        }
+        return view('dashboard');
     }
 }

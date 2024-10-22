@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
+
 class LoginRequest extends FormRequest
 {
     /**
@@ -22,26 +23,45 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nick'=> 'required',
-            'password'=> 'required',
+            'email_or_nick' => 'required|string', // Updated to a single field for email or nick
+            'password' => 'required|string',
         ];
     }
 
-    public function getCredentials(){
-        $nick = $this->get('nick');
+    /**
+     * Get the credentials for authentication.
+     *
+     * @return array<string, string>
+     */
+    public function getCredentials(): array
+    {
+        // Use 'email_or_nick' from the form input
+        $loginField = $this->get('email_or_nick');
 
-        if($this->isEmail($nick)){
-            return[
-                'email'=> $nick,
-                'password' => $this->get('password')
+        // Determine if the input is an email or a nickname
+        if ($this->isEmail($loginField)) {
+            return [
+                'email' => $loginField,
+                'password' => $this->get('password'),
             ];
         }
-        return $this->only('nick', 'password');
+
+        return [
+            'nick' => $loginField,
+            'password' => $this->get('password'),
+        ];
     }
 
-    public function isEmail($value){
+    /**
+     * Check if the given value is a valid email address.
+     *
+     * @param string $value
+     * @return bool
+     */
+    public function isEmail(string $value): bool
+    {
         $factory = $this->container->make(ValidationFactory::class);
 
-        return !$factory->make(['nick'=> $value],['nick' => 'email'])->fails();
+        return !$factory->make(['email' => $value], ['email' => 'email'])->fails();
     }
 }

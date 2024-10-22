@@ -6,34 +6,32 @@ use App\Http\Requests\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Models\User;
 
 class LoginController extends Controller
 {
-    //
-
-    public function show(){
-
-        if (Auth::check()) {
-            return redirect('/dashboard');
-        }
-        return view('auth.login');
+    public function show()
+    {
+        return view('landing');
     }
 
-    public function login(LoginRequest $request){
+    public function login(LoginRequest $request)
+    {
         $credentials = $request->getCredentials();
-        if(!Auth::validate($credentials)){
+
+        // Check if the user exists based on email or nickname
+        $user = User::where('email', $credentials['email'] ?? null)
+            ->orWhere('nick', $credentials['nick'] ?? null)
+            ->first();
+
+        if (!$user || !password_verify($credentials['password'], $user->password)) {
             Session::flash('error', 'Credenciales incorrectas');
             Session::flash('openModal', true);
-            return redirect()->to('/')->withErrors('auth.failed');
+            return redirect()->route('login')->withErrors('Error de inicio de sesión');
         }
-        $user = Auth::getProvider()->retrieveByCredentials($credentials);
 
         Auth::login($user);
 
-        return $this->authenticated($request, $user);
-    }
-
-    public function authenticated(Request $request, $user){
-        return redirect('/dashboard');
+        return redirect()->route('dashboard');
     }
 }
