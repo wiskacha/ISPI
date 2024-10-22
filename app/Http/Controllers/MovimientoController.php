@@ -683,7 +683,7 @@ class MovimientoController extends Controller
         // Obtener el total de la suma de los totales de los detalles del movimiento
         $totalDet = $movimiento->detalles->sum('total');
         // Obtener la fecha actual para mostrar en el recibo
-        $fechaActual = now()->format('d/m/Y H:i:s');
+        $fechaActual = now();
         // Obtener el nombre del usuario que genera el recibo buscando con el ID del usuario autenticado en la tabla Persona
         $instanciaUsuario = Auth::user()->persona;
         // Obtener el tipo de Movimiento (SALIDA o ENTRADA) para mostrar en el recibo
@@ -743,7 +743,7 @@ class MovimientoController extends Controller
         // Obtener el total de la suma de los totales de los detalles del movimiento
         $totalDet = $movimiento->detalles->sum('total');
         // Obtener la fecha actual para mostrar en el recibo
-        $fechaActual = now()->format('d/m/Y H:i:s');
+        $fechaActual = now();
         // Obtener el nombre del usuario que genera el recibo buscando con el ID del usuario autenticado en la tabla Persona
         $instanciaUsuario = Auth::user()->persona;
         // Obtener el tipo de Movimiento (SALIDA o ENTRADA) para mostrar en el recibo

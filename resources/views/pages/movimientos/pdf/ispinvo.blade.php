@@ -102,7 +102,7 @@
                             <td>
                                 Movimiento #: <strong>{{ $movimiento->codigo }}</strong><br />
                                 Fecha Operación: {{ date('d/M/Y H:i', strtotime($movimiento->fecha)) }}<br />
-                                Fecha Recibo: {{ date('d/M/Y H:i', strtotime($fechaActual)) }}<br />
+                                Fecha Recibo: {{ $fechaActual }}<br />
                             </td>
                         </tr>
                     </table>

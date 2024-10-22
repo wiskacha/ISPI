@@ -125,37 +125,45 @@
         }
     </style>
 </head>
+
 @php
-    // Inicializamos el contador de páginas
-    $pageBreakCount = 0;
-
-    // Función para contar los saltos de página
-    function countPageBreaks($movimientos)
+    // Función autónoma para contar los saltos de página, considerando solo productos únicos
+    function countUniqueProductPageBreaks($uniqueProducts)
     {
-        $count = 0;
-        foreach ($movimientos as $movimiento) {
-            // Contamos el salto de página para cada movimiento (excepto el primero)
-            if ($count > 0) {
-                $count++;
-            }
+        $pageCount = 0; // Contador de páginas
 
-            // Contamos los saltos de página en los detalles
-            $detallesCount = $movimiento->detalles->count();
-            if ($detallesCount > 9) {
-                $count += ceil(($detallesCount - 9) / 12);
-            }
+        // Contamos las páginas necesarias para los productos únicos
+        $uniqueProductCount = $uniqueProducts->count();
 
-            // Contamos los saltos de página en las cuotas
+        // Se asume que la primera página contiene hasta 9 productos
+        if ($uniqueProductCount > 9) {
+            // Calculamos las páginas adicionales necesarias
+            $pageCount += ceil(($uniqueProductCount - 9) / 12);
         }
-        return $count;
+
+        // Añadimos la primera página que siempre existirá
+        $pageCount++; 
+
+        // Añadimos una página adicional para el resumen final del reporte
+        // $pageCount++;
+
+        return $pageCount;
     }
 
-    // Contamos los saltos de página
-    $pageBreakCount = countPageBreaks($movimientos);
+    // Agrupamos los productos únicos a través de todos los movimientos
+    $uniqueProductsForPageCount = $movimientos->flatMap->detalles->unique(function ($detalle) {
+        return $detalle->producto->codigo; // Agrupamos por el código del producto para asegurarnos de que sean únicos
+    });
 
-    // Calculamos el total de páginas (saltos de página + 1 para la primera página)
-    $totalPages = $pageBreakCount + 1;
+    // Contamos los saltos de página para los productos únicos
+    $uniqueProductPageBreakCount = countUniqueProductPageBreaks($uniqueProductsForPageCount);
+
+    // Calculamos el total de páginas, incluyendo la primera página
+    $totalPages = $uniqueProductPageBreakCount;
 @endphp
+
+
+
 
 <body class="A4 landscape">
     <div class="container-fluid"
