@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User; // Import the User model
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\CustomVerifyEmail;
+
 
 // Middleware for authenticated users
 Route::middleware('auth')->group(function () {
@@ -29,9 +32,10 @@ Route::middleware('auth')->group(function () {
 
     // Resend email verification link
     Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
+        $user = $request->user();
+        Notification::send($user, new CustomVerifyEmail);
 
-        return back()->with('message', 'Verification link sent!');
+        return back()->with('resent', true);
     })->middleware('throttle:6,1')->name('verification.send');
 
     // Handle email verification logic

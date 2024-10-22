@@ -34,7 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 // Admin Routes (role: admin)
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin', 'verified'])->group(function () {
     // Admin-specific routes
     require_once base_path('routes/admin/clientes.php');
     require_once base_path('routes/admin/usuarios.php');

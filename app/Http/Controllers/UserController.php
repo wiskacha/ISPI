@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash; // Import the Hash facade
 use Illuminate\Support\Facades\Log;
 
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\CustomVerifyEmail;
 
 class UserController extends Controller
 {
@@ -111,7 +113,6 @@ class UserController extends Controller
             ];
 
             $user = User::create($userData);
-            $user->sendEmailVerificationNotification();
 
             // Commit the transaction
             DB::commit();
@@ -137,7 +138,6 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
             ];
             $user = User::create($userData);
-            $user->sendEmailVerificationNotification();
 
             DB::commit();
             return redirect('/personas/usuarios/vista')->with('success', 'Cuenta creada satisfactoriamente');

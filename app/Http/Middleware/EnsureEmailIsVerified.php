@@ -19,7 +19,7 @@ class EnsureEmailIsVerified
         if (Auth::check()) {
             $user = Auth::user();
             /** @var User $user */
-            if (!$user->hasVerifiedEmail()) {
+            if (!$user->hasVerifiedEmail() && !$request->routeIs('verification.notice')) {
                 return redirect()->route('verification.notice')
                     ->with('error', 'Please verify your email before accessing your dashboard.');
             }

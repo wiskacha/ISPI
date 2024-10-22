@@ -1,32 +1,20 @@
-<!-- resources/views/auth/verify-email.blade.php -->
-
 @extends('layouts.simple')
 
 @section('content')
-    @php
-        use Illuminate\Support\Str;
-    @endphp
-
-    <div class="container d-flex flex-column justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="container d-flex flex-column justify-content-center align-items-center bg-dark" style="min-height: 100vh;">
         <h5 class="alert alert-info text-center" style="width: 100%; max-width: 400px;">
             {{ __('Verifica tu dirección de correo electrónico') }}
         </h5>
 
         <div class="text-center" style="width: 100%; max-width: 400px;">
             @if (Auth::check() && Auth::user()->persona)
-                @php
-                    /** @var User $user */
-                @endphp
                 <p>
                     {{ __('¡Hola, :name!', ['name' => Auth::user()->nick]) }}<br>
                     {{ __('Se enviará un correo electrónico de verificación a:') }}<br>
-                    <strong>{{ Str::mask(Auth::user()->email, '*', 1, strlen(Auth::user()->email) - strpos(Auth::user()->email, '@') - 1) }}</strong>
+                    <strong>{{ Illuminate\Support\Str::mask(Auth::user()->email, '*', 1, strlen(Auth::user()->email) - strpos(Auth::user()->email, '@') - 1) }}</strong>
                 </p>
             @else
-                <p>
-                    {{ __('¡Hola, Invitado!') }}<br>
-                    {{ __('Por favor, inicia sesión para recibir tu correo electrónico de verificación.') }}
-                </p>
+                <p>{{ __('Por favor, inicia sesión para recibir tu correo electrónico de verificación.') }}</p>
             @endif
 
             <div class="alert alert-info">
@@ -37,11 +25,17 @@
                 <div class="alert alert-success" role="alert">
                     {{ __('Se ha enviado un nuevo enlace de verificación a tu dirección de correo electrónico.') }}
                 </div>
+                {{-- @php
+                    dd(session()->all());
+                @endphp --}}
             @endif
 
-            <form method="POST" action="{{ route('verification.send') }}">
+            <!-- Resend Button -->
+            <form method="POST" action="{{ route('verification.send') }}" id="resend-form">
                 @csrf
-                <button type="submit" class="btn btn-primary">{{ __('Reenviar correo de verificación') }}</button>
+                <button type="submit" class="btn btn-primary" id="resend-button">
+                    {{ __('Reenviar correo de verificación') }}
+                </button>
             </form>
 
             <!-- Logout Button -->
@@ -51,4 +45,12 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.getElementById('resend-form').addEventListener('submit', function(event) {
+            var button = document.getElementById('resend-button');
+            button.disabled = true;
+            button.innerHTML = "{{ __('Enviando...') }}"; // Update button text while sending
+        });
+    </script>
 @endsection
