@@ -11,7 +11,7 @@ use App\Http\Requests\RegisterRequestUsuarioE;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash; // Import the Hash facade
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\CustomVerifyEmail;
 
@@ -44,13 +44,23 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
+        $currentUser = Auth::user(); // Get the currently authenticated user
+
+        // Check if the user exists and if it's not the current user
         if ($user) {
+            if ($user->id === $currentUser->id) {
+                return redirect()->route('personas.usuarios.vistaUsuarios')
+                    ->withErrors(['error' => 'No puedes eliminar tu propia cuenta.']);
+            }
+
             $user->delete(); // Soft delete
             return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuario eliminado correctamente.');
         } else {
-            return redirect()->route('personas.usuarios.vistaUsuarios')->with('error', 'Usuario no encontrao.');
+            return redirect()->route('personas.usuarios.vistaUsuarios')->withErrors(['error' => 'Usuario no encontrado.']);
         }
     }
+
+
 
 
     public function editUsuario(User $user)

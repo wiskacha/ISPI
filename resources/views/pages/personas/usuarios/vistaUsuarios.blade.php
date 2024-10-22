@@ -95,7 +95,8 @@
                                 </form>
 
                                 <!-- Button to handle the edit action -->
-                                <a href="{{ route('personas.usuarios.editUsuario', $usuario) }}" class="btn btn-sm btn-primary">
+                                <a href="{{ route('personas.usuarios.editUsuario', $usuario) }}"
+                                    class="btn btn-sm btn-primary">
                                     <i class="fa fa-edit"></i>
                                     <span class="hide-on-small">Editar</span>
                                 </a>
@@ -106,4 +107,21 @@
             </table>
         </div>
     </div>
+    @if ($errors->any())
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+            <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-danger text-white">
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
