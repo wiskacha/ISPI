@@ -20,7 +20,9 @@ class ProductoController extends Controller
 {
     public function destroy($id)
     {
+
         $producto = Producto::find($id);
+        
         if ($producto) {
             // Check if the producto has a related detalles record
             $hasDetalles = $producto->detalles()->exists();

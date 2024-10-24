@@ -41,7 +41,7 @@ class RecintoController extends Controller
             return redirect()->route('recintos.vista')->with('error', 'No se puede eliminar el recinto porque tiene movimientos asociados.');
         }
         $recinto->delete();
-        return redirect()->route('recintos.vista')->with('success', 'Recinto: '. $recinto->nombre .' eliminado exitosamente.');
+        return redirect()->route('recintos.vista')->with('success', 'Recinto: ' . $recinto->nombre . ' eliminado exitosamente.');
     }
 
     // Registrar un nuevo recinto

@@ -210,6 +210,31 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (!confirmDeleteModal) {
+                return;
+            }
+
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+
+                const button = event.relatedTarget;
+                const empresaName = button.getAttribute('data-empresa-name');
+                const empresaId = button.getAttribute('data-empresa-id');
+
+                // Actualizar el contenido del modal
+                const modalEmpresaName = confirmDeleteModal.querySelector('#empresa-name');
+                modalEmpresaName.textContent = empresaName;
+
+                // Actualizar la acción del formulario usando la ruta nombrada
+                const deleteForm = confirmDeleteModal.querySelector('#deleteEmpresaForm');
+                const newAction = `{{ route('empresas.destroy', 'id') }}`.replace('id', empresaId);
+                deleteForm.action = newAction;
+
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -254,14 +279,13 @@
                         <div class="card-footer text-center">
                             <a href="{{ route('empresas.edit', $empresa->id_empresa) }}" class="btn btn-alt-primary"><i
                                     class="fa fa-edit"></i> Editar</a>
-                            <form action="{{ route('empresas.destroy', $empresa->id_empresa) }}" method="POST"
-                                class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-alt-danger"
-                                    onclick="return confirm('¿Estás seguro de que deseas eliminar esta empresa?');"><i
-                                        class="fa fa-trash"></i> Eliminar</button>
-                            </form>
+
+                            <button type="button" class="btn btn-alt-danger" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-empresa-name="{{ $empresa->nombre }}"
+                                data-empresa-id="{{ $empresa->id_empresa }}">
+                                <i class="fa fa-trash"></i>
+                                <span class="hide-on-small">Eliminar</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -297,4 +321,27 @@
             </div>
         </div>
     @endif
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desea eliminar a <strong id="empresa-name"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteEmpresaForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

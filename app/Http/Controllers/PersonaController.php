@@ -9,6 +9,7 @@ use App\Models\Movimiento;
 use App\Models\Contacto;
 use App\Http\Requests\RegisterRequestCliente;
 use App\Http\Requests\UpdateRequestCliente;
+use Illuminate\Support\Facades\Auth;
 
 class PersonaController extends Controller
 {
@@ -23,6 +24,7 @@ class PersonaController extends Controller
         CONCAT(nombre, ' ', papellido, ' ', COALESCE(sapellido, '')) AS NOMBRE,
         carnet AS CARNET,
         celular AS CELULAR,
+        id_persona,
         EXISTS(SELECT 1 FROM users WHERE users.id = personas.id_persona AND users.deleted_at IS NULL) AS has_user
     ")->whereNull('personas.deleted_at');
 
@@ -94,7 +96,6 @@ class PersonaController extends Controller
     public function destroy($id)
     {
         $persona = Persona::find($id);
-
         if ($persona) {
             // Check if the persona has a related user, movimiento or contacto record
             $hasUser = User::where('id', $id)->exists(); // Check if the persona has a related user record

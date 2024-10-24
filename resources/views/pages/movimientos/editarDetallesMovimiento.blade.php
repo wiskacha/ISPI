@@ -178,16 +178,13 @@
                                     </div>
 
                                     <!-- Add a delete button here -->
-                                    <form method="POST"
-                                        action="{{ route('movimientos.eliminarDetalle', ['id_movimiento' => $movimiento->id_movimiento, 'id_detalle' => $detalle->id_detalle]) }}"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('POST')
-                                        <button type="submit" class="btn btn-danger btn-sm"
-                                            onclick="return confirm('¿Está seguro que desea eliminar el producto {{ $detalle->producto->nombre }}?');">
-                                            <i class="fa fa-trash"></i><small class="hide-on-small"> Eliminar</small>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#confirmDeleteDetalleModal"
+                                        data-product-name="{{ $detalle->producto->nombre }}"
+                                        data-movimiento-id="{{ $movimiento->id_movimiento }}"
+                                        data-detalle-id="{{ $detalle->id_detalle }}">
+                                        <i class="fa fa-trash"></i><small class="hide-on-small"> Eliminar</small>
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -316,11 +313,59 @@
             </div>
         </div>
     @endif
+
+    <!-- Modal de confirmación para eliminar detalle -->
+    <div class="modal fade" id="confirmDeleteDetalleModal" tabindex="-1"
+        aria-labelledby="confirmDeleteDetalleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteDetalleModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desea eliminar el producto <strong id="product-name"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteDetalleForm" method="POST" action="">
+                        @csrf
+                        @method('POST')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('js')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmDeleteModal = document.getElementById('confirmDeleteDetalleModal');
+
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const productName = button.getAttribute('data-product-name');
+                const movimientoId = button.getAttribute('data-movimiento-id');
+                const detalleId = button.getAttribute('data-detalle-id');
+
+                // Actualizar el contenido del modal
+                const modalProductName = confirmDeleteModal.querySelector('#product-name');
+                modalProductName.textContent = productName;
+
+                // Actualizar la acción del formulario
+                const deleteForm = confirmDeleteModal.querySelector('#deleteDetalleForm');
+                const newAction =
+                    `{{ route('movimientos.eliminarDetalle', ['id_movimiento' => ':movimientoId', 'id_detalle' => ':detalleId']) }}`
+                    .replace(':movimientoId', movimientoId)
+                    .replace(':detalleId', detalleId);
+                deleteForm.action = newAction;
+            });
+        });
+    </script>
     <script>
         $(document).ready(function() {
             // Initialize Select2 within the modal when it's shown

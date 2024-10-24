@@ -32,9 +32,64 @@
 
     <!-- Page JS Code -->
     @vite(['resources/js/pages/datatables.js'])
+
+    <script>
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (!confirmDeleteModal) {
+                return;
+            }
+
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+
+
+                // Botón que disparó el modal
+                const button = event.relatedTarget;
+
+                // Extraer información del data-* attributes
+                const userName = button.getAttribute('data-user');
+                const userId = button.getAttribute('data-id');
+
+
+                // Actualizar el contenido del modal
+                const modalUserName = confirmDeleteModal.querySelector('#user-name');
+                modalUserName.textContent = userName;
+
+                // Actualizar la acción del formulario usando la ruta nombrada
+                const deleteForm = confirmDeleteModal.querySelector('#deleteForm');
+                const newAction = `{{ route('user.destroy', 'id') }}`.replace('id', userId);
+                deleteForm.action = newAction;
+
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desea eliminar al usuario <strong id="user-name"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="bg-body-light">
         <div class="content content-full">
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center py-2">
@@ -71,6 +126,7 @@
                     <tr>
                         <th class="text-center hide-on-small" style="width: 5%;">#</th>
                         <th style="width: 10%;">Nick/Email</th>
+                        <th style="width: 10%;">Correo Verificado</th>
                         <th style="width: 10%;">Dueño</th>
                         <th class="text-center" style="width: 10%;">Acciones</th> <!-- New column for actions -->
                     </tr>
@@ -80,28 +136,32 @@
                         <tr>
                             <td class="text-center hide-on-small">{{ $index + 1 }}</td>
                             <td class="fw-semibold">{{ $usuario->NICKEMAIL }}</td>
-                            <td class="text-muted">{{ $usuario->DUEÑO }}</td> <!-- Aquí mostramos el dueño -->
-                            <td class="text-center">
-                                <!-- Form to handle the delete action -->
-                                <form method="POST" action="{{ route('user.destroy', $usuario->id) }}"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('¿Está seguro que desea eliminar a {{ $usuario->NICKEMAIL }}?');">
-                                        <i class="fa fa-trash"></i>
-                                        <span class="hide-on-small">Eliminar</span>
-                                    </button>
-                                </form>
-
-                                <!-- Button to handle the edit action -->
-                                <a href="{{ route('personas.usuarios.editUsuario', $usuario) }}"
-                                    class="btn btn-sm btn-primary">
-                                    <i class="fa fa-edit"></i>
-                                    <span class="hide-on-small">Editar</span>
-                                </a>
+                            <td>
+                                @if ($usuario->email_verified_at)
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    {{ $usuario->email_verified_at->format('d/m/Y H:i') }}
                             </td>
-                        </tr>
+                        @else
+                            <i class="fas fa-times-circle text-danger"></i> No
+                    @endif
+                    </td>
+                    <td class="text-muted">{{ $usuario->DUEÑO }}</td> <!-- Aquí mostramos el dueño -->
+                    <td class="text-center">
+                        <!-- Form to handle the delete action -->
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                            data-bs-target="#confirmDeleteModal" data-user="{{ $usuario->NICKEMAIL }}"
+                            data-id="{{ $usuario->id }}">
+                            <i class="fa fa-trash"></i>
+                            <span class="hide-on-small">Eliminar</span>
+                        </button>
+
+                        <!-- Button to handle the edit action -->
+                        <a href="{{ route('personas.usuarios.editUsuario', $usuario) }}" class="btn btn-sm btn-primary">
+                            <i class="fa fa-edit"></i>
+                            <span class="hide-on-small">Editar</span>
+                        </a>
+                    </td>
+                    </tr>
                     @endforeach
                 </tbody>
             </table>
@@ -124,4 +184,5 @@
             </div>
         </div>
     @endif
+
 @endsection

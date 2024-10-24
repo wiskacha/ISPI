@@ -93,6 +93,32 @@
             $('#excludeUsers').on('change', function() {
                 $('#filterForm').submit();
             });
+
+
+            const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (!confirmDeleteModal) {
+                return;
+            }
+
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+
+
+                // Botón que disparó el modal
+                const button = event.relatedTarget;
+
+                // Extraer información del data-* attributes
+                const personName = button.getAttribute('data-person-name');
+                const personId = button.getAttribute('data-person-id');
+
+                // Actualizar el contenido del modal
+                const modalPersonName = confirmDeleteModal.querySelector('#person-name');
+                modalPersonName.textContent = personName;
+
+                // Actualizar la acción del formulario usando la ruta nombrada
+                const deleteForm = confirmDeleteModal.querySelector('#deletePersonForm');
+                const newAction = `{{ route('persona.destroy', 'id') }}`.replace('id', personId);
+                deleteForm.action = newAction;
+            });
         });
     </script>
 
@@ -205,17 +231,12 @@
                                 <td class="text-muted hide-on-small">{{ $persona->CELULAR ?? 'N/A' }}</td>
                                 <td class="text-center">
                                     <!-- Form to handle the delete action -->
-                                    <form method="POST" action="{{ route('persona.destroy', $persona->id_persona) }}"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger"
-                                            onclick="return confirm('¿Está seguro que desea eliminar a {{ $persona->NOMBRE }}?');">
-                                            <i class="fa fa-trash"></i>
-                                            <span class="hide-on-small">Eliminar</span>
-                                        </button>
-                                    </form>
-
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#confirmDeleteModal" data-person-name="{{ $persona->NOMBRE }}"
+                                        data-person-id="{{ $persona->id_persona }}">
+                                        <i class="fa fa-trash"></i>
+                                        <span class="hide-on-small">Eliminar</span>
+                                    </button>
                                     <!-- Button to handle the edit action -->
                                     <a href="{{ route('persona.editCliente', $persona) }}" class="btn btn-sm btn-primary">
                                         <i class="fa fa-edit"></i>
@@ -229,10 +250,32 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal -->
-    <div class="modal fade" id="modal-block-vcenter" tabindex="-1" role="dialog" aria-labelledby="modal-block-vcenter"
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desea eliminar a <strong id="person-name"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form id="deletePersonForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modal-block-vcenter" tabindex="-1" role="dialog"
+        aria-labelledby="modal-block-vcenter" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">

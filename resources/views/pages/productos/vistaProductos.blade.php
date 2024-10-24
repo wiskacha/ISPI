@@ -56,6 +56,33 @@
 
 
     @vite(['resources/js/pages/datatables.js'])
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (!confirmDeleteModal) {
+                return;
+            }
+
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+
+                const button = event.relatedTarget;
+
+                const productName = button.getAttribute('data-product-name');
+                const productId = button.getAttribute('data-product-id');
+
+                // Actualizar el contenido del modal
+                const modalProductName = confirmDeleteModal.querySelector('#product-name');
+                modalProductName.textContent = productName;
+
+                // Actualizar la acción del formulario usando la ruta nombrada
+                const deleteForm = confirmDeleteModal.querySelector('#deleteProductForm');
+                const newAction = `{{ route('productos.destroy', 'id') }}`.replace('id', productId);
+                deleteForm.action = newAction;
+
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -164,17 +191,13 @@
                                             </a>
                                         </div>
                                         <div class="col-md-6">
-                                            <!-- Botón Eliminar (Middle) -->
-                                            <form method="POST"
-                                                action="{{ route('productos.destroy', $producto->id_producto) }}"
-                                                style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('¿Está seguro que desea eliminar el producto {{ $producto->nombre }}?');">
-                                                    <i class="fa fa-trash"></i><small class="hide-on-small">Eliminar</small>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                                data-bs-target="#confirmDeleteModal"
+                                                data-product-name="{{ $producto->nombre }}"
+                                                data-product-id="{{ $producto->id_producto }}">
+                                                <i class="fa fa-trash"></i>
+                                                <span class="hide-on-small">Eliminar</span>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -187,7 +210,29 @@
             <button id="customPrintButton">IMPRIMIR Products</button>
         </div>
     </div>
-
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desea eliminar a <strong id="product-name"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteProductForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
 

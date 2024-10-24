@@ -5,7 +5,7 @@ use App\Http\Controllers\ReporteController;
 
 Route::prefix('reportes')->group(function () {
 
-    Route::get('/vista-generar', [ReporteController::class, 'index'])->name('recintos.vista');
+    Route::get('/vista-generar', [ReporteController::class, 'index'])->name('reportes.vista');
 
     Route::post('/reporte-generado', [ReporteController::class, 'generarReporte'])->name('reportes.reportegenerado');
 

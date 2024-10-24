@@ -210,6 +210,31 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (!confirmDeleteModal) {
+                return;
+            }
+            
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+
+                const button = event.relatedTarget;
+                const almaceneName = button.getAttribute('data-almacene-name');
+                const almaceneId = button.getAttribute('data-almacene-id');
+
+                // Actualizar el contenido del modal
+                const modalAlmaceneName = confirmDeleteModal.querySelector('#almacene-name');
+                modalAlmaceneName.textContent = almaceneName;
+
+                // Actualizar la acción del formulario usando la ruta nombrada
+                const deleteForm = confirmDeleteModal.querySelector('#deleteAlmaceneForm');
+                const newAction = `{{ route('almacenes.destroy', 'id') }}`.replace('id', almaceneId);
+                deleteForm.action = newAction;
+
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -254,14 +279,13 @@
                         <div class="card-footer text-center">
                             <a href="{{ route('almacenes.edit', $almacene->id_almacen) }}" class="btn btn-alt-primary"><i
                                     class="fa fa-edit"></i> Editar</a>
-                            <form action="{{ route('almacenes.destroy', $almacene->id_almacen) }}" method="POST"
-                                class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-alt-danger"
-                                    onclick="return confirm('¿Estás seguro de que deseas eliminar esta almacene?');"><i
-                                        class="fa fa-trash"></i> Eliminar</button>
-                            </form>
+
+                            <button type="button" class="btn btn-alt-danger" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-almacene-name="{{ $almacene->nombre }}"
+                                data-almacene-id="{{ $almacene->id_almacen }}">
+                                <i class="fa fa-trash"></i>
+                                <span class="hide-on-small">Eliminar</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -297,4 +321,27 @@
             </div>
         </div>
     @endif
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desea eliminar a <strong id="almacene-name"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteAlmaceneForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

@@ -30,6 +30,31 @@
 
     <!-- Page JS Code -->
     @vite(['resources/js/pages/datatables.js'])
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (!confirmDeleteModal) {
+                return;
+            }
+
+            confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+
+                const button = event.relatedTarget;
+                const recintoName = button.getAttribute('data-recinto-name');
+                const recintoId = button.getAttribute('data-recinto-id');
+
+                // Actualizar el contenido del modal
+                const modalRecintoName = confirmDeleteModal.querySelector('#recinto-name');
+                modalRecintoName.textContent = recintoName;
+
+                // Actualizar la acción del formulario usando la ruta nombrada
+                const deleteForm = confirmDeleteModal.querySelector('#deleteRecintoForm');
+                const newAction = `{{ route('recintos.destroy', 'id') }}`.replace('id', recintoId);
+                deleteForm.action = newAction;
+
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -88,18 +113,13 @@
                                 <td class="text-muted">{{ $recinto->tipo }}</td>
                                 <td class="text-muted">{{ $recinto->telefono }}</td>
                                 <td class="text-center">
-                                    <!-- Form to handle the delete action -->
-                                    <form method="POST" action="{{ route('recintos.destroy', $recinto->id_recinto) }}"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger"
-                                            onclick="return confirm('¿Está seguro que desea eliminar el recinto {{ $recinto->nombre }}?');">
-                                            <i class="fa fa-trash"></i>
-                                            <span class="hide-on-small">Eliminar</span>
-                                        </button>
-                                    </form>
-
+                                    
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#confirmDeleteModal" data-recinto-name="{{ $recinto->nombre }}"
+                                        data-recinto-id="{{ $recinto->id_recinto }}">
+                                        <i class="fa fa-trash"></i>
+                                        <span class="hide-on-small">Eliminar</span>
+                                    </button>
                                     <!-- Button to handle the edit action -->
                                     <a href="{{ route('recintos.edit', $recinto) }}" class="btn btn-sm btn-primary">
                                         <i class="fa fa-edit"></i>
@@ -134,4 +154,27 @@
             </div>
         </div>
     @endif
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desea eliminar a <strong id="recinto-name"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteRecintoForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

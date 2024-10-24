@@ -23,7 +23,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $usuarios = User::with('persona') // Eager load de la relación 'persona'
-            ->selectRaw("CONCAT(nick, ' / ', COALESCE(email, '')) AS NICKEMAIL, id") // Necesitamos 'id' para la relación
+            ->selectRaw("CONCAT(nick, ' / ', COALESCE(email, '')) AS NICKEMAIL, id, email_verified_at") // Agregar 'email_verified_at'
             ->whereNull('deleted_at')
             ->orderBy('updated_at', 'DESC')
             ->get();
@@ -41,8 +41,10 @@ class UserController extends Controller
         return view('pages.personas.usuarios.vistaUsuarios', ['usuarios' => $usuarios]);
     }
 
+
     public function destroy($id)
     {
+    
         $user = User::find($id);
         $currentUser = Auth::user(); // Get the currently authenticated user
 
@@ -70,10 +72,27 @@ class UserController extends Controller
 
     public function updateUsuario(UpdateRequestUsuario $request, User $user)
     {
-        $user->update($request->validated()); // Update the instance with validated data
+        // Verifica si el email cambió
+        if ($request->email !== $user->email) {
+            $user->email_verified_at = null; // Si el email cambió, se desactiva la verificación
+        }
 
-        return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuaio actualizado correctamente.');
+        // Obtener los datos validados del request
+        $data = $request->validated();
+
+        // Verifica si se ha proporcionado una nueva contraseña
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password); // Encripta la contraseña
+        } else {
+            unset($data['password']); // Si no se ha proporcionado, elimina la contraseña de los datos a actualizar
+        }
+
+        // Actualiza la instancia del usuario con los datos validados
+        $user->update($data);
+
+        return redirect()->route('personas.usuarios.vistaUsuarios')->with('success', 'Usuario actualizado correctamente.');
     }
+
 
 
     // REGISTRO DE USUARIO
