@@ -7,7 +7,7 @@
         <div style="position: absolute; top: 2%; right: 1%;">
             <a id="dark-mode-toggle" class="btn btn-sm btn-alt-secondary" href="javascript:void(0)">
                 <i id="theme-icon" class="far fa-moon"></i>
-                <span>Lightswitch</span>
+                <span>Interruptor</span>
             </a>
         </div>
 
