@@ -98,7 +98,11 @@
                                                     </div>
                                                 </form>
                                                 <!-- END Sign In Form -->
-
+                                                <div class="py-2">
+                                                    <a class="fs-sm fw-medium" href="{{ route('password.request') }}">
+                                                        He olvidado mis credenciales
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- END Sign In Block -->
@@ -133,6 +137,7 @@
             </div>
         </div>
     @endif
+    
     <!-- END Hero -->
     @if (Session::has('openModal'))
         <script>
