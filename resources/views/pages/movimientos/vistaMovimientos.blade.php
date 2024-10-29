@@ -76,6 +76,7 @@
                             <th>Fecha Final.</th>
                             <th>Operador</th>
                             <th>Almacen</th>
+                            <th>Cliente/Prov</th>
                             <th class="text-center" style="width: 15%;">Acciones</th>
                         </tr>
                     </thead>
@@ -91,6 +92,13 @@
                                 <td class="text-muted">{{ $movimiento->usuario->persona->papellido }} -
                                     [{{ $movimiento->usuario->persona->carnet }}]</td>
                                 <td class="text-muted">{{ $movimiento->almacene->nombre }}</td>
+                                @if ($movimiento->tipo == 'SALIDA')
+                                <td>{{$movimiento->cliente->carnet ?? 'C: N/A'}}</td>
+                                @elseif ($movimiento->tipo == 'ENTRADA')
+                                <td>{{$movimiento->persona->carnet ?? 'P: N/A'}}</td>
+                                @else
+                                <td class="text-muted">NO ASIGNADO</td>
+                                @endif
                                 <td class="text-center">
                                     <a href="{{ route('movimientos.edit', $movimiento->id_movimiento) }}"
                                         class="btn btn-sm btn-primary">
