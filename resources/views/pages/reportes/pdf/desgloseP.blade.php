@@ -142,7 +142,7 @@
         }
 
         // Añadimos la primera página que siempre existirá
-        $pageCount++; 
+        $pageCount++;
 
         // Añadimos una página adicional para el resumen final del reporte
         // $pageCount++;
@@ -374,9 +374,13 @@
                                             ->sum('total');
 
                                         // Nuevas variables para contar el número de detalles
-                                        $cantidadE = $detallesProducto->where('movimiento.tipo', 'ENTRADA')->count(); // Contar detalles con tipo 'ENTRADA'
+                                        $cantidadE = $detallesProducto
+                                            ->where('movimiento.tipo', 'ENTRADA')
+                                            ->sum('cantidad'); // Sumar cantidades con tipo 'ENTRADA'
 
-                                        $cantidadS = $detallesProducto->where('movimiento.tipo', 'SALIDA')->count(); // Contar detalles con tipo 'SALIDA'
+                                        $cantidadS = $detallesProducto
+                                            ->where('movimiento.tipo', 'SALIDA')
+                                            ->sum('cantidad'); // Sumar cantidades con tipo 'SALIDA'
 
                                         // Calcular la cantidad total (opcional)
                                         $cant_mov = $cantidadE + $cantidadS; // Total de conteo
@@ -401,28 +405,59 @@
                                         @php $contador_rows = 0; @endphp
                                     @endif
                                     {{-- Product Row --}}
-                                    <tr>
-                                        <td>
-                                            [{{ $productoP->codigo }}]
-                                            <small>{{ $productoP->nombre }}</small>
-                                        </td>
-                                        <td>{{ $productoP->precio }}</td> {{-- Current product price --}}
-                                        <td>{{ $detallesProducto->min('precio') }}</td> {{-- Minimum price in the details --}}
-                                        <td>{{ $detallesProducto->max('precio') }}</td> {{-- Maximum price in the details --}}
-                                        <td>{{ number_format($detallesProducto->avg('precio'), 2) }}</td>
+                                    @if (isset($criteriosB['producto']))
+                                        @if ($criteriosB['producto'] === $productoP->codigo)
+                                            <tr>
+                                                <td>
+                                                    [{{ $productoP->codigo }}]
+                                                    <small>{{ $productoP->nombre }}</small>
+                                                </td>
+                                                <td>{{ $productoP->precio }}</td> {{-- Current product price --}}
+                                                <td>{{ $detallesProducto->min('precio') }}</td> {{-- Minimum price in the details --}}
+                                                <td>{{ $detallesProducto->max('precio') }}</td> {{-- Maximum price in the details --}}
+                                                <td>{{ number_format($detallesProducto->avg('precio'), 2) }}</td>
 
-                                        @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] === 'Existencias')
-                                            <td>{{ $cantidadE }}</td> {{-- Cant. E --}}
-                                            <td>{{ $cantidadS }}</td> {{-- Cant. S --}}
-                                            <td>{{ $cantidadT }}</td> {{-- Cant. T --}}
-                                            <td>{{ $subtotalE }}</td> {{-- SubT. E --}}
-                                            <td>{{ $subtotalS }}</td> {{-- SubT. S --}}
-                                            <td>{{ $subtotalT }}</td> {{-- SubT. T --}}
-                                        @else
-                                            <td>{{ $detallesProducto->sum('cantidad') }}</td> {{-- Quantity --}}
-                                            <td>{{ $detallesProducto->sum('total') }}</td> {{-- Subtotal --}}
+                                                @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] === 'Existencias')
+                                                    <td>{{ $cantidadE }}</td> {{-- Cant. E --}}
+                                                    <td>{{ $cantidadS }}</td> {{-- Cant. S --}}
+                                                    <td>{{ $cantidadT }}</td> {{-- Cant. T --}}
+                                                    <td>{{ $subtotalE }}</td> {{-- SubT. E --}}
+                                                    <td>{{ $subtotalS }}</td> {{-- SubT. S --}}
+                                                    <td>{{ $subtotalT }}</td> {{-- SubT. T --}}
+                                                @else
+                                                    <td>{{ $detallesProducto->sum('cantidad') }}</td>
+                                                    {{-- Quantity --}}
+                                                    <td>{{ $detallesProducto->sum('total') }}</td>
+                                                    {{-- Subtotal --}}
+                                                @endif
+                                            </tr>
                                         @endif
-                                    </tr>
+                                    @else
+                                        <tr>
+                                            <td>
+                                                [{{ $productoP->codigo }}]
+                                                <small>{{ $productoP->nombre }}</small>
+                                            </td>
+                                            <td>{{ $productoP->precio }}</td> {{-- Current product price --}}
+                                            <td>{{ $detallesProducto->min('precio') }}</td> {{-- Minimum price in the details --}}
+                                            <td>{{ $detallesProducto->max('precio') }}</td> {{-- Maximum price in the details --}}
+                                            <td>{{ number_format($detallesProducto->avg('precio'), 2) }}</td>
+
+                                            @if (isset($criteriosB['tipo']) && $criteriosB['tipo'] === 'Existencias')
+                                                <td>{{ $cantidadE }}</td> {{-- Cant. E --}}
+                                                <td>{{ $cantidadS }}</td> {{-- Cant. S --}}
+                                                <td>{{ $cantidadT }}</td> {{-- Cant. T --}}
+                                                <td>{{ $subtotalE }}</td> {{-- SubT. E --}}
+                                                <td>{{ $subtotalS }}</td> {{-- SubT. S --}}
+                                                <td>{{ $subtotalT }}</td> {{-- SubT. T --}}
+                                            @else
+                                                <td>{{ $detallesProducto->sum('cantidad') }}</td>
+                                                {{-- Quantity --}}
+                                                <td>{{ $detallesProducto->sum('total') }}</td>
+                                                {{-- Subtotal --}}
+                                            @endif
+                                        </tr>
+                                    @endif
                                     @php $contador_rows++; @endphp
                                 @endforeach
                                 @if ($contador_rows >= $rows_perpage)

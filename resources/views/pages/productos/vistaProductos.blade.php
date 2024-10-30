@@ -182,7 +182,7 @@
                                 <td class="fs-sm">{{ 'U:' . $producto->unidad . ' / ' . $producto->presentacion }}</td>
                                 <td class="fs-sm">{{ $producto->empresa ? $producto->empresa->nombre : 'N/A' }}</td>
                                 <td class="text-center">
-                                    <div class="row" style="margin: auto;">
+                                    <div class="row" style="width: 100%; text-align: center;">
                                         <div class="col-md-6">
                                             <!-- Botón Editar (Left) -->
                                             <a href="{{ route('productos.edit', $producto->id_producto) }}"

@@ -96,10 +96,10 @@
                         <tr>
                             <th class="text-center hide-on-small" style="width: 5%;">#</th>
                             <th style="width: 20%;">Nombre</th>
-                            <th style="width: 10%;">Dirección</th>
-                            <th style="width: 30%;">Tipo</th>
+                            <th style="width: 30%;">Dirección</th>
+                            <th style="width: 10%;">Tipo</th>
                             <th style="width: ">Teléfono</th>
-                            <th class="text-center" style="width: 15%;">Acciones</th>
+                            <th class="text-center" style="width: 20%;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -113,18 +113,18 @@
                                 <td class="text-muted">{{ $recinto->tipo }}</td>
                                 <td class="text-muted">{{ $recinto->telefono }}</td>
                                 <td class="text-center">
-                                    
+                                    <!-- Button to handle the edit action -->
+                                    <a href="{{ route('recintos.edit', $recinto) }}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-edit"></i>
+                                        <span class="hide-on-small">Editar</span>
+                                    </a>
                                     <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
                                         data-bs-target="#confirmDeleteModal" data-recinto-name="{{ $recinto->nombre }}"
                                         data-recinto-id="{{ $recinto->id_recinto }}">
                                         <i class="fa fa-trash"></i>
                                         <span class="hide-on-small">Eliminar</span>
                                     </button>
-                                    <!-- Button to handle the edit action -->
-                                    <a href="{{ route('recintos.edit', $recinto) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa fa-edit"></i>
-                                        <span class="hide-on-small">Editar</span>
-                                    </a>
+
                                 </td>
                             </tr>
                         @endforeach

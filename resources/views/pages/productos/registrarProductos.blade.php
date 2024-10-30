@@ -229,8 +229,11 @@
             });
 
             // Input masking for specific fields
-            $('#codigo').mask('0000000000'); // Numeric only, minimum 6 digits
-            $('#precio').mask('000000000000.00', {
+            $('#codigo').on('input', function() {
+                // Permitir letras mayúsculas (A-Z) y números (0-9), y limitar a 13 caracteres
+                this.value = this.value.replace(/[^A-Z0-9]/g, '').toUpperCase().slice(0, 13);
+            });
+            $('#precio').mask('00000.00', {
                 translation: {
                     '0': {
                         pattern: /[0-9]/,

@@ -182,7 +182,7 @@
                     </div>
 
                     <!-- Fecha -->
-                    <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 col-xxl-2">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 col-xxl-3">
                         <div class="card h-100">
                             <div class="card-body d-flex align-items-center">
                                 <i class="fas fa-calendar-days fa-fw fa-lg fa-2x-md me-2 me-md-3"></i>

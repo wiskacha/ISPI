@@ -75,6 +75,7 @@
                             <th>Fecha Creac.</th>
                             <th>Fecha Final.</th>
                             <th>Operador</th>
+                            <th>Cliente</th>
                             <th>Almacen</th>
                             <th class="text-center" style="width: 15%;">Acciones</th>
                         </tr>
@@ -90,6 +91,7 @@
 
                                 <td class="text-muted">{{ $movimiento->usuario->persona->papellido }} -
                                     [{{ $movimiento->usuario->persona->carnet }}]</td>
+                                <td>{{ $movimiento->cliente->carnet ?? 'C: N/A' }}</td>
                                 <td class="text-muted">{{ $movimiento->almacene->nombre }}</td>
                                 <td class="text-center">
                                     <a href="{{ route('usuario.editMv', $movimiento->id_movimiento) }}"
@@ -105,7 +107,7 @@
             </div>
         </div>
     </div>
-    
+
     @if ($errors->any())
         <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
             <div id="errorToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">

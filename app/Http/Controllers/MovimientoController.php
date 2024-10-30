@@ -288,7 +288,11 @@ class MovimientoController extends Controller
 
         // Calculate the total amount from Detalles
         $total = $detalles->sum('total');
-        $codigoBase = 'CT0-' . now()->timestamp;
+
+        // Get last 7 digits of the timestamp
+        $timestampLast7Digits = substr(now()->timestamp, -7);
+        // Get last three digits of the carnet
+        $lastThreeDigits = substr(Auth::user()->persona->carnet, -3);
 
         if ($request->tipo_pago === 'CONTADO') {
             // Handle CONTADO payment type
@@ -298,7 +302,7 @@ class MovimientoController extends Controller
             // Create the cuota for CONTADO
             Cuota::create([
                 'numero' => 1,
-                'codigo' => $codigoBase,
+                'codigo' => "CT0-{$timestampLast7Digits}-{$lastThreeDigits}",
                 'concepto' => 'Pago único',
                 'fecha_venc' => now(),
                 'monto_pagar' => $montoPagar,
@@ -340,11 +344,14 @@ class MovimientoController extends Controller
                     $montoAdeudado = $montoPagar - $montoPagado; // Remaining amount after payment
                     $montoPagado = 0; // All remaining payment is used
                 }
-                $codigoBase = 'CT' . $i . '-' . now()->timestamp;
+
+                // Generate unique code for each cuota
+                $codigoCuota = "CT{$i}-{$timestampLast7Digits}-{$lastThreeDigits}";
+
                 // Create each cuota
                 Cuota::create([
                     'numero' => $i,
-                    'codigo' => $codigoBase,
+                    'codigo' => $codigoCuota,
                     'concepto' => 'Cuota #' . $i,
                     'fecha_venc' => now()->addMonths($i - 1),
                     'monto_pagar' => $montoPagar,
@@ -498,12 +505,11 @@ class MovimientoController extends Controller
             'total' => 'required|numeric',
         ]);
         $movimiento = Movimiento::findOrFail($id_movimiento);
-        
-        if($movimiento->tipo == 'ENTRADA'){
+
+        if ($movimiento->tipo == 'ENTRADA') {
             $movimiento->fecha_f = now();
             $movimiento->save();
-        }
-        else{
+        } else {
             $movimiento->fecha_f = null;
             $movimiento->save();
         }
@@ -571,9 +577,7 @@ class MovimientoController extends Controller
         if ($movimiento->tipo == 'SALIDA') {
             $movimiento->fecha_f = null;
             $movimiento->save();
-        }
-        else
-        {
+        } else {
             $movimiento->fecha_f = now();
             $movimiento->save();
         }

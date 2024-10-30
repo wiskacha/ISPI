@@ -6,81 +6,174 @@
     <title>Movimiento de Inventario</title>
 
     <style>
-        .invoice-box {
-            max-width: 800px;
-            margin: auto;
-            padding: 30px;
-            border: 1px solid #eee;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-            font-size: 16px;
-            line-height: 24px;
-            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
-            color: #555;
-        }
-
-        .invoice-box table {
-            width: 100%;
-            line-height: inherit;
-            text-align: left;
-        }
-
-        .invoice-box table td {
-            padding: 5px;
-            vertical-align: top;
-        }
-
-        .invoice-box table tr td:nth-child(2) {
-            text-align: right;
-        }
-
-        .invoice-box table tr.top table td {
-            padding-bottom: 20px;
-        }
-
-        .invoice-box table tr.top table td.title {
-            font-size: 45px;
-            line-height: 45px;
-            color: #333;
-        }
-
-        .invoice-box table tr.information table td {
-            padding-bottom: 40px;
-        }
-
-        .invoice-box table tr.heading td {
-            background: #eee;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
-        }
-
-        .invoice-box table tr.item td {
-            border-bottom: 1px solid #eee;
-        }
-
-        .invoice-box table tr.item.last td {
-            border-bottom: none;
-        }
-
-        .invoice-box table tr.total td {
-            border-top: 2px solid #eee;
-            font-weight: bold;
+        /* Reset y variables */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .page-break {
             page-break-after: always;
         }
 
-        @media only screen and (max-width: 600px) {
-            .invoice-box table tr.top table td {
-                width: 100%;
-                display: block;
-                text-align: center;
+        :root {
+            --primary-color: #333;
+            --secondary-color: #555;
+            --border-color: #ddd;
+            --highlight-color: #f5f5f5;
+            --header-color: #e9ecef;
+            --footer-color: #f8f9fa;
+            --table-border: #dee2e6;
+        }
+
+        /* Estilos base */
+        .invoice-box {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+            line-height: 1.4;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: var(--secondary-color);
+        }
+
+        /* Tablas */
+        .invoice-box table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            border: 1px solid var(--table-border);
+        }
+
+        .invoice-box table td {
+            padding: 8px;
+            vertical-align: top;
+            border: 1px solid var(--table-border);
+        }
+
+        /* Header */
+        .header-section {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .invoice-info {
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        /* Información principal */
+        .main-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        /* Tablas de productos y cuotas */
+        .table-header {
+            background: var(--header-color);
+            font-weight: bold;
+        }
+
+        .table-header td {
+            padding: 10px 8px;
+            border-bottom: 2px solid var(--table-border);
+        }
+
+        thead tr {
+            background-color: var(--header-color);
+            font-weight: bold;
+        }
+
+        thead td {
+            border-bottom: 2px solid var(--table-border) !important;
+        }
+
+        tfoot tr {
+            background-color: var(--footer-color);
+            font-weight: bold;
+        }
+
+        tfoot td {
+            border-top: 2px solid var(--table-border) !important;
+        }
+
+        .product-row td {
+            border: 1px solid var(--table-border);
+        }
+
+        .total-row {
+            font-weight: bold;
+            background-color: var(--footer-color);
+        }
+
+        /* Estados y resaltados */
+        .status-complete {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Resumen final */
+        .final-summary {
+            margin-top: 20px;
+            border-top: 2px solid var(--table-border);
+            padding-top: 15px;
+        }
+
+        .final-summary table {
+            max-width: 300px;
+            margin-left: auto;
+            border: 1px solid var(--table-border);
+        }
+
+        .final-summary table td {
+            border: 1px solid var(--table-border);
+        }
+
+        .final-summary thead tr {
+            background-color: var(--header-color);
+        }
+
+        .heading td {
+            background-color: var(--header-color);
+            font-weight: bold;
+            border-bottom: 2px solid var(--table-border);
+        }
+
+        .item td {
+            border: 1px solid var(--table-border);
+        }
+
+        /* Responsive */
+        @media print {
+            .invoice-box {
+                margin: 0;
+                border: none;
+                box-shadow: none;
             }
 
-            .invoice-box table tr.information table td {
-                width: 100%;
-                display: block;
-                text-align: center;
+            .table-header,
+            thead tr,
+            tfoot tr {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
@@ -115,6 +208,10 @@
                 $mostrarAlmacen = $tipoMovimiento == 'ENTRADA';
                 $mostrarCliente = $tipoMovimiento != 'ENTRADA';
                 $mostrarRecinto = $tipoMovimiento != 'ENTRADA';
+
+                $isFirstpage = true;
+                $rowCounter = 0;
+                $MaxRowperPage = 19;
             @endphp
 
             <!-- Información del operador y tipo de movimiento -->
@@ -147,7 +244,9 @@
                     </table>
                 </td>
             </tr>
-
+            @php
+                $rowCounter = 3;
+            @endphp
             <!-- Detalles del movimiento -->
             <tr>
                 <td colspan="2">
@@ -160,6 +259,9 @@
                                 <td>Subtotal</td>
                             </tr>
                         </thead>
+                        @php
+                            $rowCounter++;
+                        @endphp
                         <tbody>
                             @foreach ($movimiento->detalles as $detalle)
                                 <tr class="item">
@@ -170,13 +272,51 @@
                                     <td>x {{ $detalle->cantidad }}</td>
                                     <td>{{ $detalle->total }}</td>
                                 </tr>
+                                @php
+                                    $rowCounter++;
+                                @endphp
+                                @if ($rowCounter > $MaxRowperPage && $isFirstpage)
+                                    <tr class="page-break">
+                                        <td colspan="4" class="text-muted">Continuación en la siguiente página...</td>
+                                    </tr>;
+                                    @php
+                                        $rowCounter = 0;
+                                        $isFirstpage = false;
+                                    @endphp
+                                @elseif ($rowCounter > $MaxRowperPage + 6 && !$isFirstpage)
+                                    <tr class="page-break">
+                                        <td colspan="4" class="text-muted">Continuación en la siguiente página...</td>
+                                    </tr>;
+                                    @php
+                                        $rowCounter = 0;
+                                    @endphp
+                                @endif
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr class="total">
-                                <td></td>
-                                <td colspan="4">Total Productos: | {{ $totalDet }}</td>
+                                <td colspan="3" style="text-align: right;">Total Productos:</td>
+                                <td>{{ $totalDet }}</td>
                             </tr>
+                            @php
+                                $rowCounter++;
+                            @endphp
+                            @if ($rowCounter > $MaxRowperPage && $isFirstpage)
+                                <tr class="page-break">
+                                    <td colspan="4" class="text-muted">Continuación en la siguiente página...</td>
+                                </tr>;
+                                @php
+                                    $rowCounter = 0;
+                                    $isFirstpage = false;
+                                @endphp
+                            @elseif ($rowCounter > $MaxRowperPage + 6 && !$isFirstpage)
+                                <tr class="page-break">
+                                    <td colspan="4" class="text-muted">Continuación en la siguiente página...</td>
+                                </tr>;
+                                @php
+                                    $rowCounter = 0;
+                                @endphp
+                            @endif
                         </tfoot>
                     </table>
                 </td>
@@ -200,6 +340,9 @@
                                     <td>Estado</td>
                                 </tr>
                             </thead>
+                            @php
+                                $rowCounter++;
+                            @endphp
                             <tbody>
                                 @php
                                     $total_mPgr = 0;
@@ -222,6 +365,25 @@
                                             $estado = $estado && $cuota->condicion == 'PAGADA';
                                         @endphp
                                     </tr>
+                                    @php
+                                        $rowCounter++;
+                                    @endphp
+                                    @if ($rowCounter > $MaxRowperPage && $isFirstpage)
+                                        <tr class="page-break">
+                                            <td colspan="6" class="text-muted">Continuación en la siguiente página...</td>
+                                        </tr>;
+                                        @php
+                                            $rowCounter = 0;
+                                            $isFirstpage = false;
+                                        @endphp
+                                    @elseif ($rowCounter > $MaxRowperPage + 6 && !$isFirstpage)
+                                        <tr class="page-break">
+                                            <td colspan="6" class="text-muted">Continuación en la siguiente página...</td>
+                                        </tr>;
+                                        @php
+                                            $rowCounter = 0;
+                                        @endphp
+                                    @endif
                                 @endforeach
                             </tbody>
                             <tfoot>
@@ -239,12 +401,38 @@
                                         @endif
                                     </td>
                                 </tr>
+                                @php
+                                    $rowCounter++;
+                                @endphp
+                                @if ($rowCounter > $MaxRowperPage && $isFirstpage)
+                                    <tr class="page-break">
+                                        <td colspan="6" class="text-muted">Continuación en la siguiente página...</td>
+                                    </tr>;
+                                    @php
+                                        $rowCounter = 0;
+                                        $isFirstpage = false;
+                                    @endphp
+                                @elseif ($rowCounter > $MaxRowperPage + 6 && !$isFirstpage)
+                                    <tr class="page-break">
+                                        <td colspan="6" class="text-muted">Continuación en la siguiente página...</td>
+                                    </tr>;
+                                    @php
+                                        $rowCounter = 0;
+                                    @endphp
+                                @endif
                             </tfoot>
                         </table>
                     </td>
                 </tr>
                 @if ($movimiento->cuotas->isNotEmpty() && $movimiento->cuotas->isNotEmpty())
-                    <br />
+                    @if($rowCounter > $MaxRowperPage)
+                        <tr class="page-break">
+                            <td colspan="2" class="text-muted">Continuación en la siguiente"—>
+                        </tr>;
+                        @php
+                            $rowCounter = 0;
+                        @endphp
+                    @endif
                     <tr>
                         <td colspan="2">
                             <table cellpadding="0" cellspacing="0">

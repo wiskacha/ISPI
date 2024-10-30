@@ -105,6 +105,7 @@
                 document.getElementById('montoPagado').innerText = montoPagar.toFixed(2);
             }
 
+
             // Function to update the cuotas table for 'CRÉDITO'
             function updateCreditoTable() {
                 const cantidadCuotas = parseInt(document.getElementById('cantidad_cuotas').value) || 0;
@@ -118,7 +119,6 @@
 
                 let montoPagado = primerPago;
                 let montoAdeudado;
-
                 for (let i = 1; i <= cantidadCuotas; i++) {
                     const row = document.createElement('tr');
 
@@ -127,7 +127,6 @@
                         montoAdeudado = 0; // Fully paid
                         row.innerHTML = `
                 <td>${i}</td>
-                <td>CT${i}-${Date.now()}</td>
                 <td>Cuota #${i}</td>
                 <td>${new Date(Date.now() + (i - 1) * 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}</td>
                 <td>${montoPagar.toFixed(2)}</td>
@@ -140,7 +139,6 @@
                         montoAdeudado = montoPagar - montoPagado; // Remaining amount
                         row.innerHTML = `
                 <td>${i}</td>
-                <td>CT${i}-${Date.now()}</td>
                 <td>Cuota #${i}</td>
                 <td>${new Date(Date.now() + (i - 1) * 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}</td>
                 <td>${montoPagar.toFixed(2)}</td>
@@ -171,6 +169,19 @@
             //         event.preventDefault();
             //     }
             // });
+
+            document.getElementById("cantidad_cuotas").addEventListener("input", function() {
+                const max = parseInt(this.max);
+                const min = parseInt(this.min);
+                let value = parseInt(this.value);
+
+                if (value > max) {
+                    this.value = max;
+                } else if (value < min) {
+                    this.value = min;
+                }
+                updateCreditoTable();
+            });
         });
     </script>
     <script>
@@ -254,7 +265,8 @@
                 <div class="alert alert-warning d-flex align-items-center justify-content-between" role="alert">
                     <div class="flex-grow-1 me-3">
                         <p class="mb-0">
-                            ¡Recuerda! En caso de querer corregir los detalles accede a <a class="alert-link" href="{{route('usuario.editMv', $movimiento->id_movimiento)}}">este</a> enlace!
+                            ¡Recuerda! En caso de querer corregir los detalles accede a <a class="alert-link"
+                                href="{{ route('usuario.editMv', $movimiento->id_movimiento) }}">este</a> enlace!
                         </p>
                     </div>
                     <div class="flex-shrink-0">
@@ -297,7 +309,13 @@
                     <h3 class="mt-3">Vista Previa Cuota</h3>
                     <div id="cuotaPreview" class="alert alert-info">
                         <p>Número: 1</p>
-                        <p>Código: CT-{{ now()->timestamp }}</p>
+                        <?php
+                        // Get the last 7 digits of the current timestamp
+                        $timestampLast7Digits = substr(now()->timestamp, -7);
+                        
+                        // Get the last three digits of the carnet
+                        $lastThreeDigits = substr(Auth::user()->persona->carnet, -3);
+                        ?>
                         <p>Concepto: Pago único</p>
                         <p>Fecha Vencimiento: {{ now()->toDateString() }}</p>
                         <p>Monto a Pagar: <span id="montoPagar">{{ number_format($total, 2) }} -
@@ -312,7 +330,7 @@
                 <div id="creditoFields" class="mb-3" style="display: none;">
                     <label for="cantidad_cuotas" class="form-label">Cantidad de Cuotas:</label>
                     <input type="number" name="cantidad_cuotas" id="cantidad_cuotas" class="form-control" min="1"
-                        required>
+                        max="12" required>
                     <label for="primer_pago" class="form-label">Primer Pago:</label>
                     <input type="number" name="primer_pago" class="form-control" step="0.01" min="0"
                         value="{{ old('primer_pago') }}">
@@ -326,7 +344,6 @@
                             <thead>
                                 <tr>
                                     <th>N°</th>
-                                    <th>Código</th>
                                     <th>Concepto</th>
                                     <th>Fecha Vencimiento</th>
                                     <th>Monto</th>

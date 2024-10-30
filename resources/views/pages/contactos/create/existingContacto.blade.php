@@ -120,8 +120,10 @@
                                             name="id_persona" required>
                                             <option value="" disabled selected>Selecciona una persona</option>
                                             @foreach ($personas as $persona)
-                                                <option value="{{ $persona->id_persona }}">[{{ $persona->carnet }}]
-                                                    {{ $persona->papellido }}</option>
+                                                <option value="{{ $persona->id_persona }}">
+                                                    [{{ $persona->carnet }}] {{ substr($persona->nombre, 0, 2) . '.' }}
+                                                    {{ $persona->papellido }}
+                                                </option>
                                             @endforeach
                                         </select>
                                         @error('id_persona')

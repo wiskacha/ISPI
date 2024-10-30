@@ -249,7 +249,11 @@ class uMovimientoController extends Controller
 
         // Calculate the total amount from Detalles
         $total = $detalles->sum('total');
-        $codigoBase = 'CT0-' . now()->timestamp;
+
+        // Get last 7 digits of the timestamp
+        $timestampLast7Digits = substr(now()->timestamp, -7);
+        // Get last three digits of the carnet
+        $lastThreeDigits = substr(Auth::user()->persona->carnet, -3);
 
         if ($request->tipo_pago === 'CONTADO') {
             // Handle CONTADO payment type
@@ -259,7 +263,7 @@ class uMovimientoController extends Controller
             // Create the cuota for CONTADO
             Cuota::create([
                 'numero' => 1,
-                'codigo' => $codigoBase,
+                'codigo' => "CT0-{$timestampLast7Digits}-{$lastThreeDigits}",
                 'concepto' => 'Pago único',
                 'fecha_venc' => now(),
                 'monto_pagar' => $montoPagar,
@@ -301,11 +305,14 @@ class uMovimientoController extends Controller
                     $montoAdeudado = $montoPagar - $montoPagado; // Remaining amount after payment
                     $montoPagado = 0; // All remaining payment is used
                 }
-                $codigoBase = 'CT' . $i . '-' . now()->timestamp;
+
+                // Generate unique code for each cuota
+                $codigoCuota = "CT{$i}-{$timestampLast7Digits}-{$lastThreeDigits}";
+
                 // Create each cuota
                 Cuota::create([
                     'numero' => $i,
-                    'codigo' => $codigoBase,
+                    'codigo' => $codigoCuota,
                     'concepto' => 'Cuota #' . $i,
                     'fecha_venc' => now()->addMonths($i - 1),
                     'monto_pagar' => $montoPagar,
@@ -322,9 +329,10 @@ class uMovimientoController extends Controller
             }
         }
 
-        return redirect()->route('usuario.movimientos.edit', $movimiento->id_movimiento)
+        return redirect()->route('usuario.editMv', $movimiento->id_movimiento)
             ->with('success', 'Cuotas asignadas exitosamente en el movimiento: ' . $movimiento->codigo);
     }
+
 
     public function payCuota(Request $request, $id_cuota)
     {
@@ -344,7 +352,7 @@ class uMovimientoController extends Controller
             $movimiento->save();
         }
 
-        return redirect()->route('usuario.movimientos.edit', $cuota->id_movimiento)
+        return redirect()->route('usuario.editMv', $cuota->id_movimiento)
             ->with('success', 'Cuota ' . $cuota->numero . ' pagada exitosamente en el movimiento: ' . $movimiento->codigo);
     }
 

@@ -827,7 +827,7 @@
                                                 <input class="form-check-input" type="radio" id="proveedorTodos"
                                                     name="proveedorOption" value="todos">
                                                 <label class="form-check-label" for="proveedorTodos">Todos los
-                                                    Recintos</label>
+                                                    Proveedores</label>
                                             </div>
 
                                             <div class="form-check">
