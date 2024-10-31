@@ -121,50 +121,55 @@
             </h3>
         </div>
         <div class="block-content block-content-full">
-            <table class="table table-bordered table-striped table-vcenter js-dataTable-buttons fs-sm">
-                <thead>
-                    <tr>
-                        <th class="text-center hide-on-small" style="width: 5%;">#</th>
-                        <th style="width: 10%;">Nick/Email</th>
-                        <th style="width: 10%;">Correo Verificado</th>
-                        <th style="width: 10%;">Dueño</th>
-                        <th class="text-center" style="width: 10%;">Acciones</th> <!-- New column for actions -->
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($usuarios as $index => $usuario)
-                        <tr>
-                            <td class="text-center hide-on-small">{{ $index + 1 }}</td>
-                            <td class="fw-semibold">{{ $usuario->NICKEMAIL }}</td>
-                            <td>
-                                @if ($usuario->email_verified_at)
-                                    <i class="fas fa-check-circle text-success"></i>
-                                    {{ $usuario->email_verified_at->format('d/m/Y H:i') }}
-                            </td>
-                        @else
-                            <i class="fas fa-times-circle text-danger"></i> No
-                    @endif
-                    </td>
-                    <td class="text-muted">{{ $usuario->DUEÑO }}</td> <!-- Aquí mostramos el dueño -->
-                    <td class="text-center">
-                        <!-- Form to handle the delete action -->
-                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                            data-bs-target="#confirmDeleteModal" data-user="{{ $usuario->NICKEMAIL }}"
-                            data-id="{{ $usuario->id }}">
-                            <i class="fa fa-trash"></i>
-                            <span class="hide-on-small">Eliminar</span>
-                        </button>
+            <div style="overflow-x: auto;">
 
-                        <!-- Button to handle the edit action -->
-                        <a href="{{ route('personas.usuarios.editUsuario', $usuario) }}" class="btn btn-sm btn-primary">
-                            <i class="fa fa-edit"></i>
-                            <span class="hide-on-small">Editar</span>
-                        </a>
-                    </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                <table class="table table-bordered table-striped table-vcenter js-dataTable-responsive">
+                    <thead>
+                        <tr>
+                            <th class="text-center hide-on-small" style="width: 5%;">#</th>
+                            <th style="width: 10%;">Nick/Email</th>
+                            <th style="width: 10%;">Correo Verificado</th>
+                            <th style="width: 10%;">Dueño</th>
+                            <th class="text-center" style="width: 10%;">Acciones</th> <!-- New column for actions -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($usuarios as $index => $usuario)
+                            <tr>
+                                <td class="text-center hide-on-small">{{ $index + 1 }}</td>
+                                <td class="fw-semibold">{{ $usuario->NICKEMAIL }}</td>
+                                <td>
+                                    @if ($usuario->email_verified_at)
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        {{ $usuario->email_verified_at->format('d/m/Y H:i') }}
+                                </td>
+                            @else
+                                <i class="fas fa-times-circle text-danger"></i> No
+                        @endif
+                        </td>
+                        <td class="text-muted">{{ $usuario->DUEÑO }}</td> <!-- Aquí mostramos el dueño -->
+                        <td class="text-center">
+                            <!-- Form to handle the delete action -->
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal" data-user="{{ $usuario->NICKEMAIL }}"
+                                data-id="{{ $usuario->id }}">
+                                <i class="fa fa-trash"></i>
+                                <span class="hide-on-small">Eliminar</span>
+                            </button>
+
+                            <!-- Button to handle the edit action -->
+                            <a href="{{ route('personas.usuarios.editUsuario', $usuario) }}"
+                                class="btn btn-sm btn-primary">
+                                <i class="fa fa-edit"></i>
+                                <span class="hide-on-small">Editar</span>
+                            </a>
+                        </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
     @if ($errors->any())

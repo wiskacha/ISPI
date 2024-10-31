@@ -19,9 +19,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
 
     require_once base_path('routes/email_verification.php');
-    
+
     Route::match(['get', 'post'], '/', [HomeController::class, 'show'])->name('home');
-    Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
+    Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 });
 
 // Authenticated User Routes

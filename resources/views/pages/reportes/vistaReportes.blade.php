@@ -885,7 +885,7 @@
                                                         <label for="example-daterange1"
                                                             style="margin-top: 1rem;">Desde</label>
                                                         <input type="text" class="js-datepicker form-control"
-                                                            id="example-daterange1" placeholder="dd/mm/yyyy" required>
+                                                            id="example-daterange1" placeholder="dd/mm/yyyy" autocomplete="off" required>
                                                         <input type="hidden" name="desde" id="desde_mysql" required>
                                                     </div>
                                                 </div>
@@ -896,7 +896,7 @@
                                                         <label for="example-daterange2"
                                                             style="margin-top: 1rem;">Hasta</label>
                                                         <input type="text" class="js-datepicker form-control"
-                                                            id="example-daterange2" placeholder="dd/mm/yyyy" required>
+                                                            id="example-daterange2" placeholder="dd/mm/yyyy" autocomplete="off" required>
                                                         <input type="hidden" name="hasta" id="hasta_mysql" required>
                                                     </div>
                                                 </div>
