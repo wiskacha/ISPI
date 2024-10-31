@@ -195,7 +195,7 @@
                             <td>
                                 Movimiento #: <strong>{{ $movimiento->codigo }}</strong><br />
                                 Fecha Operación: {{ date('d/M/Y H:i', strtotime($movimiento->fecha)) }}<br />
-                                Fecha Recibo: {{ $fechaActual }}<br />
+                                Fecha Recibo: {{ $fechaActual->format('d/M/Y H:i:s') }}<br />
                             </td>
                         </tr>
                     </table>
