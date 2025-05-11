@@ -34,7 +34,7 @@
                         <h3 class="block-title">¡Bienvenido!</h3>
                     </div>
                     <div class="block-content text-center py-5">
-                        <h2 class="mb-4">Gracias por usar nuestra plataforma</h2>
+                        <h2 class="mb-4">¡Hola nuevamente!</h2>
                         <p class="fs-lg text-muted">
                             Tus herramientas de operación se encuentran en el panel izquierdo
                         </p>

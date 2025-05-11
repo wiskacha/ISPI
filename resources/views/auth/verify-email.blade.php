@@ -5,10 +5,13 @@
 
         <div style="position: absolute; top: 2%; right: 1%; display: flex; align-items: center;">
             <!-- Logout Button (Triggers Modal) -->
-            <button type="button" class="btn btn-sm btn-alt-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                <i class="fa fa-power-off"></i>
-                {{ __('Cerrar sesión') }}
-            </button>
+            <div class="">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+                </form>
+            </div>
 
             <a id="dark-mode-toggle" class="btn btn-sm btn-alt-secondary" href="javascript:void(0)"
                 style="margin-left: 10px;">
